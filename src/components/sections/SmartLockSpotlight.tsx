@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { color, motion } from "framer-motion";
 import {
   Smartphone,
   Wifi,
@@ -73,11 +73,11 @@ export function SmartLockSpotlight() {
             transition={{ duration: 0.6 }}
             className="order-1 lg:order-2"
           >
-            <span className="inline-block px-4 py-1 rounded-full bg-[var(--accent-teal)] bg-opacity-10 text-[var(--accent-teal)] text-sm font-medium mb-4">
+            <span  style={{color:"white"}} className="inline-block px-4 py-1 rounded-full bg-[var(--accent-teal)] bg-opacity-10 text-[var(--accent-teal)] text-sm font-medium mb-4">
               Smart Home Security
             </span>
 
-            <h2 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-4">
+            <h2  className="text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-4">
               Upgrade to Smart Security
             </h2>
 
@@ -100,7 +100,7 @@ export function SmartLockSpotlight() {
               {features.map((feature, index) => (
                 <li key={index} className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-[var(--accent-teal)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                    <feature.icon className="w-4 h-4 text-[var(--accent-teal)]" />
+                    <feature.icon style={{color:"white"}} className="w-4 h-4 text-[var(--accent-teal)]" />
                   </div>
                   <span className="text-[var(--text-secondary)]">
                     {feature.text}

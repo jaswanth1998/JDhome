@@ -369,7 +369,7 @@ export function ContactPageContent() {
                 {/* Phone */}
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-xl bg-[var(--accent-teal)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                    <Phone className="w-6 h-6 text-[var(--accent-teal)]" />
+                    <Phone style={{color:"white "}} className="w-6 h-6 text-[var(--accent-teal)]" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-[var(--text-primary)]">
@@ -387,7 +387,7 @@ export function ContactPageContent() {
                 {/* Email */}
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-xl bg-[var(--accent-teal)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-6 h-6 text-[var(--accent-teal)]" />
+                    <Mail style={{color:"white "}} className="w-6 h-6 text-[var(--accent-teal)]" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-[var(--text-primary)]">
@@ -405,7 +405,7 @@ export function ContactPageContent() {
                 {/* Service Area */}
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-xl bg-[var(--accent-teal)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-6 h-6 text-[var(--accent-teal)]" />
+                    <MapPin style={{color:"white"}} className="w-6 h-6 text-[var(--accent-teal)]" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-[var(--text-primary)]">
@@ -423,7 +423,7 @@ export function ContactPageContent() {
                 {/* Hours */}
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-xl bg-[var(--accent-teal)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                    <Clock className="w-6 h-6 text-[var(--accent-teal)]" />
+                    <Clock style={{color:"white"}} className="w-6 h-6 text-[var(--accent-teal)]" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-[var(--text-primary)]">

@@ -20,33 +20,48 @@ export async function POST(request: NextRequest) {
     // Validate the form data
     const validatedData = contactFormSchema.parse(body);
 
-    // Log the submission (in production, you would send an email here)
+    // Log the submission
     console.log("Contact form submission:", validatedData);
 
-    // Here you would typically:
-    // 1. Send an email notification using a service like SendGrid, Resend, or Nodemailer
-    // 2. Store the submission in a database
-    // 3. Send a confirmation email to the user
+    // Prepare webhook payload
+    const webhookPayload = {
+      type: "contact",
+      timestamp: new Date().toISOString(),
+      source: "jd-homes-website",
+      name: validatedData.name,
+      email: validatedData.email,
+      phone: validatedData.phone,
+      service: validatedData.service,
+      message: validatedData.message,
+      preferredContact: validatedData.preferredContact,
+      data: {
+        name: validatedData.name,
+        email: validatedData.email,
+        phone: validatedData.phone,
+        service: validatedData.service,
+        message: validatedData.message,
+        preferredContact: validatedData.preferredContact,
+      },
+    };
 
-    // Example with Resend (uncomment and configure when ready):
-    // import { Resend } from 'resend';
-    // const resend = new Resend(process.env.RESEND_API_KEY);
-    //
-    // await resend.emails.send({
-    //   from: 'noreply@jdhomesolutions.com',
-    //   to: 'info@jdhomesolutions.com',
-    //   subject: `New Contact Form Submission - ${validatedData.service}`,
-    //   html: `
-    //     <h2>New Contact Form Submission</h2>
-    //     <p><strong>Name:</strong> ${validatedData.name}</p>
-    //     <p><strong>Email:</strong> ${validatedData.email}</p>
-    //     <p><strong>Phone:</strong> ${validatedData.phone}</p>
-    //     <p><strong>Service:</strong> ${validatedData.service}</p>
-    //     <p><strong>Preferred Contact:</strong> ${validatedData.preferredContact}</p>
-    //     <p><strong>Message:</strong></p>
-    //     <p>${validatedData.message}</p>
-    //   `,
-    // });
+    // Send to webhook
+    const webhookResponse = await fetch(
+      "https://myn8n.plaper.org/webhook/JD-homes",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        },
+        body: JSON.stringify(webhookPayload),
+      }
+    );
+
+    if (!webhookResponse.ok) {
+      console.error("Webhook error:", await webhookResponse.text());
+      throw new Error("Failed to send notification");
+    }
 
     return NextResponse.json(
       { message: "Form submitted successfully", data: validatedData },

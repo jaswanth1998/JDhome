@@ -170,7 +170,9 @@ export function AboutPageContent() {
                 className="text-center"
               >
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--accent-teal)] bg-opacity-10 flex items-center justify-center">
-                  <item.icon className="w-8 h-8 text-[var(--accent-teal)]" />
+
+                  <item.icon style={{color:"white"}} className="w-8 h-8 text-[var(--accent-teal)]" />
+
                 </div>
                 <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
                   {item.title}
@@ -226,7 +228,7 @@ export function AboutPageContent() {
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.6 }}
             >
-              <span className="inline-block px-4 py-1 rounded-full bg-[var(--accent-teal)] bg-opacity-10 text-[var(--accent-teal)] text-sm font-medium mb-4">
+              <span style={{color:'white'}} className="inline-block px-4 py-1 rounded-full bg-[var(--accent-teal)] bg-opacity-10 text-[var(--accent-teal)] text-sm font-medium mb-4">
                 Our Values
               </span>
 

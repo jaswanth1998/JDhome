@@ -58,7 +58,7 @@ export function FinalCTA() {
               variant="primary"
               icon={FileText}
               size="lg"
-              className="min-w-[240px] bg-white text-[var(--primary-main)] hover:bg-white/90"
+              
             >
               Get Free Quote
             </Button>
