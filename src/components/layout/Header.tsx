@@ -251,7 +251,7 @@ export function Header() {
                   </Button>
 
                   <Button
-                    as="link"
+                    as="link" 
                     href="/contact"
                     variant="primary"
                     fullWidth
