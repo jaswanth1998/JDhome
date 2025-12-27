@@ -64,13 +64,38 @@ export function ContactPageContent() {
     setSubmitStatus(null);
 
     try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      // Prepare webhook payload
+      const webhookPayload = {
+        type: "contact",
+        timestamp: new Date().toISOString(),
+        source: "jd-homes-website",
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        service: data.service,
+        message: data.message,
+        preferredContact: data.preferredContact,
+        data: {
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          service: data.service,
+          message: data.message,
+          preferredContact: data.preferredContact,
         },
-        body: JSON.stringify(data),
-      });
+      };
+
+      // Send directly to webhook
+      const response = await fetch(
+        "https://myn8n.plaper.org/webhook/JD-homes",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(webhookPayload),
+        }
+      );
 
       if (response.ok) {
         setSubmitStatus("success");
