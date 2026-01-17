@@ -114,6 +114,7 @@ export default function RootLayout({
               ],
               areaServed: [
                 "Oshawa",
+                "Durham Region",
                 "Whitby",
                 "Ajax",
                 "Pickering",

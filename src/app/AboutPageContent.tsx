@@ -67,7 +67,7 @@ export function AboutPageContent() {
               className="text-4xl md:text-5xl font-bold mb-6"
             
             >
-              Trusted Locksmith Services in Oshawa and Durham
+              Trusted Locksmith Services in Oshawa's and Durham’s Region
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 30 }}
@@ -104,7 +104,7 @@ export function AboutPageContent() {
               <div className="space-y-4 text-[var(--text-secondary)] leading-relaxed">
                 <p>
                   {theme.brand.name} was founded with a simple mission: provide
-                  Oshawa residents with trustworthy, professional locksmith
+                  Oshawa's and Durham’s residents with trustworthy, professional locksmith
                   services they can rely on. From emergency lockouts to
                   cutting-edge smart lock installations, we treat every job with
                   the same dedication to quality and customer satisfaction.
@@ -287,7 +287,7 @@ export function AboutPageContent() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-lg text-white/80 mb-8"
             >
-              Proudly serving Oshawa and Durham and throughout Durham Region
+              Proudly serving Oshawa's and throughout Durham Region
             </motion.p>
 
             <motion.div

@@ -31,7 +31,7 @@ export function ServiceArea() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-3xl md:text-4xl font-bold mb-4"
           >
-            Serving Oshawa & Surrounding Areas
+            Serving Oshawa and Durham & Surrounding Areas
           </motion.h2>
 
           {/* Description */}
@@ -42,7 +42,7 @@ export function ServiceArea() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg text-white/80 mb-8 max-w-2xl mx-auto"
           >
-            Based in Oshawa, we provide reliable locksmith and smart home
+            Based in Oshawa and Durham, we provide reliable locksmith and smart home
             security services throughout Durham Region
           </motion.p>
 
