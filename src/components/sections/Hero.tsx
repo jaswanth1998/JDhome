@@ -37,7 +37,7 @@ export function Hero() {
             className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance"
               style={{ color: "white" }}
           >
-            Oshawa&apos;s Trusted Locksmith &{" "}
+            Oshawa&apos;s and Durham&apos;s Trusted Locksmith &{" "}
             <span className="text-[var(--accent-teal)]">Smart Home Security</span>{" "}
             Experts
           </motion.h1>
