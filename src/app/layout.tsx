@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
-import { Header, Footer, MobileCallButton } from "@/components/layout";
 import { theme } from "@/config/theme";
 
 const inter = Inter({
@@ -145,10 +144,7 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <Header />
-        <main>{children}</main>
-        <Footer />
-        <MobileCallButton />
+        {children}
       </body>
     </html>
   );
