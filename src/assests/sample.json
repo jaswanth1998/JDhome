@@ -1,0 +1,40 @@
+{
+    "client": {
+        "name": "jaswanth",
+        "email": "jaswanthtata@gmail.com",
+        "phone": "4375334583",
+        "address": "halifax",
+        "created_by": "49574511-84ac-4c6e-bb55-0e0935e28249"
+    },
+    "invoice": {
+        "invoice_number": "INV-202603-002",
+        "client_id": "a267309e-6279-4fbc-af1a-15a720b2885b",
+        "invoice_date": "2026-03-09",
+        "payment_method": "Cash",
+        "notes": null,
+        "subtotal": 100,
+        "hst_rate": 0.13,
+        "hst_amount": 13,
+        "total": 113,
+        "status": "sent",
+        "created_by": "49574511-84ac-4c6e-bb55-0e0935e28249"
+    },
+    "invoice_items": [
+        {
+            "invoice_id": "6c4522eb-1084-4c76-9044-1c3c87d7131c",
+            "description": "testing",
+            "quantity": 2,
+            "rate": 34,
+            "amount": 68,
+            "sort_order": 0
+        },
+        {
+            "invoice_id": "6c4522eb-1084-4c76-9044-1c3c87d7131c",
+            "description": "testing3",
+            "quantity": 1,
+            "rate": 32,
+            "amount": 32,
+            "sort_order": 1
+        }
+    ]
+}
