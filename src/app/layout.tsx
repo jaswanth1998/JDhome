@@ -129,7 +129,7 @@ export default function RootLayout({
               ].filter(Boolean),
               hasOfferCatalog: {
                 "@type": "OfferCatalog",
-                name: "Locksmith Services",
+                name: "Locksmith and Garage Door Services",
                 itemListElement: theme.services.categories.map((service) => ({
                   "@type": "Offer",
                   itemOffered: {

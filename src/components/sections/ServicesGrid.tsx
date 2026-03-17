@@ -19,8 +19,8 @@ export function ServicesGrid() {
     <section className="section bg-white" id="services">
       <div className="container">
         <SectionHeading
-          title="Professional Locksmith Services in Oshawa and Durham"
-          subtitle="From smart lock installations to emergency lockouts, we provide comprehensive security solutions for your home and business."
+          title="Locksmith, Car Lockout, and Garage Door Service in Oshawa"
+          subtitle="Three focused services, one reliable team: general locksmith work, fast car lockout response, and garage door repair and installation across Durham Region."
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

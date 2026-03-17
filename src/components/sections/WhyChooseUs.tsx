@@ -9,7 +9,7 @@ export function WhyChooseUs() {
       <div className="container">
         <SectionHeading
           title="Why Oshawa and Durham Trust JD Home Services"
-          subtitle="We combine traditional locksmith expertise with modern smart home technology to deliver exceptional service."
+          subtitle="We focus on the three services customers call for most: locksmith work, rapid car lockout help, and dependable garage door repair and installation."
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">

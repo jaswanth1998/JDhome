@@ -34,12 +34,9 @@ type ContactFormData = z.infer<typeof contactFormSchema>;
 
 const serviceOptions = [
   { value: "", label: "Select a service..." },
-  { value: "smart-lock", label: "Smart Lock Installation" },
-  { value: "emergency", label: "Emergency Lockout" },
-  { value: "installation", label: "Lock Installation/Replacement" },
-  { value: "high-security", label: "High-Security Systems" },
-  { value: "garage-door", label: "Garage Door Services" },
-  { value: "rekeying", label: "Lock Rekeying" },
+  { value: "locksmith", label: "Locksmith" },
+  { value: "car-lockout", label: "Car Lockout" },
+  { value: "garage-door-repair-installation", label: "Garage Door Repair & Installation" },
   { value: "other", label: "Other" },
 ];
 
@@ -131,7 +128,7 @@ export function ContactPageContent() {
               className="text-lg md:text-xl text-white/80"
             >
               Get in touch for a free quote or immediate assistance with your
-              locksmith needs
+              locksmith, car lockout, or garage door needs
             </motion.p>
           </div>
         </div>
@@ -371,10 +368,10 @@ export function ContactPageContent() {
               {/* Emergency Contact */}
               <div className="mb-8 p-6 rounded-xl bg-[var(--accent-orange)] bg-opacity-10 border border-[var(--accent-orange)] border-opacity-20">
                 <h3 className="text-lg font-semibold text-[var(--accent-orange)] mb-2">
-                  Emergency Lockout?
+                  Emergency Car Lockout?
                 </h3>
                 <p className="text-[var(--text-secondary)] mb-4">
-                  We&apos;re available 24/7 for emergency lockout services.
+                  We&apos;re available 24/7 for car lockouts and urgent locksmith issues.
                 </p>
                 <a
                   href={`tel:${theme.contact.phone.tel}`}
@@ -394,7 +391,7 @@ export function ContactPageContent() {
                 {/* Phone */}
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-xl bg-[var(--accent-teal)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                    <Phone style={{color:"white "}} className="w-6 h-6 text-[var(--accent-teal)]" />
+                    <Phone className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-[var(--text-primary)]">
@@ -412,7 +409,7 @@ export function ContactPageContent() {
                 {/* Email */}
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-xl bg-[var(--accent-teal)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                    <Mail style={{color:"white "}} className="w-6 h-6 text-[var(--accent-teal)]" />
+                    <Mail className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-[var(--text-primary)]">
@@ -430,7 +427,7 @@ export function ContactPageContent() {
                 {/* Service Area */}
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-xl bg-[var(--accent-teal)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                    <MapPin style={{color:"white"}} className="w-6 h-6 text-[var(--accent-teal)]" />
+                    <MapPin className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-[var(--text-primary)]">
@@ -448,7 +445,7 @@ export function ContactPageContent() {
                 {/* Hours */}
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-xl bg-[var(--accent-teal)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                    <Clock style={{color:"white"}} className="w-6 h-6 text-[var(--accent-teal)]" />
+                    <Clock className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-[var(--text-primary)]">

@@ -1,6 +1,6 @@
 "use client";
 
-import { color, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   ShieldCheck,
   Award,
@@ -26,13 +26,13 @@ const whyChooseUs = [
     icon: Clock,
     title: "Fast Response",
     description:
-      "Quick response times with 24/7 emergency availability for lockouts.",
+      "Quick response times with 24/7 emergency availability for car lockouts.",
   },
   {
     icon: Award,
     title: "Expert Technicians",
     description:
-      "Skilled professionals with years of experience in locksmith services.",
+      "Skilled professionals with practical experience in locksmith and garage door service.",
   },
   {
     icon: Users,
@@ -46,7 +46,7 @@ const values = [
   "Integrity in every interaction",
   "Quality workmanship guaranteed",
   "Transparent and fair pricing",
-  "Ongoing education in security technology",
+  "Practical recommendations based on real needs",
   "Commitment to customer satisfaction",
   "Respect for your property and time",
 ];
@@ -56,16 +56,14 @@ const serviceAreas = theme.contact.address.fullServiceArea.split(", ");
 export function AboutPageContent() {
   return (
     <>
-      {/* Hero Section */}
       <section className="section bg-gradient-primary text-white">
         <div className="container">
-          <div className="max-w-3xl mx-auto text-center" >
+          <div className="max-w-3xl mx-auto text-center">
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               className="text-4xl md:text-5xl font-bold mb-6"
-            
             >
               Trusted Locksmith Services in Oshawa and Durham
             </motion.h1>
@@ -75,18 +73,16 @@ export function AboutPageContent() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="text-lg md:text-xl text-white/80"
             >
-              Combining traditional locksmith expertise with modern smart home
-              technology
+              Focused on locksmith work, car lockout response, and garage door
+              repair and installation
             </motion.p>
           </div>
         </div>
       </section>
 
-      {/* Our Story Section */}
       <section className="section bg-white">
         <div className="container">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Content */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -104,28 +100,27 @@ export function AboutPageContent() {
               <div className="space-y-4 text-[var(--text-secondary)] leading-relaxed">
                 <p>
                   {theme.brand.name} was founded with a simple mission: provide
-                  Oshawa residents with trustworthy, professional locksmith
-                  services they can rely on. From emergency lockouts to
-                  cutting-edge smart lock installations, we treat every job with
-                  the same dedication to quality and customer satisfaction.
+                  Oshawa residents with trustworthy, professional service they
+                  can rely on. From lock changes and rekeying to urgent car
+                  lockouts, we treat every job with the same dedication to
+                  quality and customer satisfaction.
                 </p>
                 <p>
-                  As the smart home revolution transforms residential security,
-                  we&apos;ve positioned ourselves at the forefront – offering both
-                  traditional locksmith expertise and modern smart home
-                  integration. Whether you need a simple lock replacement or a
-                  comprehensive smart security system, we deliver results that
-                  are finished to perfection.
+                  We have built our service around three core needs customers
+                  call for most often: dependable locksmith work, rapid vehicle
+                  lockout help, and garage door repair and installation.
+                  Whether you need a lock changed, a car opened, or a garage
+                  door system repaired, we deliver results that are finished to
+                  perfection.
                 </p>
                 <p>
-                  Our commitment to ongoing education ensures we stay current
-                  with the latest security technologies, allowing us to provide
-                  you with the best solutions for your home or business.
+                  Our commitment to ongoing training and practical field
+                  experience helps us provide the right solution for your home,
+                  business, or vehicle without overselling work you do not need.
                 </p>
               </div>
             </motion.div>
 
-            {/* Visual */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -151,12 +146,11 @@ export function AboutPageContent() {
         </div>
       </section>
 
-      {/* Why Choose Us Section */}
       <section className="section bg-[var(--bg-secondary)]">
         <div className="container">
           <SectionHeading
             title="Why Choose Us"
-            subtitle="We're committed to delivering exceptional service with integrity and professionalism."
+            subtitle="We are committed to delivering exceptional service with integrity and professionalism."
           />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -170,9 +164,7 @@ export function AboutPageContent() {
                 className="text-center"
               >
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--accent-teal)] bg-opacity-10 flex items-center justify-center">
-
-                  <item.icon style={{color:"white"}} className="w-8 h-8 text-[var(--accent-teal)]" />
-
+                  <item.icon className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
                   {item.title}
@@ -186,11 +178,9 @@ export function AboutPageContent() {
         </div>
       </section>
 
-      {/* Our Values Section */}
       <section className="section bg-white">
         <div className="container">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Visual */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -221,14 +211,13 @@ export function AboutPageContent() {
               </div>
             </motion.div>
 
-            {/* Content */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.6 }}
             >
-              <span style={{color:'white'}} className="inline-block px-4 py-1 rounded-full bg-[var(--accent-teal)] bg-opacity-10 text-[var(--accent-teal)] text-sm font-medium mb-4">
+              <span className="inline-block px-4 py-1 rounded-full bg-[var(--accent-teal)] bg-opacity-10 text-[var(--accent-teal)] text-sm font-medium mb-4">
                 Our Values
               </span>
 
@@ -256,7 +245,6 @@ export function AboutPageContent() {
         </div>
       </section>
 
-      {/* Service Area Section */}
       <section className="section bg-[var(--primary-main)] text-white">
         <div className="container">
           <div className="text-center max-w-3xl mx-auto">
@@ -287,7 +275,7 @@ export function AboutPageContent() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-lg text-white/80 mb-8"
             >
-              Proudly serving Oshawa and Durham and throughout Durham Region
+              Proudly serving Oshawa and communities throughout Durham Region
             </motion.p>
 
             <motion.div
@@ -339,7 +327,6 @@ export function AboutPageContent() {
         </div>
       </section>
 
-      {/* Final CTA */}
       <FinalCTA />
     </>
   );

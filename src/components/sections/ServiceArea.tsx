@@ -42,8 +42,8 @@ export function ServiceArea() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg text-white/80 mb-8 max-w-2xl mx-auto"
           >
-            Based in Oshawa and Durham, we provide reliable locksmith and smart home
-            security services throughout Durham Region
+            Based in Oshawa, we provide locksmith service, car lockout response,
+            and garage door repair and installation throughout Durham Region.
           </motion.p>
 
           {/* Service Areas */}
