@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { ServicesPageContent } from "./ServicesPageContent";
 
 export const metadata: Metadata = {
-  title: "Locksmith Services Oshawa and Durham | Smart Locks, Emergency, Garage Doors",
+  title: "Locksmith Services Oshawa and Durham | Locksmith, Car Lockout, Garage Doors",
   description:
-    "Complete locksmith services in Oshawa and Durham: smart lock installation, emergency lockouts, high-security systems, garage door openers, and rekeying. Licensed & insured.",
+    "Professional locksmith services in Oshawa and Durham Region, including general locksmith work, fast car lockout service, and garage door repair and installation.",
 };
 
 export default function ServicesPage() {

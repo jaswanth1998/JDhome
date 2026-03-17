@@ -14,7 +14,6 @@ const trustBadges = [
 export function Hero() {
   return (
     <section className="relative min-h-[90vh] flex items-center bg-gradient-primary overflow-hidden">
-      {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div
           className="absolute inset-0"
@@ -24,35 +23,32 @@ export function Hero() {
         />
       </div>
 
-      {/* Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary-main)] via-[var(--primary-dark)] to-[var(--primary-main)] opacity-95" />
 
       <div className="container relative z-10">
         <div className="max-w-4xl mx-auto text-center text-white">
-          {/* Main Heading */}
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance"
-              style={{ color: "white" }}
+            style={{ color: "white" }}
           >
-            Oshawa&apos;s and Durham&apos;s Trusted Locksmith &{" "}
-            <span className="text-[var(--accent-teal)]">Smart Home Security</span>{" "}
-            Experts
+            Oshawa&apos;s Trusted{" "}
+            <span className="text-[var(--accent-teal)]">Locksmith, Car Lockout,</span>{" "}
+            and Garage Door Team
           </motion.h1>
 
-          {/* Subheadline */}
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-xl md:text-2xl text-white/80 mb-10"
           >
-            {theme.brand.tagline}
+            General locksmith service, fast vehicle lockout response, and garage
+            door repair and installation across Durham Region.
           </motion.p>
 
-          {/* CTA Buttons */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -82,7 +78,6 @@ export function Hero() {
             </Button>
           </motion.div>
 
-          {/* Trust Badges */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -90,10 +85,7 @@ export function Hero() {
             className="flex flex-wrap items-center justify-center gap-6 md:gap-10"
           >
             {trustBadges.map((badge, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-2 text-sm text-white/90"
-              >
+              <div key={index} className="flex items-center gap-2 text-sm text-white/90">
                 <badge.icon className="w-5 h-5 text-[var(--accent-teal)]" />
                 <span>{badge.text}</span>
               </div>
@@ -102,7 +94,6 @@ export function Hero() {
         </div>
       </div>
 
-      {/* Bottom Wave */}
       <div className="absolute bottom-0 left-0 right-0">
         <svg
           className="w-full h-16 md:h-24"

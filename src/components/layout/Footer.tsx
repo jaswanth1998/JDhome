@@ -12,11 +12,9 @@ const quickLinks = [
 ];
 
 const serviceLinks = [
-  { name: "Smart Lock Installation", href: "/services#smart-locks" },
-  { name: "Emergency Lockout", href: "/services#emergency" },
-  { name: "Lock Replacement", href: "/services#installation" },
-  { name: "Garage Door Services", href: "/services#garage-door" },
-  { name: "High-Security Systems", href: "/services#high-security" },
+  { name: "Locksmith", href: "/services#locksmith" },
+  { name: "Car Lockout", href: "/services#car-lockout" },
+  { name: "Garage Door Repair & Installation", href: "/services#garage-door-repair-installation" },
 ];
 
 export function Footer() {

@@ -201,8 +201,8 @@ function LoginForm() {
               with ease.
             </h1>
             <p className="mt-5 text-base leading-relaxed max-w-sm" style={{ color: "rgba(255,255,255,0.6)" }}>
-              Access invoices, manage clients, and track your locksmith and
-              smart home security operations.
+              Access invoices, manage clients, and track your locksmith, car
+              lockout, and garage door operations.
             </p>
           </motion.div>
 

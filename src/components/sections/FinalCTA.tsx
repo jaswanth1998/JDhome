@@ -18,7 +18,7 @@ export function FinalCTA() {
             transition={{ duration: 0.5 }}
             className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
           >
-            Need a Locksmith? We&apos;re Here to Help.
+            Need Locksmith, Car Lockout, or Garage Door Help?
           </motion.h2>
 
           {/* Subheading */}
@@ -29,8 +29,8 @@ export function FinalCTA() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-lg md:text-xl text-white/80 mb-10"
           >
-            Call now for immediate assistance or request a free quote for your
-            project
+            Call now for urgent service or request a quote for planned locksmith
+            or garage door work.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -75,7 +75,7 @@ export function FinalCTA() {
             <span className="text-[var(--accent-orange)] font-semibold">
               24/7 Emergency Service
             </span>{" "}
-            available for lockouts in Oshawa & Durham Region
+            available for car lockouts in Oshawa & Durham Region
           </motion.p>
         </div>
       </div>
