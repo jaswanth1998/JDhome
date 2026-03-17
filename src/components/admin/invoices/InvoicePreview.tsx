@@ -16,6 +16,7 @@ export type InvoicePreviewData = {
   subtotal: number;
   hstAmount: number;
   total: number;
+  signatureDataUrl?: string;
 };
 
 function formatCurrency(amount: number) {
@@ -231,6 +232,23 @@ export function InvoicePreview({ data }: { data: InvoicePreviewData }) {
           </div>
         </div>
       </div>
+
+      {/* Client Signature */}
+      {data.signatureDataUrl && (
+        <div className="px-4 sm:px-8 py-3 sm:py-4 border-b border-[var(--border-light)]">
+          <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">
+            Client Signature
+          </p>
+          <div className="border-b border-[var(--text-muted)] pb-1 inline-block">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={data.signatureDataUrl}
+              alt="Client signature"
+              className="h-16 sm:h-20 w-auto object-contain"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <div className="px-4 sm:px-8 py-3 sm:py-4 text-center rounded-b-lg bg-[var(--neutral-lightest-gray)]">

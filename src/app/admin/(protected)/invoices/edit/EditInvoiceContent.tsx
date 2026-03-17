@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import {
   InvoiceForm,
@@ -11,9 +11,42 @@ import {
 import type { InvoiceFormData } from "@/components/admin/invoices/InvoiceForm";
 import type { InvoicePreviewData } from "@/components/admin/invoices/InvoicePreview";
 
-export default function NewInvoiceContent() {
+type InvoiceDetail = {
+  id: string;
+  invoice_number: string;
+  invoice_date: string;
+  payment_method: string;
+  notes: string | null;
+  client_signature: string | null;
+  subtotal: number;
+  hst_rate: number;
+  hst_amount: number;
+  total: number;
+  status: string;
+  client_id: string;
+  client: {
+    name: string;
+    email: string;
+    phone: string | null;
+    address: string | null;
+  };
+  invoice_items: {
+    description: string;
+    quantity: number;
+    rate: number;
+    amount: number;
+    sort_order: number;
+  }[];
+};
+
+export default function EditInvoiceContent() {
   const { supabase, user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
+
+  const [invoice, setInvoice] = useState<InvoiceDetail | null>(null);
+  const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [previewData, setPreviewData] = useState<InvoicePreviewData>({
     invoiceNumber: "",
@@ -29,24 +62,47 @@ export default function NewInvoiceContent() {
     signatureDataUrl: "",
   });
 
-  async function saveInvoice(
+  const fetchInvoice = useCallback(async () => {
+    if (!id) {
+      router.push("/admin/invoices");
+      return;
+    }
+    const { data, error } = await supabase
+      .schema("jdhome")
+      .from("invoices")
+      .select(
+        `
+        id, invoice_number, invoice_date, payment_method, notes, client_signature,
+        subtotal, hst_rate, hst_amount, total, status, client_id,
+        client:clients(name, email, phone, address),
+        invoice_items(description, quantity, rate, amount, sort_order)
+      `
+      )
+      .eq("id", id)
+      .single();
+
+    if (error || !data) {
+      router.push("/admin/invoices");
+      return;
+    }
+
+    const inv = data as unknown as InvoiceDetail;
+    inv.invoice_items.sort((a, b) => a.sort_order - b.sort_order);
+    setInvoice(inv);
+    setLoading(false);
+  }, [supabase, id, router]);
+
+  useEffect(() => {
+    fetchInvoice();
+  }, [fetchInvoice]);
+
+  async function updateInvoice(
     formData: InvoiceFormData,
     status: "draft" | "sent"
   ) {
-    // 1. Determine invoice number
-    let invoiceNumber: string;
-    if (formData.autoGenerate) {
-      const { data: numData, error: numError } = await supabase
-        .schema("jdhome")
-        .rpc("generate_invoice_number");
-      if (numError) throw new Error("Failed to generate invoice number: " + numError.message);
-      invoiceNumber = numData as string;
-    } else {
-      invoiceNumber = formData.invoiceNumber.trim();
-      if (!invoiceNumber) throw new Error("Invoice number is required");
-    }
+    if (!invoice) throw new Error("Invoice not loaded");
 
-    // 2. Upsert client
+    // 1. Upsert client
     let clientId = formData.clientId;
     if (!clientId) {
       const { data: clientData, error: clientError } = await supabase
@@ -62,10 +118,10 @@ export default function NewInvoiceContent() {
         .select("id")
         .single();
 
-      if (clientError) throw new Error("Failed to save client: " + clientError.message);
+      if (clientError)
+        throw new Error("Failed to save client: " + clientError.message);
       clientId = clientData.id;
     } else {
-      // Update existing client info
       await supabase
         .schema("jdhome")
         .from("clients")
@@ -78,7 +134,7 @@ export default function NewInvoiceContent() {
         .eq("id", clientId);
     }
 
-    // 3. Compute totals
+    // 2. Compute totals
     const computedItems = formData.items.map((item, i) => {
       const qty = Number(item.quantity) || 0;
       const rate = Number(item.rate) || 0;
@@ -94,32 +150,51 @@ export default function NewInvoiceContent() {
     const hstAmount = Math.round(subtotal * 0.13 * 100) / 100;
     const total = subtotal + hstAmount;
 
-    // 4. Insert invoice
-    const { data: invoiceData, error: invoiceError } = await supabase
+    // 3. Determine invoice number
+    const finalInvoiceNumber = formData.autoGenerate
+      ? invoice.invoice_number
+      : formData.invoiceNumber.trim() || invoice.invoice_number;
+
+    // 4. Update invoice record
+    const updatePayload: Record<string, unknown> = {
+      invoice_number: finalInvoiceNumber,
+      client_id: clientId,
+      invoice_date: formData.invoiceDate,
+      payment_method: formData.paymentMethod,
+      notes: formData.notes || null,
+      client_signature: formData.signatureDataUrl || null,
+      subtotal,
+      hst_rate: 0.13,
+      hst_amount: hstAmount,
+      total,
+      status,
+    };
+
+    if (status === "sent" && invoice.status === "draft") {
+      updatePayload.sent_at = new Date().toISOString();
+    }
+
+    const { error: invoiceError } = await supabase
       .schema("jdhome")
       .from("invoices")
-      .insert({
-        invoice_number: invoiceNumber,
-        client_id: clientId,
-        invoice_date: formData.invoiceDate,
-        payment_method: formData.paymentMethod,
-        notes: formData.notes || null,
-        client_signature: formData.signatureDataUrl || null,
-        subtotal,
-        hst_rate: 0.13,
-        hst_amount: hstAmount,
-        total,
-        status,
-        created_by: user?.id,
-      })
-      .select("id")
-      .single();
+      .update(updatePayload)
+      .eq("id", invoice.id);
 
-    if (invoiceError) throw new Error("Failed to save invoice: " + invoiceError.message);
+    if (invoiceError)
+      throw new Error("Failed to update invoice: " + invoiceError.message);
 
-    // 5. Insert line items
+    // 5. Replace line items: delete old, insert new
+    const { error: deleteError } = await supabase
+      .schema("jdhome")
+      .from("invoice_items")
+      .delete()
+      .eq("invoice_id", invoice.id);
+
+    if (deleteError)
+      throw new Error("Failed to update line items: " + deleteError.message);
+
     const itemsToInsert = computedItems.map((item) => ({
-      invoice_id: invoiceData.id,
+      invoice_id: invoice.id,
       description: item.description,
       quantity: item.quantity,
       rate: item.rate,
@@ -132,19 +207,19 @@ export default function NewInvoiceContent() {
       .from("invoice_items")
       .insert(itemsToInsert);
 
-    if (itemsError) throw new Error("Failed to save line items: " + itemsError.message);
+    if (itemsError)
+      throw new Error("Failed to save line items: " + itemsError.message);
 
     return {
-      id: invoiceData.id,
+      id: invoice.id,
       client: {
         name: formData.clientName,
         email: formData.clientEmail,
         phone: formData.clientPhone || null,
         address: formData.clientAddress || null,
-        created_by: user?.id,
       },
       invoice: {
-        invoice_number: invoiceNumber,
+        invoice_number: finalInvoiceNumber,
         client_id: clientId,
         invoice_date: formData.invoiceDate,
         payment_method: formData.paymentMethod,
@@ -154,7 +229,6 @@ export default function NewInvoiceContent() {
         hst_amount: hstAmount,
         total,
         status,
-        created_by: user?.id,
       },
       invoice_items: itemsToInsert,
     };
@@ -163,7 +237,7 @@ export default function NewInvoiceContent() {
   async function handleSaveDraft(formData: InvoiceFormData) {
     setIsSaving(true);
     try {
-      const result = await saveInvoice(formData, "draft");
+      const result = await updateInvoice(formData, "draft");
       router.push(`/admin/invoices/view?id=${result.id}`);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to save invoice");
@@ -175,9 +249,8 @@ export default function NewInvoiceContent() {
   async function handleSaveAndSend(formData: InvoiceFormData) {
     setIsSaving(true);
     try {
-      const result = await saveInvoice(formData, "sent");
+      const result = await updateInvoice(formData, "sent");
 
-      // Call webhook to send invoice
       const webhookRes = await fetch(
         "https://myn8n.plaper.org/webhook/a92a21d9-2c77-456a-b657-61694a39e1a0",
         {
@@ -203,22 +276,49 @@ export default function NewInvoiceContent() {
     }
   }
 
+  if (loading || !invoice) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-8 h-8 text-[var(--accent-teal)] animate-spin" />
+      </div>
+    );
+  }
+
+  const initialData: InvoiceFormData = {
+    invoiceNumber: invoice.invoice_number,
+    autoGenerate: false,
+    clientName: invoice.client.name,
+    clientEmail: invoice.client.email,
+    clientPhone: invoice.client.phone ?? "",
+    clientAddress: invoice.client.address ?? "",
+    clientId: invoice.client_id,
+    invoiceDate: invoice.invoice_date,
+    paymentMethod: invoice.payment_method,
+    notes: invoice.notes ?? "",
+    signatureDataUrl: invoice.client_signature ?? "",
+    items: invoice.invoice_items.map((item) => ({
+      description: item.description,
+      quantity: item.quantity,
+      rate: item.rate,
+    })),
+  };
+
   return (
     <div>
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button
-          onClick={() => router.push("/admin/invoices")}
+          onClick={() => router.push(`/admin/invoices/view?id=${invoice.id}`)}
           className="p-2 rounded-lg hover:bg-white transition-colors"
         >
           <ArrowLeft className="w-5 h-5 text-[var(--text-muted)]" />
         </button>
         <div>
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">
-            New Invoice
+            Edit Invoice
           </h1>
           <p className="text-sm text-[var(--text-muted)]">
-            Fill in the details below
+            {invoice.invoice_number}
           </p>
         </div>
       </div>
@@ -228,10 +328,12 @@ export default function NewInvoiceContent() {
         {/* Form */}
         <div className="bg-white rounded-lg border border-[var(--border-light)] p-4 sm:p-6">
           <InvoiceForm
+            initialData={initialData}
             onPreviewChange={setPreviewData}
             onSaveDraft={handleSaveDraft}
             onSaveAndSend={handleSaveAndSend}
             isSaving={isSaving}
+            saveLabels={{ draft: "Update Draft", send: "Update & Send" }}
           />
         </div>
 

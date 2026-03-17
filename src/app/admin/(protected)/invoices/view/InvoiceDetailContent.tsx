@@ -9,6 +9,7 @@ import {
   Clock,
   Send,
   Loader2,
+  Pencil,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import {
@@ -23,6 +24,7 @@ type InvoiceDetail = {
   invoice_date: string;
   payment_method: string;
   notes: string | null;
+  client_signature: string | null;
   subtotal: number;
   hst_rate: number;
   hst_amount: number;
@@ -77,7 +79,7 @@ export default function InvoiceDetailContent() {
       .from("invoices")
       .select(
         `
-        id, invoice_number, invoice_date, payment_method, notes,
+        id, invoice_number, invoice_date, payment_method, notes, client_signature,
         subtotal, hst_rate, hst_amount, total, status,
         sent_at, paid_at, created_at,
         client:clients(name, email, phone, address),
@@ -217,6 +219,7 @@ export default function InvoiceDetailContent() {
     subtotal: invoice.subtotal,
     hstAmount: invoice.hst_amount,
     total: invoice.total,
+    signatureDataUrl: invoice.client_signature ?? "",
   };
 
   return (
@@ -245,6 +248,16 @@ export default function InvoiceDetailContent() {
 
         {/* Actions */}
         <div className="flex gap-2 flex-wrap">
+          {(invoice.status === "draft" || invoice.status === "sent") && (
+            <button
+              onClick={() => router.push(`/admin/invoices/edit?id=${invoice.id}`)}
+              className="btn btn-sm bg-white text-[var(--text-primary)] hover:bg-[var(--neutral-light-gray)] border border-[var(--border-light)]"
+            >
+              <Pencil className="w-4 h-4" />
+              Edit
+            </button>
+          )}
+
           {invoice.status === "draft" && (
             <button
               onClick={handleSend}

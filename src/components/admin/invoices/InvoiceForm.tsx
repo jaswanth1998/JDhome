@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Hash, Sparkles, PackagePlus } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { LineItemRow } from "./LineItemRow";
+import { SignaturePad } from "./SignaturePad";
 import type { InvoicePreviewData } from "./InvoicePreview";
 
 type Client = {
@@ -21,6 +22,8 @@ type LineItem = {
 };
 
 export type InvoiceFormData = {
+  invoiceNumber: string;
+  autoGenerate: boolean;
   clientName: string;
   clientEmail: string;
   clientPhone: string;
@@ -30,6 +33,7 @@ export type InvoiceFormData = {
   paymentMethod: string;
   notes: string;
   items: LineItem[];
+  signatureDataUrl: string;
 };
 
 const PAYMENT_METHODS = ["E-Transfer", "Cash", "Cheque", "Credit Card"];
@@ -46,6 +50,7 @@ type InvoiceFormProps = {
   onSaveDraft: (data: InvoiceFormData) => Promise<void>;
   onSaveAndSend: (data: InvoiceFormData) => Promise<void>;
   isSaving: boolean;
+  saveLabels?: { draft: string; send: string };
 };
 
 export function InvoiceForm({
@@ -54,9 +59,16 @@ export function InvoiceForm({
   onSaveDraft,
   onSaveAndSend,
   isSaving,
+  saveLabels,
 }: InvoiceFormProps) {
   const { supabase } = useAuth();
 
+  const [autoGenerate, setAutoGenerate] = useState(
+    initialData?.autoGenerate ?? true
+  );
+  const [invoiceNumber, setInvoiceNumber] = useState(
+    initialData?.invoiceNumber ?? ""
+  );
   const [clientName, setClientName] = useState(initialData?.clientName ?? "");
   const [clientEmail, setClientEmail] = useState(
     initialData?.clientEmail ?? ""
@@ -80,6 +92,49 @@ export function InvoiceForm({
   const [items, setItems] = useState<LineItem[]>(
     initialData?.items ?? [{ ...emptyItem }]
   );
+  const [signatureDataUrl, setSignatureDataUrl] = useState(
+    initialData?.signatureDataUrl ?? ""
+  );
+
+  // Service items catalog
+  type ServiceItem = {
+    id: string;
+    name: string;
+    description: string;
+    default_rate: number;
+    category: string;
+  };
+  const [serviceItems, setServiceItems] = useState<ServiceItem[]>([]);
+  const [showCatalog, setShowCatalog] = useState(false);
+  const [catalogQuery, setCatalogQuery] = useState("");
+
+  useEffect(() => {
+    supabase
+      .schema("jdhome")
+      .from("service_items")
+      .select("id, name, description, default_rate, category")
+      .eq("is_active", true)
+      .order("category")
+      .order("name")
+      .then(({ data }) => setServiceItems((data as ServiceItem[]) ?? []));
+  }, [supabase]);
+
+  const filteredCatalog = catalogQuery
+    ? serviceItems.filter(
+        (s) =>
+          s.name.toLowerCase().includes(catalogQuery.toLowerCase()) ||
+          s.description.toLowerCase().includes(catalogQuery.toLowerCase())
+      )
+    : serviceItems;
+
+  function addFromCatalog(service: ServiceItem) {
+    setItems((prev) => [
+      ...prev,
+      { description: service.description, quantity: 1, rate: service.default_rate },
+    ]);
+    setShowCatalog(false);
+    setCatalogQuery("");
+  }
 
   // Client search
   const [clientQuery, setClientQuery] = useState("");
@@ -158,7 +213,7 @@ export function InvoiceForm({
   // Push preview data upstream
   useEffect(() => {
     onPreviewChange({
-      invoiceNumber: "", // will be generated on save
+      invoiceNumber: autoGenerate ? "Auto" : invoiceNumber,
       clientName,
       clientAddress,
       invoiceDate,
@@ -168,20 +223,26 @@ export function InvoiceForm({
       subtotal,
       hstAmount,
       total,
+      signatureDataUrl,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    autoGenerate,
+    invoiceNumber,
     clientName,
     clientAddress,
     invoiceDate,
     paymentMethod,
     notes,
+    signatureDataUrl,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify(items),
   ]);
 
   function getFormData(): InvoiceFormData {
     return {
+      invoiceNumber,
+      autoGenerate,
       clientName,
       clientEmail,
       clientPhone,
@@ -191,11 +252,14 @@ export function InvoiceForm({
       paymentMethod,
       notes,
       items,
+      signatureDataUrl,
     };
   }
 
   // Validation
   function validate(): string | null {
+    if (!autoGenerate && !invoiceNumber.trim())
+      return "Invoice number is required (or switch to auto-generate)";
     if (!clientName.trim()) return "Client name is required";
     if (!clientEmail.trim()) return "Client email is required";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail))
@@ -337,6 +401,56 @@ export function InvoiceForm({
         </div>
       </section>
 
+      {/* Invoice Number */}
+      <section className="space-y-3">
+        <h3 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider">
+          Invoice Number
+        </h3>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setAutoGenerate(true);
+              setInvoiceNumber("");
+            }}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
+              autoGenerate
+                ? "bg-[var(--accent-teal)] text-white border-[var(--accent-teal)]"
+                : "bg-white text-[var(--text-secondary)] border-[var(--border-light)] hover:border-[var(--accent-teal)]"
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            Auto-generate
+          </button>
+          <button
+            type="button"
+            onClick={() => setAutoGenerate(false)}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
+              !autoGenerate
+                ? "bg-[var(--accent-teal)] text-white border-[var(--accent-teal)]"
+                : "bg-white text-[var(--text-secondary)] border-[var(--border-light)] hover:border-[var(--accent-teal)]"
+            }`}
+          >
+            <Hash className="w-3.5 h-3.5" />
+            Custom
+          </button>
+        </div>
+        {autoGenerate ? (
+          <p className="text-xs text-[var(--text-muted)]">
+            A number will be assigned automatically when saved (e.g. INV-202603-001)
+          </p>
+        ) : (
+          <input
+            type="text"
+            className="input !h-10 text-sm"
+            placeholder="e.g. INV-2026-001 or QUOTE-001"
+            value={invoiceNumber}
+            onChange={(e) => setInvoiceNumber(e.target.value)}
+            autoFocus
+          />
+        )}
+      </section>
+
       {/* Invoice Details */}
       <section className="space-y-3">
         <h3 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider">
@@ -402,14 +516,78 @@ export function InvoiceForm({
           />
         ))}
 
-        <button
-          type="button"
-          onClick={addItem}
-          className="flex items-center gap-1.5 text-sm text-[var(--accent-teal)] hover:text-[var(--accent-teal-hover)] font-medium"
-        >
-          <Plus className="w-4 h-4" />
-          Add Line Item
-        </button>
+        <div className="flex gap-3 flex-wrap">
+          <button
+            type="button"
+            onClick={addItem}
+            className="flex items-center gap-1.5 text-sm text-[var(--accent-teal)] hover:text-[var(--accent-teal-hover)] font-medium"
+          >
+            <Plus className="w-4 h-4" />
+            Add Blank Item
+          </button>
+          {serviceItems.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowCatalog(!showCatalog)}
+              className="flex items-center gap-1.5 text-sm text-[var(--primary-main)] hover:text-[var(--primary-dark)] font-medium"
+            >
+              <PackagePlus className="w-4 h-4" />
+              Add from Catalog
+            </button>
+          )}
+        </div>
+
+        {/* Catalog picker */}
+        {showCatalog && (
+          <div className="border border-[var(--border-light)] rounded-lg bg-white shadow-lg overflow-hidden">
+            <div className="p-2 border-b border-[var(--border-light)]">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-muted)]" />
+                <input
+                  type="text"
+                  className="input !h-8 text-xs !pl-8"
+                  placeholder="Search service items..."
+                  value={catalogQuery}
+                  onChange={(e) => setCatalogQuery(e.target.value)}
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="max-h-48 overflow-y-auto">
+              {filteredCatalog.length === 0 ? (
+                <p className="text-xs text-[var(--text-muted)] text-center py-4">
+                  No items found
+                </p>
+              ) : (
+                filteredCatalog.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => addFromCatalog(s)}
+                    className="w-full text-left px-3 py-2 hover:bg-[var(--neutral-lightest-gray)] border-b border-[var(--border-light)] last:border-b-0 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="min-w-0">
+                        <span className="text-sm font-medium text-[var(--text-primary)]">
+                          {s.name}
+                        </span>
+                        <span className="text-[10px] text-[var(--text-muted)] ml-2">
+                          {s.category}
+                        </span>
+                      </div>
+                      <span className="text-sm font-medium text-[var(--accent-teal)] shrink-0 ml-3">
+                        ${Number(s.default_rate).toFixed(2)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[var(--text-muted)] truncate mt-0.5">
+                      {s.description}
+                    </p>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Notes */}
@@ -423,6 +601,17 @@ export function InvoiceForm({
           rows={3}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
+        />
+      </section>
+
+      {/* Client Signature */}
+      <section className="space-y-3">
+        <h3 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wider">
+          Client Signature
+        </h3>
+        <SignaturePad
+          initialDataUrl={initialData?.signatureDataUrl}
+          onChange={setSignatureDataUrl}
         />
       </section>
 
@@ -465,7 +654,7 @@ export function InvoiceForm({
           disabled={isSaving}
           className="btn btn-outline btn-sm flex-1"
         >
-          {isSaving ? "Saving..." : "Save Draft"}
+          {isSaving ? "Saving..." : (saveLabels?.draft ?? "Save Draft")}
         </button>
         <button
           type="button"
@@ -473,7 +662,7 @@ export function InvoiceForm({
           disabled={isSaving}
           className="btn btn-primary btn-sm flex-1"
         >
-          {isSaving ? "Sending..." : "Save & Send"}
+          {isSaving ? "Sending..." : (saveLabels?.send ?? "Save & Send")}
         </button>
       </div>
     </div>
