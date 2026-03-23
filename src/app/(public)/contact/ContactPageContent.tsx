@@ -112,12 +112,21 @@ export function ContactPageContent() {
       {/* Hero Section */}
       <section className="section bg-gradient-primary text-white">
         <div className="container">
-          <div className="max-w-3xl mx-auto text-center">
+          <div className="max-w-3xl mx-auto text-center text-white/80" style={
+            {
+              color: "white !important"
+            }
+          }>
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               className="text-4xl md:text-5xl font-bold mb-6"
+              style={
+            {
+              color: "white !important"
+            }
+          }
             >
               Contact Us
             </motion.h1>

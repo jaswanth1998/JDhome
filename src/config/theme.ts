@@ -15,7 +15,7 @@ export const theme = {
      BRAND IDENTITY
      ========================================== */
   brand: {
-    name: "JD Home Solutions Inc.",
+    name: "JD Home Services",
     tagline: "From Install to Repair. Finished to Perfection.",
     description: "Professional locksmith, car lockout, and garage door repair services in Oshawa, Ontario.",
 
@@ -376,13 +376,13 @@ export const theme = {
       display: "(289) 991-3277",
       tel: "+12899913277",
     },
-    email: "info@jdhomesolutions.com",
+    email: "Info@jdhomeservices.ca",
 
     address: {
       city: "Oshawa",
       region: "Ontario",
       country: "Canada",
-      serviceArea: "Oshawa & Durham Region",
+      serviceArea: "Durham Region and Surrounding areas.",
       fullServiceArea: "Oshawa, Whitby, Ajax, Pickering, Courtice, Bowmanville",
     },
 
@@ -415,7 +415,7 @@ export const theme = {
      ========================================== */
   seo: {
     defaultTitle: "JD Home Solutions | Locksmith Oshawa | Car Lockout & Garage Door Repair",
-    titleTemplate: "%s | JD Home Solutions Inc.",
+    titleTemplate: "%s | JD Home Services",
     defaultDescription: "Trusted locksmith services in Oshawa and Durham Region. General locksmith work, fast car lockout response, and garage door repair and installation.",
     keywords: "locksmith Oshawa, car lockout Oshawa, garage door repair Oshawa, garage door installation Durham Region, locksmith Durham Region",
     siteUrl: "https://jdhomesolutions.com",
@@ -479,6 +479,68 @@ export const theme = {
           "Safety inspection and balance testing",
           "Professional recommendations for repair vs. replacement",
         ],
+      },
+    ],
+  },
+
+  /* ==========================================
+     CLIENT SEGMENTS
+     ========================================== */
+  clients: {
+    segments: [
+      {
+        id: "homeowners",
+        name: "Homeowners",
+        description: "Lock changes, rekeying, garage door repairs, and practical security upgrades for day-to-day peace of mind.",
+        icon: "Home",
+        highlights: ["Move-ins & lock changes", "Garage door repair"],
+      },
+      {
+        id: "landlords",
+        name: "Landlords & Property Managers",
+        description: "Dependable service for rental turnovers, tenant lock issues, hardware updates, and access control needs.",
+        icon: "Building2",
+        highlights: ["Rekeying between tenants", "Common entry hardware"],
+      },
+      {
+        id: "businesses",
+        name: "Retail & Small Business",
+        description: "Commercial locksmith support for storefronts, offices, service doors, and everyday security maintenance.",
+        icon: "Store",
+        highlights: ["Lock repair & replacement", "Entry door hardware"],
+      },
+      {
+        id: "drivers",
+        name: "Drivers Across Durham",
+        description: "Fast car lockout help for commuters, families, and working drivers who need careful, damage-aware entry.",
+        icon: "Car",
+        highlights: ["Emergency lockout response", "Clear arrival updates"],
+      },
+    ],
+  },
+
+  /* ==========================================
+     COMPANY PARTNERS
+     ========================================== */
+  partners: {
+    companies: [
+      {
+        id: "mtli",
+        name: "MTLI",
+        description: "Commercial and facility support projects.",
+        logo: "/images/partners/mtli.svg",
+      },
+      {
+        id: "tke",
+        name: "TKE",
+        description: "Reliable service coordination and on-site support.",
+        logo: "/images/partners/tke.svg",
+      },
+      {
+        id: "fedex",
+        name: "FedEx",
+        description: "Responsive access and service work for active sites.",
+        logo: "/images/partners/fedex.svg",
       },
     ],
   },

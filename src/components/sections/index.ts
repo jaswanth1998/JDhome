@@ -1,5 +1,7 @@
 export { Hero } from "./Hero";
 export { ServicesGrid } from "./ServicesGrid";
+export { Clients } from "./Clients";
+export { CompanyPartners } from "./CompanyPartners";
 export { WhyChooseUs } from "./WhyChooseUs";
 export { SmartLockSpotlight } from "./SmartLockSpotlight";
 export { ServiceArea } from "./ServiceArea";

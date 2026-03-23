@@ -383,7 +383,7 @@ function LoginForm() {
 
           {/* Footer */}
           <p className="text-center text-xs mt-10" style={{ color: "rgba(255,255,255,0.3)" }}>
-            &copy; {new Date().getFullYear()} JD Home Solutions Inc. All rights
+            &copy; {new Date().getFullYear()} JD Home Services All rights
             reserved.
           </p>
         </motion.div>

@@ -131,6 +131,7 @@ export default function InvoiceDetailContent() {
               email: invoice.client.email,
               phone: invoice.client.phone,
               address: invoice.client.address,
+              client_signature: invoice.client_signature,
             },
             invoice: {
               invoice_number: invoice.invoice_number,

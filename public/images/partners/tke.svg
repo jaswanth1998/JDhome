@@ -1,0 +1,8 @@
+<svg width="320" height="120" viewBox="0 0 320 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="120" rx="24" fill="#0F172A"/>
+  <rect x="18" y="18" width="284" height="84" rx="18" fill="#111827"/>
+  <rect x="36" y="32" width="48" height="56" rx="14" fill="#06B6D4"/>
+  <path d="M48 48H72V53H63V76H57V53H48V48Z" fill="white"/>
+  <text x="102" y="57" fill="white" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="800" letter-spacing="2">TKE</text>
+  <text x="102" y="78" fill="#CBD5E1" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" letter-spacing="1.4">FIELD SERVICE</text>
+</svg>

@@ -141,6 +141,7 @@ export default function NewInvoiceContent() {
         email: formData.clientEmail,
         phone: formData.clientPhone || null,
         address: formData.clientAddress || null,
+        client_signature: formData.signatureDataUrl || null,
         created_by: user?.id,
       },
       invoice: {

@@ -217,6 +217,7 @@ export default function EditInvoiceContent() {
         email: formData.clientEmail,
         phone: formData.clientPhone || null,
         address: formData.clientAddress || null,
+        client_signature: formData.signatureDataUrl || null,
       },
       invoice: {
         invoice_number: finalInvoiceNumber,

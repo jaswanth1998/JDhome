@@ -34,9 +34,9 @@ export function Hero() {
             className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance"
             style={{ color: "white" }}
           >
-            Oshawa&apos;s Trusted{" "}
-            <span className="text-[var(--accent-teal)]">Locksmith, Car Lockout,</span>{" "}
-            and Garage Door Team
+            Durham&apos;s Trusted{" "}
+            <span className="text-[var(--accent-teal)]">Garage door technicians</span>{" "}
+            Locksmiths.
           </motion.h1>
 
           <motion.p
@@ -45,8 +45,7 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-xl md:text-2xl text-white/80 mb-10"
           >
-            General locksmith service, fast vehicle lockout response, and garage
-            door repair and installation across Durham Region.
+            General Garage door repairs and installation, locksmith services, House and car lockout service across Durham and surrounding areas.
           </motion.p>
 
           <motion.div

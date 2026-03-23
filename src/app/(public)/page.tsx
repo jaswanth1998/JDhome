@@ -1,6 +1,8 @@
 import {
   Hero,
   ServicesGrid,
+  Clients,
+  CompanyPartners,
   WhyChooseUs,
   SmartLockSpotlight,
   ServiceArea,
@@ -13,6 +15,8 @@ export default function Home() {
     <>
       <Hero />
       <ServicesGrid />
+      <Clients />
+      <CompanyPartners />
       <WhyChooseUs />
       <SmartLockSpotlight />
       <ServiceArea />

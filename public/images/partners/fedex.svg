@@ -1,0 +1,10 @@
+<svg width="320" height="120" viewBox="0 0 320 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="120" rx="24" fill="#F3F4F6"/>
+  <rect x="18" y="18" width="284" height="84" rx="18" fill="white"/>
+  <rect x="36" y="34" width="56" height="52" rx="16" fill="#4F46E5"/>
+  <path d="M50 72V48H68V53H56V58H66V63H56V72H50Z" fill="white"/>
+  <text x="108" y="63" font-family="Inter, Arial, sans-serif" font-size="30" font-weight="800">
+    <tspan fill="#4F46E5">Fed</tspan><tspan fill="#F59E0B">Ex</tspan>
+  </text>
+  <text x="108" y="82" fill="#6B7280" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" letter-spacing="1.4">ACTIVE SITE SUPPORT</text>
+</svg>
