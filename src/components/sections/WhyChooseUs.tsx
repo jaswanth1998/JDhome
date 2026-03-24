@@ -8,7 +8,7 @@ export function WhyChooseUs() {
     <section className="section bg-[var(--bg-secondary)]" id="why-choose-us">
       <div className="container">
         <SectionHeading
-          title="Why Oshawa and Durham Trust JD Home Services"
+          title="Why People Trust JD Home Services"
           subtitle="We focus on the three services customers call for most: locksmith work, rapid car lockout help, and dependable garage door repair and installation."
         />
 

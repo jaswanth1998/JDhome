@@ -176,7 +176,7 @@ function LoginForm() {
             </div>
             <div>
               <p className="font-semibold text-sm tracking-wide" style={{ color: "rgba(255,255,255,0.9)" }}>
-                JD Home Solutions
+                JD Home Services
               </p>
               <p className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>Admin Portal</p>
             </div>
@@ -253,7 +253,7 @@ function LoginForm() {
             </div>
             <div>
               <p className="font-semibold text-sm" style={{ color: "rgba(255,255,255,0.9)" }}>
-                JD Home Solutions
+                JD Home Services
               </p>
               <p className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>Admin Portal</p>
             </div>

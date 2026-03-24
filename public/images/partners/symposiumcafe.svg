@@ -1,0 +1,8 @@
+<svg width="320" height="120" viewBox="0 0 320 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="120" rx="24" fill="#F8F5EF"/>
+  <rect x="18" y="18" width="284" height="84" rx="18" fill="#FFFDF8"/>
+  <circle cx="60" cy="60" r="28" fill="#1B3A5F"/>
+  <path d="M48 70V49H60.5C65.3 49 68 51.7 68 55.9C68 59 66.4 61.1 63.6 62.1L68.8 70H62.6L58.2 63.1H54V70H48ZM54 58.7H60C61.7 58.7 62.8 57.7 62.8 56.1C62.8 54.5 61.7 53.5 60 53.5H54V58.7Z" fill="white"/>
+  <text x="100" y="55" fill="#1B3A5F" font-family="Georgia, 'Times New Roman', serif" font-size="20" font-weight="700">Symposium</text>
+  <text x="100" y="77" fill="#8B5E3C" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="600" letter-spacing="1.2">CAFE RESTAURANT</text>
+</svg>

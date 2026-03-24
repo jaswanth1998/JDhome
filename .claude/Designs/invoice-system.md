@@ -2,7 +2,7 @@
 
 ## Overview
 
-An invoice system for JD Home Solutions that allows admins to create, preview, send, and track invoices. Invoices match the exact layout of `JD_Home_Invoice.docx` with dynamic values. A copy is emailed to the customer and stored in Supabase.
+An invoice system for JD Home Services that allows admins to create, preview, send, and track invoices. Invoices match the exact layout of `JD_Home_Invoice.docx` with dynamic values. A copy is emailed to the customer and stored in Supabase.
 
 ---
 
@@ -372,9 +372,9 @@ SMTP Flow:
 5. Upload PDF to Supabase Storage (jdhome-invoices bucket)
 6. Send email via SMTP (using Deno smtp client):
    - SMTP Host/Port/Auth from Edge Function secrets
-   - From: JD Home Solutions <invoices@jdhomeservices.ca> (or configured sender)
+   - From: JD Home Services <invoices@jdhomeservices.ca> (or configured sender)
    - To: client.email
-   - Subject: "Invoice {invoice_number} - JD Home Solutions"
+   - Subject: "Invoice {invoice_number} - JD Home Services"
    - HTML body: brief message with total due
    - Attachment: generated PDF (base64-encoded)
 7. Update invoice: pdf_url, sent_at, status='sent'
@@ -390,7 +390,7 @@ SMTP Flow:
 | `SMTP_USER` | SMTP auth username | invoices@jdhomeservices.ca |
 | `SMTP_PASS` | SMTP auth password | ******* |
 | `SMTP_FROM_EMAIL` | Sender email address | invoices@jdhomeservices.ca |
-| `SMTP_FROM_NAME` | Sender display name | JD Home Solutions |
+| `SMTP_FROM_NAME` | Sender display name | JD Home Services |
 | `SUPABASE_SERVICE_ROLE_KEY` | For DB access from Edge Function | (auto-set by Supabase) |
 
 ---
@@ -475,13 +475,13 @@ const navItems = [
 
 ## Email Template
 
-**Subject:** `Invoice INV-202603-001 - JD Home Solutions`
+**Subject:** `Invoice INV-202603-001 - JD Home Services`
 
 **Body (HTML):**
 ```
 Hi {client_name},
 
-Please find attached your invoice INV-202603-001 from JD Home Solutions.
+Please find attached your invoice INV-202603-001 from JD Home Services.
 
 Invoice Date: March 8, 2026
 Total Due: $1,491.60
@@ -491,7 +491,7 @@ If you have any questions about this invoice, please contact us:
 Phone: (289) 991-3277
 Email: 17508336canadainc@gmail.com
 
-Thank you for choosing JD Home Solutions.
+Thank you for choosing JD Home Services.
 From Install to Repair. Finished to Perfection.
 ```
 
@@ -517,7 +517,7 @@ const client = new SMTPClient({
 await client.send({
   from: `${Deno.env.get("SMTP_FROM_NAME")} <${Deno.env.get("SMTP_FROM_EMAIL")}>`,
   to: clientEmail,
-  subject: `Invoice ${invoiceNumber} - JD Home Solutions`,
+  subject: `Invoice ${invoiceNumber} - JD Home Services`,
   html: emailHtmlBody,
   attachments: [
     {

@@ -19,7 +19,7 @@ export function ServicesGrid() {
     <section className="section bg-white" id="services">
       <div className="container">
         <SectionHeading
-          title="Locksmith, Car Lockout, and Garage Door Service in Oshawa"
+          title="Garage Door and Locksmith Services in Durham Region & Surrounding Areas"
           subtitle="Three focused services, one reliable team: general locksmith work, fast car lockout response, and garage door repair and installation across Durham Region."
         />
 

@@ -1,5 +1,5 @@
 /**
- * JD HOME SOLUTIONS - CENTRALIZED THEME CONFIGURATION
+ * JD Home Services - CENTRALIZED THEME CONFIGURATION
  *
  * This file contains ALL customizable branding elements for the website.
  * Edit colors, typography, logos, contact info, and spacing from this single file.
@@ -414,11 +414,11 @@ export const theme = {
      SEO & META INFORMATION
      ========================================== */
   seo: {
-    defaultTitle: "JD Home Solutions | Locksmith Oshawa | Car Lockout & Garage Door Repair",
+    defaultTitle: "JD Home Services | Locksmith Oshawa | Car Lockout & Garage Door Repair",
     titleTemplate: "%s | JD Home Services",
     defaultDescription: "Trusted locksmith services in Oshawa and Durham Region. General locksmith work, fast car lockout response, and garage door repair and installation.",
     keywords: "locksmith Oshawa, car lockout Oshawa, garage door repair Oshawa, garage door installation Durham Region, locksmith Durham Region",
-    siteUrl: "https://jdhomesolutions.com",
+    siteUrl: "https://www.jdhomeservices.ca",
     ogImage: "/images/og-image.jpg",
     twitterHandle: "@jdhomesolutions",
   },
@@ -537,10 +537,10 @@ export const theme = {
         logo: "/images/partners/tke.svg",
       },
       {
-        id: "fedex",
-        name: "FedEx",
-        description: "Responsive access and service work for active sites.",
-        logo: "/images/partners/fedex.svg",
+        id: "symposium-cafe",
+        name: "Symposium Cafe",
+        description: "Hospitality-focused service support for active restaurant locations.",
+        logo: "/images/partners/symposiumcafe.svg",
       },
     ],
   },

@@ -211,7 +211,7 @@ Using `denomailer` (Deno SMTP client):
 - Send email:
   - From: `SMTP_FROM_NAME <SMTP_FROM_EMAIL>`
   - To: client email
-  - Subject: `Invoice {invoice_number} - JD Home Solutions`
+  - Subject: `Invoice {invoice_number} - JD Home Services`
   - HTML body: greeting, invoice summary (date, total, payment method), contact info, thank you
   - Attachment: generated PDF as binary
 

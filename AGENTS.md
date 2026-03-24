@@ -4,7 +4,7 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## Project Overview
 
-JD Home Solutions (jdhomesolutions.com / www.jdhomeservices.ca) - a business website + admin panel for a locksmith and smart home security company in Oshawa, Ontario. Frontend deployed to GitHub Pages; backend powered by Supabase.
+JD Home Services (jdhomesolutions.com / www.jdhomeservices.ca) - a business website + admin panel for a locksmith and smart home security company in Oshawa, Ontario. Frontend deployed to GitHub Pages; backend powered by Supabase.
 
 ## Commands
 
@@ -100,7 +100,7 @@ This project shares a Supabase instance with **quickmart** (a separate app). Eac
 | Schema | Owner | Purpose |
 |--------|-------|---------|
 | `public` | quickmart | Products, transactions, shift reports, etc. |
-| `jdhome` | JD Home Solutions | All JDhome tables (admin panel, services, bookings, etc.) |
+| `jdhome` | JD Home Services | All JDhome tables (admin panel, services, bookings, etc.) |
 | `auth` | Supabase built-in | Shared authentication (`auth.users`) |
 
 **Critical rules:**
