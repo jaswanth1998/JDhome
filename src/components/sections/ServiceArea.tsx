@@ -31,7 +31,7 @@ export function ServiceArea() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-3xl md:text-4xl font-bold mb-4"
           >
-            Serving Oshawa and Durham & Surrounding Areas
+           Serving Durham & Surrounding areas
           </motion.h2>
 
           {/* Description */}

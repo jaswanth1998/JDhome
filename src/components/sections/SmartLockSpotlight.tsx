@@ -15,7 +15,7 @@ import { Button } from "@/components/ui";
 const features = [
   { icon: Clock3, text: "24/7 response for urgent car lockouts" },
   { icon: ShieldCheck, text: "Damage-free entry whenever possible" },
-  { icon: MapPinned, text: "Coverage across Oshawa and Durham Region" },
+  { icon: MapPinned, text: "Coverage across Durham and surrounding areas" },
   { icon: Wrench, text: "Help with stuck locks and key access issues" },
   { icon: Phone, text: "Direct phone support when you need help fast" },
 ];
@@ -80,7 +80,7 @@ export function SmartLockSpotlight() {
 
             <p className="text-[var(--text-secondary)] mb-8 leading-relaxed">
               When your keys are locked inside the vehicle, speed matters. We
-              provide car lockout service across Oshawa and Durham Region with a
+              provide car lockout service across Durham and surrounding areas with a
               focus on quick arrival, careful entry, and clear communication.
             </p>
 

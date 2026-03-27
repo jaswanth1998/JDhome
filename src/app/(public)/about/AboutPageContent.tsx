@@ -65,7 +65,7 @@ export function AboutPageContent() {
               transition={{ duration: 0.6 }}
               className="text-4xl md:text-5xl font-bold mb-6"
             >
-              Trusted Locksmith Services in Oshawa and Durham
+              Trusted Locksmith Services in Durham and surrounding areas
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 30 }}

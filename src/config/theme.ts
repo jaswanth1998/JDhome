@@ -383,7 +383,7 @@ export const theme = {
       region: "Ontario",
       country: "Canada",
       serviceArea: "Durham Region and Surrounding areas.",
-      fullServiceArea: "Oshawa, Whitby, Ajax, Pickering, Courtice, Bowmanville",
+      fullServiceArea: "Oshawa, Whitby, Ajax, Pickering, Courtice, Bowmanville, Cobourg, Millbrook, Kawartha lakes, Peterborough, Lindsay, Port perry, Uxbridge, Stouffville  ",
     },
 
     hours: {
@@ -416,7 +416,7 @@ export const theme = {
   seo: {
     defaultTitle: "JD Home Services | Locksmith Oshawa | Car Lockout & Garage Door Repair",
     titleTemplate: "%s | JD Home Services",
-    defaultDescription: "Trusted locksmith services in Oshawa and Durham Region. General locksmith work, fast car lockout response, and garage door repair and installation.",
+    defaultDescription: "Trusted locksmith services in Durham and surrounding areas. General locksmith work, fast car lockout response, and garage door repair and installation.",
     keywords: "locksmith Oshawa, car lockout Oshawa, garage door repair Oshawa, garage door installation Durham Region, locksmith Durham Region",
     siteUrl: "https://www.jdhomeservices.ca",
     ogImage: "/images/og-image.jpg",
@@ -432,7 +432,7 @@ export const theme = {
         id: "locksmith",
         name: "Locksmith",
         shortDescription: "Residential and commercial locksmith service for lock changes, repairs, rekeying, and new hardware installs",
-        description: "Our general locksmith service covers the everyday security work property owners rely on. We handle lock changes, rekeying, deadbolt and knob replacement, hardware upgrades, lock repairs, and security checks for homes, offices, storefronts, and rental properties throughout Oshawa and Durham Region.",
+        description: "Our general locksmith service covers the everyday security work property owners rely on. We handle lock changes, rekeying, deadbolt and knob replacement, hardware upgrades, lock repairs, and security checks for homes, offices, storefronts, and rental properties throughout Durham and surrounding areas.",
         icon: "Lock",
         color: "#1B3A5F",
         featured: true,
@@ -448,7 +448,7 @@ export const theme = {
       {
         id: "car-lockout",
         name: "Car Lockout",
-        shortDescription: "Fast, damage-free vehicle entry when you are locked out anywhere in Oshawa or Durham Region",
+        shortDescription: "Fast, damage-free vehicle entry when you are locked out anywhere in Durham and surrounding regions",
         description: "Locked your keys in the car or dealing with a stuck vehicle lock? We provide rapid-response car lockout assistance with non-destructive entry methods whenever possible. Our goal is simple: get you back into your vehicle quickly, safely, and without adding more stress to your day.",
         icon: "Car",
         color: "#F59E0B",
@@ -456,7 +456,7 @@ export const theme = {
         featured: true,
         features: [
           "24/7 emergency availability",
-          "Fast response across Oshawa and Durham Region",
+          "Fast response across Durham and surrounding regions",
           "Damage-free vehicle entry whenever possible",
           "Help with keys locked inside or malfunctioning locks",
           "Service for most cars, SUVs, vans, and light trucks",

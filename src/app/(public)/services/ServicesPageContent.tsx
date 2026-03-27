@@ -32,7 +32,7 @@ export function ServicesPageContent() {
             >
               We focus on three core services: general locksmith work, rapid car
               lockout assistance, and garage door repair and installation
-              throughout Oshawa and Durham Region.
+              throughout Durham and surrounding areas.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 30 }}
