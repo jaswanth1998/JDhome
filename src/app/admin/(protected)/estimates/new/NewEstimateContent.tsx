@@ -11,7 +11,7 @@ import {
 import type { EstimateFormData } from "@/components/admin/estimates/EstimateForm";
 import type { EstimatePreviewData } from "@/components/admin/estimates/EstimatePreview";
 //TODO: Move this to env vars and backend config
-const ESTIMATE_WEBHOOK_URL = "ESTIMATE_WEBHOOK_PLACEHOLDER";
+const ESTIMATE_WEBHOOK_URL = "https://myn8n.plaper.org/webhook/jdhomes_estimate";
 
 export default function NewEstimateContent() {
   const { supabase, user } = useAuth();
@@ -227,7 +227,7 @@ export default function NewEstimateContent() {
       </div>
 
       {/* Form + Preview layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div >
         {/* Form */}
         <div className="bg-white rounded-lg border border-[var(--border-light)] p-4 sm:p-6">
           <EstimateForm
@@ -239,14 +239,14 @@ export default function NewEstimateContent() {
         </div>
 
         {/* Preview */}
-        <div className="hidden lg:block">
+        {/* <div className="hidden lg:block">
           <div className="sticky top-20">
             <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">
               Preview
             </p>
             <EstimatePreview data={previewData} />
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

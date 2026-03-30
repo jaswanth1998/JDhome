@@ -19,7 +19,7 @@ import {
 } from "@/components/admin/estimates";
 import type { EstimatePreviewData } from "@/components/admin/estimates/EstimatePreview";
 //TODO: Move this to env vars and backend config
-const ESTIMATE_WEBHOOK_URL = "ESTIMATE_WEBHOOK_PLACEHOLDER";
+const ESTIMATE_WEBHOOK_URL = "https://myn8n.plaper.org/webhook/jdhomes_estimate";
 
 type EstimateDetail = {
   id: string;

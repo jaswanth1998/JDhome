@@ -325,7 +325,7 @@ export default function EditInvoiceContent() {
       </div>
 
       {/* Form + Preview layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div >
         {/* Form */}
         <div className="bg-white rounded-lg border border-[var(--border-light)] p-4 sm:p-6">
           <InvoiceForm
@@ -339,14 +339,14 @@ export default function EditInvoiceContent() {
         </div>
 
         {/* Preview */}
-        <div className="hidden lg:block">
+        {/* <div className="hidden lg:block">
           <div className="sticky top-20">
             <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">
               Preview
             </p>
             <InvoicePreview data={previewData} />
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
