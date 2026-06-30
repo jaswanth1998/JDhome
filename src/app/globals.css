@@ -177,6 +177,17 @@ a {
   transition: color var(--transition-fast);
 }
 
+/* Inline links within long-form content (e.g. Privacy Policy) */
+.privacy-content a {
+  color: var(--accent-teal);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.privacy-content a:hover {
+  color: var(--accent-teal-hover);
+}
+
 /* Images */
 img {
   max-width: 100%;

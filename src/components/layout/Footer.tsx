@@ -160,9 +160,17 @@ export function Footer() {
             <p>
               &copy; {currentYear} {theme.brand.name}. All rights reserved.
             </p>
-            <p>
-              Proudly serving {theme.contact.address.city}, {theme.contact.address.region}
-            </p>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/privacy-policy"
+                className="hover:text-[var(--accent-teal)] transition-colors"
+              >
+                Privacy Policy
+              </Link>
+              <span>
+                Proudly serving {theme.contact.address.city}, {theme.contact.address.region}
+              </span>
+            </div>
           </div>
         </div>
       </div>
