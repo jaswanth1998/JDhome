@@ -3,7 +3,14 @@
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, FileText, FileCheck, Package, Loader2 } from "lucide-react";
+import {
+  LayoutDashboard,
+  FileText,
+  FileCheck,
+  Package,
+  Settings,
+  Loader2,
+} from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { LogoutButton } from "@/components/admin/LogoutButton";
 
@@ -12,6 +19,7 @@ const navItems = [
   { href: "/admin/invoices", label: "Invoices", icon: FileText },
   { href: "/admin/estimates", label: "Estimates", icon: FileCheck },
   { href: "/admin/service-items", label: "Service Items", icon: Package },
+  { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 export default function ProtectedAdminLayout({

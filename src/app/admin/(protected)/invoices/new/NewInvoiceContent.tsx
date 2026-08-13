@@ -10,6 +10,7 @@ import {
 } from "@/components/admin/invoices";
 import type { InvoiceFormData } from "@/components/admin/invoices/InvoiceForm";
 import type { InvoicePreviewData } from "@/components/admin/invoices/InvoicePreview";
+import { sendDocument, toInvoiceDocument } from "@/lib/pdf";
 
 export default function NewInvoiceContent() {
   const { supabase, user } = useAuth();
@@ -178,23 +179,14 @@ export default function NewInvoiceContent() {
     try {
       const result = await saveInvoice(formData, "sent");
 
-      // Call webhook to send invoice
-      const webhookRes = await fetch(
-        "https://myn8n.plaper.org/webhook/a92a21d9-2c77-456a-b657-61694a39e1a0",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            client: result.client,
-            invoice: result.invoice,
-            invoice_items: result.invoice_items,
-          }),
-        }
+      // Render the PDF in the browser, then hand it to n8n to email
+      await sendDocument(
+        toInvoiceDocument(
+          result.invoice,
+          result.client,
+          result.invoice_items
+        )
       );
-
-      if (!webhookRes.ok) {
-        throw new Error("Failed to send invoice via webhook");
-      }
 
       router.push(`/admin/invoices/view?id=${result.id}`);
     } catch (err) {

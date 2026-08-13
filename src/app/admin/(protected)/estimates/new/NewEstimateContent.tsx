@@ -10,8 +10,8 @@ import {
 } from "@/components/admin/estimates";
 import type { EstimateFormData } from "@/components/admin/estimates/EstimateForm";
 import type { EstimatePreviewData } from "@/components/admin/estimates/EstimatePreview";
+import { sendDocument, toEstimateDocument } from "@/lib/pdf";
 //TODO: Move this to env vars and backend config
-const ESTIMATE_WEBHOOK_URL = "https://myn8n.plaper.org/webhook/jdhomes_estimate";
 
 export default function NewEstimateContent() {
   const { supabase, user } = useAuth();
@@ -184,19 +184,13 @@ export default function NewEstimateContent() {
       const result = await saveEstimate(formData, "sent");
 
       // Call webhook to send estimate email
-      const webhookRes = await fetch(ESTIMATE_WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          client: result.client,
-          estimate: result.estimate,
-          estimate_items: result.estimate_items,
-        }),
-      });
-
-      if (!webhookRes.ok) {
-        throw new Error("Failed to send estimate via webhook");
-      }
+      await sendDocument(
+        toEstimateDocument(
+          result.estimate,
+          result.client,
+          result.estimate_items
+        )
+      );
 
       router.push(`/admin/estimates/view?id=${result.id}`);
     } catch (err) {

@@ -2,9 +2,17 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Search, FileText } from "lucide-react";
+import {
+  Plus,
+  Search,
+  FileText,
+  Download,
+  Trash2,
+  Loader2,
+} from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { InvoiceStatusBadge } from "@/components/admin/invoices";
+import { downloadDocumentPdf, toInvoiceDocument } from "@/lib/pdf";
 
 type Invoice = {
   id: string;
@@ -13,6 +21,34 @@ type Invoice = {
   total: number;
   status: string;
   client: { name: string } | null;
+};
+
+/** Full record the PDF needs — the list query only selects a summary. */
+type InvoiceFull = {
+  id: string;
+  invoice_number: string;
+  invoice_date: string;
+  payment_method: string;
+  notes: string | null;
+  client_signature: string | null;
+  subtotal: number;
+  hst_rate: number;
+  hst_amount: number;
+  total: number;
+  status: string;
+  client: {
+    name: string;
+    email: string;
+    phone: string | null;
+    address: string | null;
+  };
+  invoice_items: {
+    description: string;
+    quantity: number;
+    rate: number;
+    amount: number;
+    sort_order: number;
+  }[];
 };
 
 const STATUS_TABS = ["all", "draft", "sent", "paid", "overdue"] as const;
@@ -39,6 +75,10 @@ export default function InvoiceListContent() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<(typeof STATUS_TABS)[number]>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [rowBusy, setRowBusy] = useState<{
+    id: string;
+    action: "download" | "delete";
+  } | null>(null);
 
   const fetchInvoices = useCallback(async () => {
     setLoading(true);
@@ -60,6 +100,62 @@ export default function InvoiceListContent() {
   useEffect(() => {
     fetchInvoices();
   }, [fetchInvoices]);
+
+  async function handleDownload(id: string) {
+    setRowBusy({ id, action: "download" });
+    try {
+      // The list only holds a summary — pull the full record the PDF needs
+      const { data, error } = await supabase
+        .schema("jdhome")
+        .from("invoices")
+        .select(
+          `
+          id, invoice_number, invoice_date, payment_method, notes, client_signature,
+          subtotal, hst_rate, hst_amount, total, status,
+          client:clients(name, email, phone, address),
+          invoice_items(description, quantity, rate, amount, sort_order)
+        `
+        )
+        .eq("id", id)
+        .single();
+
+      if (error || !data) {
+        alert("Failed to load invoice");
+        return;
+      }
+
+      const inv = data as unknown as InvoiceFull;
+      inv.invoice_items.sort((a, b) => a.sort_order - b.sort_order);
+
+      // Render the PDF in the browser and save it locally
+      await downloadDocumentPdf(
+        toInvoiceDocument(inv, inv.client, inv.invoice_items)
+      );
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to download invoice");
+    } finally {
+      setRowBusy(null);
+    }
+  }
+
+  async function handleDelete(id: string, invoiceNumber: string) {
+    if (!confirm(`Delete invoice ${invoiceNumber}? This cannot be undone.`))
+      return;
+    setRowBusy({ id, action: "delete" });
+    try {
+      const { error } = await supabase
+        .schema("jdhome")
+        .from("invoices")
+        .delete()
+        .eq("id", id);
+      if (error) throw new Error("Failed to delete invoice");
+      await fetchInvoices();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to delete invoice");
+    } finally {
+      setRowBusy(null);
+    }
+  }
 
   const filtered = searchQuery
     ? invoices.filter(
@@ -164,6 +260,9 @@ export default function InvoiceListContent() {
                   <th className="text-center px-4 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
                     Status
                   </th>
+                  <th className="text-right px-4 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -187,6 +286,42 @@ export default function InvoiceListContent() {
                     </td>
                     <td className="px-4 py-3 text-center">
                       <InvoiceStatusBadge status={inv.status} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          title="Download PDF"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDownload(inv.id);
+                          }}
+                          disabled={rowBusy?.id === inv.id}
+                          className="p-1.5 rounded hover:bg-[var(--neutral-light-gray)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors disabled:opacity-40"
+                        >
+                          {rowBusy?.id === inv.id &&
+                          rowBusy.action === "download" ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Download className="w-4 h-4" />
+                          )}
+                        </button>
+                        <button
+                          title="Delete"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(inv.id, inv.invoice_number);
+                          }}
+                          disabled={rowBusy?.id === inv.id}
+                          className="p-1.5 rounded hover:bg-red-50 text-[var(--text-muted)] hover:text-red-600 transition-colors disabled:opacity-40"
+                        >
+                          {rowBusy?.id === inv.id &&
+                          rowBusy.action === "delete" ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -216,9 +351,44 @@ export default function InvoiceListContent() {
                     {formatCurrency(inv.total)}
                   </span>
                 </div>
-                <p className="text-xs text-[var(--text-muted)] mt-1">
-                  {formatDate(inv.invoice_date)}
-                </p>
+                <div className="flex items-center justify-between mt-1">
+                  <p className="text-xs text-[var(--text-muted)]">
+                    {formatDate(inv.invoice_date)}
+                  </p>
+                  <div className="flex items-center justify-end gap-1">
+                    <button
+                      title="Download PDF"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownload(inv.id);
+                      }}
+                      disabled={rowBusy?.id === inv.id}
+                      className="p-1.5 rounded hover:bg-[var(--neutral-light-gray)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors disabled:opacity-40"
+                    >
+                      {rowBusy?.id === inv.id &&
+                      rowBusy.action === "download" ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4" />
+                      )}
+                    </button>
+                    <button
+                      title="Delete"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(inv.id, inv.invoice_number);
+                      }}
+                      disabled={rowBusy?.id === inv.id}
+                      className="p-1.5 rounded hover:bg-red-50 text-[var(--text-muted)] hover:text-red-600 transition-colors disabled:opacity-40"
+                    >
+                      {rowBusy?.id === inv.id && rowBusy.action === "delete" ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

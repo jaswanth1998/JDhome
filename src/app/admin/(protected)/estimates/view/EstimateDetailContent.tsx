@@ -11,15 +11,16 @@ import {
   Send,
   Loader2,
   Pencil,
+  Download,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { EstimateStatusBadge } from "@/components/admin/estimates";
 import {
-  EstimatePreview,
-  EstimateStatusBadge,
-} from "@/components/admin/estimates";
-import type { EstimatePreviewData } from "@/components/admin/estimates/EstimatePreview";
-//TODO: Move this to env vars and backend config
-const ESTIMATE_WEBHOOK_URL = "https://myn8n.plaper.org/webhook/jdhomes_estimate";
+  sendDocument,
+  downloadDocumentPdf,
+  toEstimateDocument,
+  DocumentPdfViewer,
+} from "@/lib/pdf";
 
 type EstimateDetail = {
   id: string;
@@ -123,46 +124,29 @@ export default function EstimateDetailContent() {
         if (updateError) throw new Error("Failed to update estimate status");
       }
 
-      const webhookRes = await fetch(ESTIMATE_WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          client: {
-            name: estimate.client.name,
-            email: estimate.client.email,
-            phone: estimate.client.phone,
-            address: estimate.client.address,
-            client_signature: estimate.client_signature,
-          },
-          estimate: {
-            estimate_number: estimate.estimate_number,
-            estimate_date: estimate.estimate_date,
-            valid_until: estimate.valid_until,
-            payment_method: estimate.payment_method,
-            notes: estimate.notes,
-            subtotal: estimate.subtotal,
-            hst_rate: estimate.hst_rate,
-            hst_amount: estimate.hst_amount,
-            total: estimate.total,
-            status: "sent",
-          },
-          estimate_items: estimate.estimate_items.map((item) => ({
-            description: item.description,
-            quantity: item.quantity,
-            rate: item.rate,
-            amount: item.amount,
-            sort_order: item.sort_order,
-          })),
-        }),
-      });
-
-      if (!webhookRes.ok) {
-        throw new Error("Failed to send estimate via webhook");
-      }
+      // Render the PDF in the browser, then hand it to n8n to email
+      await sendDocument(
+        toEstimateDocument(estimate, estimate.client, estimate.estimate_items)
+      );
 
       await fetchEstimate();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to send estimate");
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function handleDownload() {
+    if (!estimate) return;
+    setActionLoading("download");
+    try {
+      // Render the PDF in the browser and save it locally
+      await downloadDocumentPdf(
+        toEstimateDocument(estimate, estimate.client, estimate.estimate_items)
+      );
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to download estimate");
     } finally {
       setActionLoading(null);
     }
@@ -217,25 +201,6 @@ export default function EstimateDetailContent() {
     );
   }
 
-  const previewData: EstimatePreviewData = {
-    estimateNumber: estimate.estimate_number,
-    clientName: estimate.client.name,
-    clientAddress: estimate.client.address ?? "",
-    estimateDate: estimate.estimate_date,
-    validUntil: estimate.valid_until ?? "",
-    paymentMethod: estimate.payment_method,
-    items: estimate.estimate_items.map((i) => ({
-      description: i.description,
-      quantity: i.quantity,
-      rate: i.rate,
-      amount: i.amount,
-    })),
-    notes: estimate.notes ?? "",
-    subtotal: estimate.subtotal,
-    hstAmount: estimate.hst_amount,
-    total: estimate.total,
-    signatureDataUrl: estimate.client_signature ?? "",
-  };
 
   return (
     <div>
@@ -318,6 +283,15 @@ export default function EstimateDetailContent() {
           )}
 
           <button
+            onClick={handleDownload}
+            disabled={actionLoading === "download"}
+            className="btn btn-sm bg-white text-[var(--text-primary)] hover:bg-[var(--neutral-light-gray)] border border-[var(--border-light)]"
+          >
+            <Download className="w-4 h-4" />
+            {actionLoading === "download" ? "Preparing..." : "Download PDF"}
+          </button>
+
+          <button
             onClick={handleDelete}
             disabled={actionLoading === "delete"}
             className="btn btn-sm bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
@@ -329,9 +303,15 @@ export default function EstimateDetailContent() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Estimate Preview */}
+        {/* Estimate Preview — the actual PDF the client receives */}
         <div className="lg:col-span-2">
-          <EstimatePreview data={previewData} />
+          <DocumentPdfViewer
+            data={toEstimateDocument(
+              estimate,
+              estimate.client,
+              estimate.estimate_items
+            )}
+          />
         </div>
 
         {/* Timeline / Info */}
