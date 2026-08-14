@@ -214,15 +214,15 @@ export default function InvoiceDetailContent() {
 
         {/* Actions */}
         <div className="flex gap-2 flex-wrap">
-          {(invoice.status === "draft" || invoice.status === "sent") && (
-            <button
-              onClick={() => router.push(`/admin/invoices/edit?id=${invoice.id}`)}
-              className="btn btn-sm bg-white text-[var(--text-primary)] hover:bg-[var(--neutral-light-gray)] border border-[var(--border-light)]"
-            >
-              <Pencil className="w-4 h-4" />
-              Edit
-            </button>
-          )}
+          {/* Available for every status — a paid invoice may still need a
+              correction (wrong address, typo in a line item). */}
+          <button
+            onClick={() => router.push(`/admin/invoices/edit?id=${invoice.id}`)}
+            className="btn btn-sm bg-white text-[var(--text-primary)] hover:bg-[var(--neutral-light-gray)] border border-[var(--border-light)]"
+          >
+            <Pencil className="w-4 h-4" />
+            Edit
+          </button>
 
           {invoice.status === "draft" && (
             <button

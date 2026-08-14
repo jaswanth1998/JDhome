@@ -6,6 +6,7 @@ import {
   Plus,
   Search,
   FileText,
+  Pencil,
   Download,
   Trash2,
   Loader2,
@@ -290,6 +291,17 @@ export default function InvoiceListContent() {
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
                         <button
+                          title="Edit"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/admin/invoices/edit?id=${inv.id}`);
+                          }}
+                          disabled={rowBusy?.id === inv.id}
+                          className="p-1.5 rounded hover:bg-[var(--neutral-light-gray)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors disabled:opacity-40"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
                           title="Download PDF"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -356,6 +368,17 @@ export default function InvoiceListContent() {
                     {formatDate(inv.invoice_date)}
                   </p>
                   <div className="flex items-center justify-end gap-1">
+                    <button
+                      title="Edit"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/admin/invoices/edit?id=${inv.id}`);
+                      }}
+                      disabled={rowBusy?.id === inv.id}
+                      className="p-1.5 rounded hover:bg-[var(--neutral-light-gray)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors disabled:opacity-40"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
                     <button
                       title="Download PDF"
                       onClick={(e) => {

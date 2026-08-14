@@ -228,15 +228,15 @@ export default function EstimateDetailContent() {
 
         {/* Actions */}
         <div className="flex gap-2 flex-wrap">
-          {(estimate.status === "draft" || estimate.status === "sent") && (
-            <button
-              onClick={() => router.push(`/admin/estimates/edit?id=${estimate.id}`)}
-              className="btn btn-sm bg-white text-[var(--text-primary)] hover:bg-[var(--neutral-light-gray)] border border-[var(--border-light)]"
-            >
-              <Pencil className="w-4 h-4" />
-              Edit
-            </button>
-          )}
+          {/* Available for every status — an accepted or declined estimate may
+              still need a correction. */}
+          <button
+            onClick={() => router.push(`/admin/estimates/edit?id=${estimate.id}`)}
+            className="btn btn-sm bg-white text-[var(--text-primary)] hover:bg-[var(--neutral-light-gray)] border border-[var(--border-light)]"
+          >
+            <Pencil className="w-4 h-4" />
+            Edit
+          </button>
 
           {estimate.status === "draft" && (
             <button
