@@ -11,22 +11,30 @@
  * bundle and never runs during the static export build.
  */
 import type { JDDocumentData, DocumentKind } from "./types";
-import { getDocumentSettings } from "./settings";
+import { getDocumentSettings, type DocumentSettings } from "./settings";
 
 export const DOCUMENT_WEBHOOKS: Record<DocumentKind, string> = {
   invoice: "https://myn8n.plaper.org/webhook/jdhomes-invoice-pdf",
   estimate: "https://myn8n.plaper.org/webhook/jdhomes-estimate-pdf",
 };
 
-/** Render the document to a PDF Blob in the browser. */
+/**
+ * Render the document to a PDF Blob in the browser.
+ *
+ * `settingsOverride` is used by the public share page, which receives settings
+ * from the share RPC — it has no authenticated session, so it cannot read the
+ * settings table itself.
+ */
 export async function buildDocumentPdfBlob(
-  data: JDDocumentData
+  data: JDDocumentData,
+  settingsOverride?: DocumentSettings
 ): Promise<Blob> {
-  const [{ pdf }, { JDDocument }, settings] = await Promise.all([
+  const [{ pdf }, { JDDocument }, fetched] = await Promise.all([
     import("@react-pdf/renderer"),
     import("./JDDocument"),
-    getDocumentSettings(),
+    settingsOverride ? Promise.resolve(null) : getDocumentSettings(),
   ]);
+  const settings = settingsOverride ?? fetched ?? undefined;
   return pdf(<JDDocument data={data} settings={settings} />).toBlob();
 }
 
@@ -36,8 +44,11 @@ export function documentFileName(data: JDDocumentData) {
 }
 
 /** Trigger a browser download of the PDF (used by "Download PDF" actions). */
-export async function downloadDocumentPdf(data: JDDocumentData) {
-  const blob = await buildDocumentPdfBlob(data);
+export async function downloadDocumentPdf(
+  data: JDDocumentData,
+  settingsOverride?: DocumentSettings
+) {
+  const blob = await buildDocumentPdfBlob(data, settingsOverride);
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

@@ -12,6 +12,8 @@ import {
   Loader2,
   Pencil,
   Download,
+  Link2,
+  Check,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { EstimateStatusBadge } from "@/components/admin/estimates";
@@ -30,6 +32,7 @@ type EstimateDetail = {
   payment_method: string;
   notes: string | null;
   client_signature: string | null;
+  public_token: string;
   subtotal: number;
   hst_rate: number;
   hst_amount: number;
@@ -74,6 +77,7 @@ export default function EstimateDetailContent() {
   const [estimate, setEstimate] = useState<EstimateDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const fetchEstimate = useCallback(async () => {
     if (!id) {
@@ -86,6 +90,7 @@ export default function EstimateDetailContent() {
       .select(
         `
         id, estimate_number, estimate_date, valid_until, payment_method, notes, client_signature,
+        public_token,
         subtotal, hst_rate, hst_amount, total, status,
         sent_at, accepted_at, declined_at, created_at,
         client:clients(name, email, phone, address),
@@ -134,6 +139,19 @@ export default function EstimateDetailContent() {
       alert(err instanceof Error ? err.message : "Failed to send estimate");
     } finally {
       setActionLoading(null);
+    }
+  }
+
+  async function handleCopyShareLink() {
+    if (!estimate) return;
+    const url = `${window.location.origin}/share/?token=${estimate.public_token}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard needs a secure context; show the link so it can be copied.
+      prompt("Copy this link:", url);
     }
   }
 
@@ -281,6 +299,19 @@ export default function EstimateDetailContent() {
               {actionLoading === "declined" ? "..." : "Decline"}
             </button>
           )}
+
+          <button
+            onClick={handleCopyShareLink}
+            className="btn btn-sm bg-white text-[var(--text-primary)] hover:bg-[var(--neutral-light-gray)] border border-[var(--border-light)]"
+            title="Public link the client can open without logging in"
+          >
+            {copied ? (
+              <Check className="w-4 h-4 text-green-600" />
+            ) : (
+              <Link2 className="w-4 h-4" />
+            )}
+            {copied ? "Copied!" : "Copy link"}
+          </button>
 
           <button
             onClick={handleDownload}
