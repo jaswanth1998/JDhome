@@ -7,6 +7,8 @@ import {
   Search,
   FileText,
   Pencil,
+  Link2,
+  Check,
   Download,
   Trash2,
   Loader2,
@@ -21,6 +23,7 @@ type Invoice = {
   invoice_date: string;
   total: number;
   status: string;
+  public_token: string;
   client: { name: string } | null;
 };
 
@@ -76,6 +79,7 @@ export default function InvoiceListContent() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<(typeof STATUS_TABS)[number]>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [rowBusy, setRowBusy] = useState<{
     id: string;
     action: "download" | "delete";
@@ -86,7 +90,9 @@ export default function InvoiceListContent() {
     let query = supabase
       .schema("jdhome")
       .from("invoices")
-      .select("id, invoice_number, invoice_date, total, status, client:clients(name)")
+      .select(
+        "id, invoice_number, invoice_date, total, status, public_token, client:clients(name)"
+      )
       .order("created_at", { ascending: false });
 
     if (activeTab !== "all") {
@@ -101,6 +107,18 @@ export default function InvoiceListContent() {
   useEffect(() => {
     fetchInvoices();
   }, [fetchInvoices]);
+
+  async function handleCopyShareLink(token: string, id: string) {
+    const url = `${window.location.origin}/share/?token=${token}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId((cur) => (cur === id ? null : cur)), 2000);
+    } catch {
+      // Clipboard needs a secure context; show the link so it can be copied.
+      prompt("Copy this link:", url);
+    }
+  }
 
   async function handleDownload(id: string) {
     setRowBusy({ id, action: "download" });
@@ -302,6 +320,20 @@ export default function InvoiceListContent() {
                           <Pencil className="w-4 h-4" />
                         </button>
                         <button
+                          title="Copy client link"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCopyShareLink(inv.public_token, inv.id);
+                          }}
+                          className="p-1.5 rounded hover:bg-[var(--neutral-light-gray)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors disabled:opacity-40"
+                        >
+                          {copiedId === inv.id ? (
+                            <Check className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <Link2 className="w-4 h-4" />
+                          )}
+                        </button>
+                        <button
                           title="Download PDF"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -378,6 +410,20 @@ export default function InvoiceListContent() {
                       className="p-1.5 rounded hover:bg-[var(--neutral-light-gray)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors disabled:opacity-40"
                     >
                       <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      title="Copy client link"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCopyShareLink(inv.public_token, inv.id);
+                      }}
+                      className="p-1.5 rounded hover:bg-[var(--neutral-light-gray)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors disabled:opacity-40"
+                    >
+                      {copiedId === inv.id ? (
+                        <Check className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <Link2 className="w-4 h-4" />
+                      )}
                     </button>
                     <button
                       title="Download PDF"
