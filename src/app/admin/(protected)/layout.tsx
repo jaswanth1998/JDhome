@@ -82,7 +82,7 @@ export default function ProtectedAdminLayout({
                   href={item.href}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     isActive
-                      ? "bg-[var(--accent-teal)] bg-opacity-10 text-[var(--accent-teal)]"
+                      ? "bg-[var(--accent-teal)]/10 text-[var(--accent-teal)]"
                       : "text-[var(--text-secondary)] hover:bg-[var(--neutral-light-gray)] hover:text-[var(--text-primary)]"
                   }`}
                 >

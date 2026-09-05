@@ -9,6 +9,7 @@ interface SectionHeadingProps {
   centered?: boolean;
   light?: boolean;
   className?: string;
+  as?: "h1" | "h2" | "h3";
 }
 
 export function SectionHeading({
@@ -17,7 +18,10 @@ export function SectionHeading({
   centered = true,
   light = false,
   className,
+  as = "h2",
 }: SectionHeadingProps) {
+  const Tag = as;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -30,14 +34,14 @@ export function SectionHeading({
         className
       )}
     >
-      <h2
+      <Tag
         className={cn(
           "text-3xl md:text-4xl font-bold mb-4",
           light ? "text-white" : "text-[var(--text-primary)]"
         )}
       >
         {title}
-      </h2>
+      </Tag>
 
       {subtitle && (
         <p

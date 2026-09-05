@@ -1,12 +1,28 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/seo";
+import { breadcrumbNode, withGraph } from "@/lib/jsonld";
+import { buildMetadata } from "@/lib/seo";
 import { ServicesPageContent } from "./ServicesPageContent";
 
-export const metadata: Metadata = {
-  title: "Locksmith Services Durham and surrounding areas | Locksmith, Car Lockout, Garage Doors",
+export const metadata: Metadata = buildMetadata({
+  title: "Locksmith, Car Lockout & Garage Door Services | Oshawa, ON",
   description:
-    "Professional locksmith services in Durham and surrounding areas, including general locksmith work, fast car lockout service, and garage door repair and installation.",
-};
+    "Three core services from an Oshawa-based team: residential and commercial locksmith work, 24/7 car lockout help, and garage door repair and installation.",
+  path: "/services/",
+});
 
 export default function ServicesPage() {
-  return <ServicesPageContent />;
+  return (
+    <>
+      <JsonLd
+        data={withGraph([
+          breadcrumbNode([
+            { name: "Home", path: "/" },
+            { name: "Services", path: "/services/" },
+          ]),
+        ])}
+      />
+      <ServicesPageContent />
+    </>
+  );
 }

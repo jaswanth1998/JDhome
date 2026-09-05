@@ -112,23 +112,14 @@ export function ContactPageContent() {
       {/* Hero Section */}
       <section className="section bg-gradient-primary text-white">
         <div className="container">
-          <div className="max-w-3xl mx-auto text-center text-white/80" style={
-            {
-              color: "white !important"
-            }
-          }>
+          <div className="max-w-3xl mx-auto text-center text-white/80">
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-4xl md:text-5xl font-bold mb-6"
-              style={
-            {
-              color: "white !important"
-            }
-          }
+              className="text-4xl md:text-5xl font-bold mb-6 text-white"
             >
-              Contact Us
+              Contact Our Oshawa Locksmith &amp; Garage Door Team
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 30 }}
@@ -375,7 +366,7 @@ export function ContactPageContent() {
               transition={{ duration: 0.6 }}
             >
               {/* Emergency Contact */}
-              <div className="mb-8 p-6 rounded-xl bg-[var(--accent-orange)] bg-opacity-10 border border-[var(--accent-orange)] border-opacity-20">
+              <div className="mb-8 p-6 rounded-xl bg-[var(--accent-orange)]/10 border border-[var(--accent-orange)]/20">
                 <h3 className="text-lg font-semibold text-[var(--accent-orange)] mb-2">
                   Emergency Car Lockout?
                 </h3>
@@ -399,13 +390,13 @@ export function ContactPageContent() {
               <div className="space-y-6">
                 {/* Phone */}
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-teal)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-teal)]/10 flex items-center justify-center flex-shrink-0">
                     <Phone className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-[var(--text-primary)]">
+                    <h3 className="font-semibold text-[var(--text-primary)]" style={{ fontSize: "1.125rem" }}>
                       Phone
-                    </h4>
+                    </h3>
                     <a
                       href={`tel:${theme.contact.phone.tel}`}
                       className="text-[var(--accent-teal)] hover:underline"
@@ -417,13 +408,13 @@ export function ContactPageContent() {
 
                 {/* Email */}
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-teal)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-teal)]/10 flex items-center justify-center flex-shrink-0">
                     <Mail className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-[var(--text-primary)]">
+                    <h3 className="font-semibold text-[var(--text-primary)]" style={{ fontSize: "1.125rem" }}>
                       Email
-                    </h4>
+                    </h3>
                     <a
                       href={`mailto:${theme.contact.email}`}
                       className="text-[var(--accent-teal)] hover:underline"
@@ -435,13 +426,13 @@ export function ContactPageContent() {
 
                 {/* Service Area */}
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-teal)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-teal)]/10 flex items-center justify-center flex-shrink-0">
                     <MapPin className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-[var(--text-primary)]">
+                    <h3 className="font-semibold text-[var(--text-primary)]" style={{ fontSize: "1.125rem" }}>
                       Service Area
-                    </h4>
+                    </h3>
                     <p className="text-[var(--text-secondary)]">
                       {theme.contact.address.serviceArea}
                     </p>
@@ -453,13 +444,13 @@ export function ContactPageContent() {
 
                 {/* Hours */}
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-teal)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--accent-teal)]/10 flex items-center justify-center flex-shrink-0">
                     <Clock className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-[var(--text-primary)]">
+                    <h3 className="font-semibold text-[var(--text-primary)]" style={{ fontSize: "1.125rem" }}>
                       Hours
-                    </h4>
+                    </h3>
                     <p className="text-[var(--text-secondary)]">
                       Regular: {theme.contact.hours.regular.display}
                     </p>
@@ -472,9 +463,9 @@ export function ContactPageContent() {
 
               {/* Response Time */}
               <div className="mt-8 p-6 rounded-xl bg-[var(--bg-secondary)]">
-                <h4 className="font-semibold text-[var(--text-primary)] mb-2">
+                <h3 className="font-semibold text-[var(--text-primary)] mb-2" style={{ fontSize: "1.125rem" }}>
                   Response Time
-                </h4>
+                </h3>
                 <p className="text-[var(--text-secondary)] text-sm">
                   {theme.contact.responseTime.regular}
                 </p>

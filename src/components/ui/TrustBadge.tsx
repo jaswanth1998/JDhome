@@ -28,7 +28,7 @@ export function TrustBadge({
       className={cn("text-center", className)}
     >
       {/* Icon Container */}
-      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--accent-teal)] bg-opacity-10 flex items-center justify-center">
+      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--accent-teal)]/10 flex items-center justify-center">
         {IconComponent && (
           <IconComponent
             className="w-8 h-8 text-white"

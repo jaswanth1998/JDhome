@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "npx serve out",
-    "lint": "eslint"
+    "lint": "eslint",
+    "verify:seo": "node scripts/verify-seo.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -16,7 +17,6 @@
     "framer-motion": "^12.23.26",
     "lucide-react": "^0.561.0",
     "next": "16.0.10",
-    "next-seo": "^7.0.1",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "react-hook-form": "^7.68.0",

@@ -13,22 +13,29 @@ const navigation = [
   { name: "Home", href: "/" },
   {
     name: "Services",
-    href: "/services",
-    dropdown: [
-      { name: "Locksmith", href: "/services#locksmith" },
-      { name: "Car Lockout", href: "/services#car-lockout" },
-      { name: "Garage Door Repair & Installation", href: "/services#garage-door-repair-installation" },
-    ],
+    href: "/services/",
+    dropdown: theme.services.categories.map((service) => ({
+      name: service.name,
+      href: `/services/${service.id}/`,
+    })),
   },
-  { name: "About", href: "/about" },
-  { name: "Contact", href: "/contact" },
+  { name: "Service Areas", href: "/service-areas/" },
+  { name: "About", href: "/about/" },
+  { name: "Contact", href: "/contact/" },
 ];
 
 export function Header() {
+  const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const pathname = usePathname();
+  const [menuPathname, setMenuPathname] = useState(pathname);
+
+  // Close mobile menu on route change (derived during render rather than in an effect)
+  if (pathname !== menuPathname) {
+    setMenuPathname(pathname);
+    setIsMobileMenuOpen(false);
+  }
 
   // Handle scroll effect
   useEffect(() => {
@@ -39,11 +46,6 @@ export function Header() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // Close mobile menu on route change
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [pathname]);
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
@@ -57,9 +59,12 @@ export function Header() {
     };
   }, [isMobileMenuOpen]);
 
+  // Compare without trailing slashes so it works whether or not the router reports one
   const isActive = (href: string) => {
-    if (href === "/") return pathname === "/";
-    return pathname.startsWith(href);
+    const current = pathname.replace(/\/+$/, "") || "/";
+    const target = href.replace(/\/+$/, "") || "/";
+    if (target === "/") return current === "/";
+    return current === target || current.startsWith(`${target}/`);
   };
 
   return (
@@ -248,8 +253,8 @@ export function Header() {
                   </Button>
 
                   <Button
-                    as="link" 
-                    href="/contact"
+                    as="link"
+                    href="/contact/"
                     variant="primary"
                     fullWidth
                     size="lg"

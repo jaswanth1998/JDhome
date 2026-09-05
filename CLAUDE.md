@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-JD Home Services (jdhomesolutions.com / www.jdhomeservices.ca) - a business website + admin panel for a locksmith and smart home security company in Oshawa, Ontario. Frontend deployed to GitHub Pages; backend powered by Supabase.
+JD Home Services (jdhomesolutions.com / www.jdhomeservices.ca) - a business website + admin panel for a locksmith, car lockout, and garage door company in Oshawa, Ontario (Durham Region). Frontend deployed to GitHub Pages; backend powered by Supabase.
 
 ## Commands
 
@@ -12,6 +12,7 @@ JD Home Services (jdhomesolutions.com / www.jdhomeservices.ca) - a business webs
 - `npm run build` - Build static export to `out/` directory
 - `npm run start` - Serve the static `out/` build via `npx serve out`
 - `npm run lint` - Run ESLint (flat config, `eslint.config.mjs`)
+- `npm run verify:seo` - Verify SEO output in `out/` (titles, canonicals, JSON-LD, sitemap, robots); run after `npm run build`
 
 No test framework is configured.
 
@@ -35,9 +36,10 @@ CSS custom properties mirroring the theme are defined in `src/app/globals.css` u
 
 ### Component Organization
 
-- `src/components/layout/` - Header, Footer, MobileCallButton (marketing layout pieces)
-- `src/components/sections/` - Homepage sections (Hero, ServicesGrid, WhyChooseUs, SmartLockSpotlight, ServiceArea, Testimonials, FinalCTA)
-- `src/components/ui/` - Reusable primitives (Button, ServiceCard, TestimonialCard, TrustBadge, SectionHeading)
+- `src/components/layout/` - Header, Footer, MobileCallButton, MotionProvider (marketing layout pieces)
+- `src/components/sections/` - Homepage sections (Hero, ServicesGrid, Clients, CompanyPartners, WhyChooseUs, CarLockoutSpotlight, ServiceArea, Testimonials, FinalCTA)
+- `src/components/ui/` - Reusable primitives (Button, ServiceCard, TestimonialCard, TrustBadge, SectionHeading, Breadcrumbs)
+- `src/components/seo/` - `JsonLd` server component (structured data); `src/components/analytics/` - env-gated `GoogleAnalytics`
 - `src/components/admin/` - Admin-specific components (LogoutButton, invoices/)
 - Each directory has an `index.ts` barrel export
 
@@ -47,23 +49,31 @@ The app uses Next.js route groups to separate marketing and admin layouts:
 
 ```
 src/app/
-  layout.tsx                      # Root: html/body/fonts/globals (no Header/Footer)
-  (public)/                       # Marketing site (URLs: /, /about, /services, /contact)
-    layout.tsx                    # Wraps with Header + Footer + MobileCallButton
-    page.tsx, about/, contact/, services/
+  layout.tsx                      # Root: html/body/fonts/globals + GoogleAnalytics (no Header/Footer)
+  sitemap.ts, robots.ts           # sitemap.xml / robots.txt (force-static)
+  og-image.png/route.tsx          # Pre-rendered 1200x630 OG image (force-static)
+  (public)/                       # Marketing site
+    layout.tsx                    # MotionProvider + skip link + Header/Footer/MobileCallButton + site JSON-LD
+    page.tsx                      # Home
+    about/, contact/, privacy-policy/
+    services/
+      page.tsx                    # Services hub (/services/, keeps a #<id> anchor per service)
+      [slug]/page.tsx             # Service detail (/services/{locksmith|car-lockout|garage-door-repair-installation}/)
+    service-areas/
+      page.tsx                    # Service-area hub (/service-areas/, all 14 cities)
+      [city]/page.tsx             # Core city pages (/service-areas/{oshawa|whitby|ajax|pickering|courtice|bowmanville}/)
+  share/                          # Public invoice/estimate share links (noindex)
   admin/                          # Admin panel (URLs: /admin/*)
     layout.tsx                    # Wraps with AuthProvider
     login/page.tsx                # Login page (no route guard)
     (protected)/                  # Route guard + admin shell
       layout.tsx                  # Client-side auth check + sidebar/topbar
       dashboard/page.tsx          # Admin dashboard
-      invoices/
-        page.tsx                  # Invoice list
-        new/page.tsx              # Create new invoice
-        view/page.tsx             # Invoice detail (uses ?id= query param)
+      invoices/, estimates/       # List page + new/, edit/, view/ (use ?id= query params)
+      service-items/, settings/
 ```
 
-Marketing pages use the pattern: `page.tsx` (server component with metadata) renders a `*PageContent.tsx` (client component).
+Marketing pages use the pattern: `page.tsx` (server component with metadata) renders a `*PageContent.tsx`. The original pages (home, about, services hub, contact) use client content components with framer-motion; the service detail and city pages use server content components (`ServicePageContent`, `CityPageContent`, no `"use client"`), and the service-areas hub is inlined in its `page.tsx`. Dynamic segments (`[slug]`, `[city]`) are pre-rendered with `dynamicParams = false` + `generateStaticParams` (required by `output: "export"`); `params` is a Promise in Next 16, so `await params` in both `generateMetadata` and the page.
 
 ### Admin Authentication (Client-Side)
 
@@ -80,7 +90,17 @@ No middleware or server-side auth — the static export doesn't support it.
 
 ### Contact Form
 
-The contact form (`src/app/contact/ContactPageContent.tsx`) submits to an external webhook endpoint. Form validation uses zod schemas with `@hookform/resolvers`.
+The contact form (`src/app/(public)/contact/ContactPageContent.tsx`) submits to an external webhook endpoint. Form validation uses zod schemas with `@hookform/resolvers`.
+
+### SEO & Structured Data
+
+- `src/lib/seo.ts` - `SITE_URL`, `absoluteUrl()`, `buildMetadata({ title, description, path })` (absolute title, canonical, OG, Twitter), `SITE_ROUTES` (feeds `sitemap.ts` - add every new indexable route here), `coreCities`, `getService()`, `getCity()`
+- `src/lib/jsonld.ts` - JSON-LD builders (`businessNode`, `websiteNode`, `serviceNode`, `faqPageNode`, `breadcrumbNode`, `withGraph`), rendered with `<JsonLd data={withGraph([...])} />` from `src/components/seo/` as the first child of a page fragment. The site-wide business/website graph is emitted once in `(public)/layout.tsx`; each page adds its own `BreadcrumbList` (service pages also add `Service` + `FAQPage`)
+- `src/app/sitemap.ts`, `src/app/robots.ts`, and `src/app/og-image.png/route.tsx` must keep `export const dynamic = "force-static"` to build under `output: "export"`
+- `theme.serviceCities` (14 cities; `core: true` cities get a `/service-areas/[city]/` page and carry a `blurb`) plus per-service `seo` (`title`, `description`, `h1`) and `faqs` (5 each) on `theme.services.categories` drive the service and city pages. Optional props on some `as const` tuple entries (`badge`, `blurb`) produce union types - widen with a typed assignment (`const cities: readonly ServiceCity[] = theme.serviceCities`) or narrow with `"badge" in service`
+- Write internal hrefs with trailing slashes (`/services/locksmith/`, `/service-areas/`) to match `trailingSlash: true`
+- Never emit `AggregateRating`/`Review` schema from on-site testimonials (self-serving reviews violate Google's structured-data guidelines); reviews belong on a Google Business Profile
+- Content rules: Canadian English; no invented business facts (prices, years in business, customer counts, licence numbers, street address); city pages must not quote response-time minutes
 
 ## Deployment
 
@@ -90,6 +110,7 @@ The contact form (`src/app/contact/ContactPageContent.tsx`) submits to an extern
 - Custom domain configured via `public/CNAME`
 - Docker setup exists (`Dockerfile` + `docker-compose.yml`) mapping port 5006 -> 3000
 - **Environment variables** (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) are injected from GitHub Secrets during build. For local dev, use `.env.local` (gitignored). See `.env.example` for required vars.
+- Optional SEO/analytics vars: `NEXT_PUBLIC_GA_MEASUREMENT_ID` (GA4 tag renders only when set) and `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` (Search Console meta tag). Both are read at build time, so they must be GitHub Secrets too.
 
 ## Supabase Backend
 

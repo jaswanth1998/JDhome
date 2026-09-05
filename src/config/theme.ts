@@ -10,6 +10,73 @@
  * 3. Access values: theme.colors.primary.main, theme.typography.fontFamily.heading, etc.
  */
 
+export type ServiceCity = {
+  slug: string;
+  name: string;
+  region: string;
+  core: boolean;
+  blurb?: string;
+};
+
+export type ServiceFaq = { question: string; answer: string };
+
+/* ==========================================
+   SERVICE CITIES
+   Core cities get dedicated service-area pages; the rest are listed only.
+   ========================================== */
+const serviceCities = [
+  {
+    slug: "oshawa",
+    name: "Oshawa",
+    region: "Durham Region",
+    core: true,
+    blurb: "Oshawa is our home base, so it is the area we can usually reach most quickly for locksmith work, car lockouts, and garage door repair.",
+  },
+  {
+    slug: "whitby",
+    name: "Whitby",
+    region: "Durham Region",
+    core: true,
+    blurb: "Whitby sits directly west of Oshawa along the Highway 401 corridor, a short trip from our base for lock changes, car lockouts, and garage door work, including Brooklin to the north.",
+  },
+  {
+    slug: "ajax",
+    name: "Ajax",
+    region: "Durham Region",
+    core: true,
+    blurb: "Ajax lies west of Whitby on the Lake Ontario shoreline. We serve Ajax homes, rental units, and businesses from our Oshawa base.",
+  },
+  {
+    slug: "pickering",
+    name: "Pickering",
+    region: "Durham Region",
+    core: true,
+    blurb: "Pickering is the westernmost lakeshore city in Durham Region and borders Toronto. We serve Pickering from our Oshawa base with the same three services we offer at home.",
+  },
+  {
+    slug: "courtice",
+    name: "Courtice",
+    region: "Durham Region",
+    core: true,
+    blurb: "Courtice is part of the Municipality of Clarington and sits immediately east of Oshawa, making it one of the closest communities to our base.",
+  },
+  {
+    slug: "bowmanville",
+    name: "Bowmanville",
+    region: "Durham Region",
+    core: true,
+    blurb: "Bowmanville is the largest community in Clarington, east of Courtice along Highway 401. We serve Bowmanville from our Oshawa base for lock changes, car lockouts, and garage door repair and installation.",
+  },
+  { slug: "cobourg", name: "Cobourg", region: "Northumberland County", core: false },
+  { slug: "millbrook", name: "Millbrook", region: "Peterborough County", core: false },
+  { slug: "kawartha-lakes", name: "Kawartha Lakes", region: "City of Kawartha Lakes", core: false },
+  { slug: "peterborough", name: "Peterborough", region: "Peterborough", core: false },
+  { slug: "lindsay", name: "Lindsay", region: "City of Kawartha Lakes", core: false },
+  { slug: "port-perry", name: "Port Perry", region: "Durham Region", core: false },
+  { slug: "uxbridge", name: "Uxbridge", region: "Durham Region", core: false },
+  { slug: "stouffville", name: "Stouffville", region: "York Region", core: false },
+] as const satisfies readonly ServiceCity[];
+
 export const theme = {
   /* ==========================================
      BRAND IDENTITY
@@ -20,10 +87,8 @@ export const theme = {
     description: "Professional locksmith, car lockout, and garage door repair services in Oshawa, Ontario.",
 
     logo: {
-      primary: "/images/logo.svg",
-      white: "/images/logo-white.svg",
-      icon: "/images/logo-icon.svg",
-      iconWhite: "/images/logo-icon-white.svg",
+      primary: "/images/logo.png",
+      pdf: "/images/logo-pdf.png",
     },
 
     favicon: "/favicon.ico",
@@ -382,8 +447,12 @@ export const theme = {
       city: "Oshawa",
       region: "Ontario",
       country: "Canada",
-      serviceArea: "Durham Region and Surrounding areas.",
-      fullServiceArea: "Oshawa, Whitby, Ajax, Pickering, Courtice, Bowmanville, Cobourg, Millbrook, Kawartha lakes, Peterborough, Lindsay, Port perry, Uxbridge, Stouffville  ",
+      serviceArea: "Durham Region and surrounding areas",
+      fullServiceArea: serviceCities.map((c) => c.name).join(", "),
+      geo: {
+        latitude: 43.8971,
+        longitude: -78.8658,
+      },
     },
 
     hours: {
@@ -411,15 +480,20 @@ export const theme = {
   },
 
   /* ==========================================
+     SERVICE CITIES (see serviceCities above)
+     ========================================== */
+  serviceCities,
+
+  /* ==========================================
      SEO & META INFORMATION
      ========================================== */
   seo: {
-    defaultTitle: "JD Home Services | Locksmith Oshawa | Car Lockout & Garage Door Repair",
+    defaultTitle: "Locksmith & Garage Door Repair Oshawa | JD Home Services",
     titleTemplate: "%s | JD Home Services",
-    defaultDescription: "Trusted locksmith services in Durham and surrounding areas. General locksmith work, fast car lockout response, and garage door repair and installation.",
+    defaultDescription: "Oshawa locksmith for lock changes and rekeying, 24/7 car lockout help, and garage door repair and installation across Durham Region. Call (289) 991-3277.",
     keywords: "locksmith Oshawa, car lockout Oshawa, garage door repair Oshawa, garage door installation Durham Region, locksmith Durham Region",
     siteUrl: "https://www.jdhomeservices.ca",
-    ogImage: "/images/og-image.jpg",
+    ogImage: "/og-image.png",
     twitterHandle: "@jdhomesolutions",
   },
 
@@ -444,6 +518,39 @@ export const theme = {
           "Security upgrades after move-ins or tenant turnover",
           "Clear recommendations and professional workmanship",
         ],
+        seo: {
+          title: "Locksmith in Oshawa & Durham Region | JD Home Services",
+          description:
+            "Lock changes, rekeying, deadbolt installs, and lock repair for homes, rentals, and businesses in Oshawa and Durham Region. Licensed and insured.",
+          h1: "Locksmith Services in Oshawa & Durham Region",
+        },
+        faqs: [
+          {
+            question: "Do you handle both residential and commercial locksmith work?",
+            answer:
+              "Yes. Our locksmith service covers homes, offices, storefronts, and rental properties throughout Durham Region and surrounding areas. Typical jobs include lock changes, lock repair and alignment, rekeying, and installing new deadbolts, knobs, levers, and entry hardware.",
+          },
+          {
+            question: "Should I rekey or replace my locks after moving in or changing tenants?",
+            answer:
+              "Rekeying keeps your existing hardware and changes the lock so previous keys no longer work, which is often enough after a move-in or tenant turnover when the locks are in good condition. Replacement makes more sense when the hardware is worn, damaged, or due for a security upgrade. We look at your doors and give you a clear recommendation rather than suggesting work you do not need.",
+          },
+          {
+            question: "Can you install deadbolts and new door hardware?",
+            answer:
+              "Yes. We install deadbolts, knobs, levers, and other entry hardware for homes, offices, storefronts, and rental units, and we handle hardware upgrades and lock alignment on existing doors. Every install is finished with attention to fit and smooth, reliable operation.",
+          },
+          {
+            question: "Which areas do you cover for locksmith service?",
+            answer:
+              "We are based in Oshawa and provide locksmith service throughout Durham Region, including Whitby, Ajax, Pickering, Courtice, and Bowmanville. We also travel to nearby communities such as Port Perry, Uxbridge, Stouffville, Cobourg, Peterborough, and Lindsay. If you are not sure whether we cover your location, call us and we will let you know.",
+          },
+          {
+            question: "How do I get a quote for locksmith work?",
+            answer:
+              "Call us at (289) 991-3277 or send a message through our contact page with a short description of the job, such as how many doors are involved and whether you need rekeying, repair, or new hardware. We will talk through the options and give you clear recommendations before any work begins. Our regular hours are Monday to Friday, 8 AM to 6 PM.",
+          },
+        ],
       },
       {
         id: "car-lockout",
@@ -462,6 +569,39 @@ export const theme = {
           "Service for most cars, SUVs, vans, and light trucks",
           "Upfront communication before work begins",
         ],
+        seo: {
+          title: "24/7 Car Lockout Service Oshawa & Durham | JD Home Services",
+          description:
+            "Locked out of your car in Oshawa or Durham Region? Get 24/7 car lockout help with damage-free entry when possible. Call JD Home Services: (289) 991-3277.",
+          h1: "24/7 Car Lockout Service in Oshawa & Durham Region",
+        },
+        faqs: [
+          {
+            question: "Are you available 24/7 for car lockouts?",
+            answer:
+              "Yes. Car lockout help is available 24 hours a day, seven days a week, including evenings and weekends. Call (289) 991-3277 at any time and we will confirm your location and give you an arrival estimate.",
+          },
+          {
+            question: "Will unlocking my car damage the door or lock?",
+            answer:
+              "We use non-destructive entry methods whenever possible, so in most cases your door and lock are left exactly as they were. If the vehicle or the condition of the lock means damage-free entry is not realistic, we explain the situation and your options before any work begins.",
+          },
+          {
+            question: "How quickly can you reach me in Oshawa or Durham Region?",
+            answer:
+              "Response time is typically 20-30 minutes for emergency lockouts, depending on your location and traffic. Oshawa is our home base, so nearby areas are usually the quickest to reach, and we cover the rest of Durham Region and surrounding communities from there. When you call, we will confirm where you are and give you a realistic arrival estimate.",
+          },
+          {
+            question: "What kinds of vehicles can you open?",
+            answer:
+              "We provide lockout service for most cars, SUVs, vans, and light trucks. When you call, let us know the make and model of your vehicle so we can confirm we are able to help before we head out.",
+          },
+          {
+            question: "What should I have ready when I call about a lockout?",
+            answer:
+              "Have your exact location ready, such as a street address, the nearest intersection, or the name of the parking lot, along with your vehicle's make, model, and colour. Let us know whether the keys are locked inside or the lock itself is not working, and keep your phone nearby so we can send arrival updates. We will confirm the details and explain the next steps before we head out.",
+          },
+        ],
       },
       {
         id: "garage-door-repair-installation",
@@ -478,6 +618,39 @@ export const theme = {
           "Opener setup and operational checks",
           "Safety inspection and balance testing",
           "Professional recommendations for repair vs. replacement",
+        ],
+        seo: {
+          title: "Garage Door Repair & Installation Oshawa | JD Home Services",
+          description:
+            "Garage door repair, replacement, and new installation in Oshawa and Durham Region: track, roller, cable, and opener work with safety and balance checks.",
+          h1: "Garage Door Repair & Installation in Oshawa & Durham Region",
+        },
+        faqs: [
+          {
+            question: "Do you repair garage doors, or only install new ones?",
+            answer:
+              "We do both. Our garage door service covers repair and troubleshooting of existing doors as well as new door installation and replacement. If your door is off-track, noisy, or damaged, we diagnose the issue and let you know whether a repair or a replacement is the more sensible choice.",
+          },
+          {
+            question: "My garage door is off-track or noisy. Can that be repaired?",
+            answer:
+              "In many cases, yes. Off-track, noisy, and rough-running doors are often caused by worn or misaligned tracks, rollers, cables, or other hardware, and we handle those adjustments and replacements as part of our repair service. It is best to stop using the door until it has been inspected, since operating an off-track door can cause further damage. Once the work is done, we complete a safety inspection and balance test.",
+          },
+          {
+            question: "Do you install and set up garage door openers?",
+            answer:
+              "Yes. Opener setup and operational checks are part of our garage door service, whether the opener is going in with a new door or being added to an existing one. After installation we test the door's travel, balance, and safety features so the system runs smoothly and safely from the start.",
+          },
+          {
+            question: "How do I know whether to repair or replace my garage door?",
+            answer:
+              "It depends on the condition of the door, its hardware, and how it has been operating. Isolated problems such as a worn roller, a frayed cable, or a door that has come off its track can usually be repaired, while a door that is badly damaged, unsafe, or repeatedly failing may be better replaced. We inspect the whole system, explain what we find, and give you a straightforward recommendation for repair versus replacement.",
+          },
+          {
+            question: "Do you service garage doors outside Oshawa?",
+            answer:
+              "Yes. We repair and install garage doors from our Oshawa base across Durham Region, including Whitby, Ajax, Pickering, Courtice, and Bowmanville, and we also travel to nearby communities such as Port Perry, Uxbridge, Cobourg, Peterborough, and Lindsay. Call us with your location and we will confirm availability.",
+          },
         ],
       },
     ],

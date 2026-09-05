@@ -1,12 +1,28 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/seo";
+import { breadcrumbNode, withGraph } from "@/lib/jsonld";
+import { buildMetadata } from "@/lib/seo";
 import { AboutPageContent } from "./AboutPageContent";
 
-export const metadata: Metadata = {
-  title: "About JD Home Services | Licensed Locksmith ONTARIO",
+export const metadata: Metadata = buildMetadata({
+  title: "About JD Home Services | Locksmith & Garage Doors, Oshawa",
   description:
-    "Learn about JD Home Services, Oshawa's trusted provider for locksmith service, car lockouts, and garage door repair and installation across Durham Region.",
-};
+    "JD Home Services is an Oshawa, Ontario team focused on locksmith work, car lockout response, and garage door repair and installation across Durham Region.",
+  path: "/about/",
+});
 
 export default function AboutPage() {
-  return <AboutPageContent />;
+  return (
+    <>
+      <JsonLd
+        data={withGraph([
+          breadcrumbNode([
+            { name: "Home", path: "/" },
+            { name: "About", path: "/about/" },
+          ]),
+        ])}
+      />
+      <AboutPageContent />
+    </>
+  );
 }

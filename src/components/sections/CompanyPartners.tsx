@@ -36,6 +36,10 @@ export function CompanyPartners() {
                 <img
                   src={company.logo}
                   alt={`${company.name} company mark`}
+                  width={140}
+                  height={56}
+                  loading="lazy"
+                  decoding="async"
                   className="max-h-14 w-auto"
                 />
               </div>

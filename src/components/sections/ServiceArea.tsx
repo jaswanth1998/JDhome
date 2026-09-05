@@ -1,11 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { MapPin, ArrowRight } from "lucide-react";
-import { theme } from "@/config/theme";
+import { theme, type ServiceCity } from "@/config/theme";
 import { Button } from "@/components/ui";
 
-const serviceAreas = theme.contact.address.fullServiceArea.split(", ");
+const serviceCities: readonly ServiceCity[] = theme.serviceCities;
 
 export function ServiceArea() {
   return (
@@ -29,7 +30,7 @@ export function ServiceArea() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-3xl md:text-4xl font-bold mb-4"
+            className="text-3xl md:text-4xl font-bold mb-4 text-white"
           >
            Serving Durham & Surrounding areas
           </motion.h2>
@@ -54,16 +55,14 @@ export function ServiceArea() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="flex flex-wrap items-center justify-center gap-4 mb-10"
           >
-            {serviceAreas.map((area, index) => (
-              <span
-                key={area}
-                className="px-4 py-2 rounded-full bg-white/10 text-white text-sm font-medium"
+            {serviceCities.map((city) => (
+              <Link
+                key={city.slug}
+                href={city.core ? `/service-areas/${city.slug}/` : "/service-areas/"}
+                className="px-4 py-2 rounded-full bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors"
               >
-                {area}
-                {index < serviceAreas.length - 1 && (
-                  <span className="hidden">•</span>
-                )}
-              </span>
+                {city.name}
+              </Link>
             ))}
           </motion.div>
 
@@ -76,13 +75,13 @@ export function ServiceArea() {
           >
             <Button
               as="link"
-              href="/contact"
+              href="/service-areas/"
               variant="primary"
               icon={ArrowRight}
               iconPosition="right"
               size="lg"
             >
-              Check if We Service Your Area
+              See All Service Areas
             </Button>
           </motion.div>
         </div>

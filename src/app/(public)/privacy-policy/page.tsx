@@ -1,22 +1,27 @@
 import type { Metadata } from "next";
 import { theme } from "@/config/theme";
+import { JsonLd } from "@/components/seo";
+import { breadcrumbNode, withGraph } from "@/lib/jsonld";
+import { buildMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy",
+export const metadata: Metadata = buildMetadata({
+  title: "Privacy Policy | JD Home Services",
   description:
-    "Privacy Policy for JD Home Services, including how we collect, use, and protect personal information shared through our website, phone, and WhatsApp messaging service.",
-};
+    "How JD Home Services collects, uses, and protects personal information shared through our website, phone, email, and WhatsApp messaging.",
+  path: "/privacy-policy/",
+});
 
 const LAST_UPDATED = "June 30, 2026";
 
 export default function PrivacyPolicyPage() {
   return (
     <>
+      <JsonLd data={withGraph([breadcrumbNode([{ name: "Home", path: "/" }, { name: "Privacy Policy", path: "/privacy-policy/" }])])} />
       {/* Hero */}
       <section className="section bg-gradient-primary text-white">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">
               Privacy Policy
             </h1>
             <p className="text-lg text-white/80">

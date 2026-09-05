@@ -3,7 +3,7 @@ export { ServicesGrid } from "./ServicesGrid";
 export { Clients } from "./Clients";
 export { CompanyPartners } from "./CompanyPartners";
 export { WhyChooseUs } from "./WhyChooseUs";
-export { SmartLockSpotlight } from "./SmartLockSpotlight";
+export { CarLockoutSpotlight } from "./CarLockoutSpotlight";
 export { ServiceArea } from "./ServiceArea";
 export { Testimonials } from "./Testimonials";
 export { FinalCTA } from "./FinalCTA";

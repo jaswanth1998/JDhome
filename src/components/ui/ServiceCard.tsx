@@ -36,7 +36,7 @@ export function ServiceCard({
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.5 }}
     >
-      <Link href={`/services#${id}`} className="block h-full">
+      <Link href={`/services/${id}/`} className="block h-full">
         <div
           className={cn(
             "group relative h-full bg-white rounded-lg border border-[var(--border-light)] p-6",

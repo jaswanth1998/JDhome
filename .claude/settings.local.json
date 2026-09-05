@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__supabase__list_tables",
+      "mcp__supabase__execute_sql",
+      "mcp__supabase__get_project_url",
+      "mcp__supabase__get_publishable_keys",
+      "Bash(rm:*)",
+      "Bash(python3 -c \":*)",
+      "mcp__supabase__apply_migration",
+      "mcp__supabase__deploy_edge_function",
+      "Bash(npm run build)",
+      "mcp__supabase__get_logs",
+      "Bash(find /Users/jaswanthtata/Desktop/projects/JDhome -type f -path */supabase/functions/*)",
+      "Bash(find /Users/jaswanthtata/Desktop/projects/JDhome -type f -name *edge* -o -name *function*)",
+      "Bash(cat \"/Users/jaswanthtata/Desktop/projects/JDhome/src/app/admin/\\(protected\\)/invoices/page.tsx\")",
+      "Bash(cat \"/Users/jaswanthtata/Desktop/projects/JDhome/src/app/admin/\\(protected\\)/invoices/new/page.tsx\")",
+      "Bash(find /Users/jaswanthtata/Desktop/projects/JDhome -name *migration* -o -name *schema*)",
+      "mcp__supabase__list_edge_functions"
+    ]
+  }
+}

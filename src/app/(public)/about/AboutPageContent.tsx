@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   ShieldCheck,
@@ -11,7 +12,7 @@ import {
   ArrowRight,
   CheckCircle,
 } from "lucide-react";
-import { theme } from "@/config/theme";
+import { theme, type ServiceCity } from "@/config/theme";
 import { Button, SectionHeading } from "@/components/ui";
 import { FinalCTA } from "@/components/sections";
 
@@ -51,7 +52,7 @@ const values = [
   "Respect for your property and time",
 ];
 
-const serviceAreas = theme.contact.address.fullServiceArea.split(", ");
+const serviceCities: readonly ServiceCity[] = theme.serviceCities;
 
 export function AboutPageContent() {
   return (
@@ -63,7 +64,7 @@ export function AboutPageContent() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-4xl md:text-5xl font-bold mb-6"
+              className="text-4xl md:text-5xl font-bold mb-6 text-white"
             >
               Trusted Locksmith Services in Durham and surrounding areas
             </motion.h1>
@@ -89,7 +90,7 @@ export function AboutPageContent() {
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.6 }}
             >
-              <span className="inline-block px-4 py-1 rounded-full bg-[var(--accent-teal)] bg-opacity-10 text-[var(--accent-teal)] text-sm font-medium mb-4">
+              <span className="inline-block px-4 py-1 rounded-full bg-[var(--accent-teal)]/10 text-[var(--accent-teal)] text-sm font-medium mb-4">
                 Our Story
               </span>
 
@@ -135,7 +136,7 @@ export function AboutPageContent() {
                     <div className="text-center">
                       <div className="text-5xl md:text-6xl font-bold">JD</div>
                       <div className="text-sm md:text-base mt-2 text-white/80">
-                        Home Solutions
+                        Home Services
                       </div>
                     </div>
                   </div>
@@ -163,7 +164,7 @@ export function AboutPageContent() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="text-center"
               >
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--accent-teal)] bg-opacity-10 flex items-center justify-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--accent-teal)]/10 flex items-center justify-center">
                   <item.icon className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
@@ -217,7 +218,7 @@ export function AboutPageContent() {
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.6 }}
             >
-              <span className="inline-block px-4 py-1 rounded-full bg-[var(--accent-teal)] bg-opacity-10 text-[var(--accent-teal)] text-sm font-medium mb-4">
+              <span className="inline-block px-4 py-1 rounded-full bg-[var(--accent-teal)]/10 text-[var(--accent-teal)] text-sm font-medium mb-4">
                 Our Values
               </span>
 
@@ -263,7 +264,7 @@ export function AboutPageContent() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-3xl md:text-4xl font-bold mb-4"
+              className="text-3xl md:text-4xl font-bold mb-4 text-white"
             >
               Our Service Area
             </motion.h2>
@@ -285,13 +286,14 @@ export function AboutPageContent() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="flex flex-wrap items-center justify-center gap-4 mb-10"
             >
-              {serviceAreas.map((area) => (
-                <span
-                  key={area}
-                  className="px-4 py-2 rounded-full bg-white/10 text-white text-sm font-medium"
+              {serviceCities.map((city) => (
+                <Link
+                  key={city.slug}
+                  href={city.core ? `/service-areas/${city.slug}/` : "/service-areas/"}
+                  className="px-4 py-2 rounded-full bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors"
                 >
-                  {area}
-                </span>
+                  {city.name}
+                </Link>
               ))}
             </motion.div>
 
@@ -314,7 +316,7 @@ export function AboutPageContent() {
 
               <Button
                 as="link"
-                href="/contact"
+                href="/contact/"
                 variant="primary"
                 icon={ArrowRight}
                 iconPosition="right"

@@ -35,7 +35,7 @@ export function Hero() {
             style={{ color: "white" }}
           >
             Durham&apos;s Trusted{" "}
-            <span className="text-[var(--accent-teal)]">Garage door technicians</span>{" "} &
+            <span className="text-[var(--accent-teal)]">Garage Door Technicians</span>{" "} &
             Locksmiths.
           </motion.h1>
 

@@ -20,7 +20,7 @@ const features = [
   { icon: Phone, text: "Direct phone support when you need help fast" },
 ];
 
-export function SmartLockSpotlight() {
+export function CarLockoutSpotlight() {
   return (
     <section className="section bg-white" id="car-lockout-spotlight">
       <div className="container">
@@ -66,7 +66,7 @@ export function SmartLockSpotlight() {
             transition={{ duration: 0.6 }}
             className="order-1 lg:order-2"
           >
-            <span className="inline-block px-4 py-1 rounded-full bg-[var(--accent-teal)] bg-opacity-10 text-[var(--accent-teal)] text-sm font-medium mb-4">
+            <span className="inline-block px-4 py-1 rounded-full bg-[var(--accent-teal)]/10 text-[var(--accent-teal)] text-sm font-medium mb-4">
               Rapid Response
             </span>
 
@@ -87,7 +87,7 @@ export function SmartLockSpotlight() {
             <ul className="space-y-3 mb-8">
               {features.map((feature, index) => (
                 <li key={index} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[var(--accent-teal)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-[var(--accent-teal)]/10 flex items-center justify-center flex-shrink-0">
                     <feature.icon className="w-4 h-4 text-white" />
                   </div>
                   <span className="text-[var(--text-secondary)]">
@@ -99,7 +99,7 @@ export function SmartLockSpotlight() {
 
             <Button
               as="link"
-              href="/services#car-lockout"
+              href="/services/car-lockout/"
               variant="primary"
               icon={ArrowRight}
               iconPosition="right"
@@ -114,4 +114,4 @@ export function SmartLockSpotlight() {
   );
 }
 
-export default SmartLockSpotlight;
+export default CarLockoutSpotlight;

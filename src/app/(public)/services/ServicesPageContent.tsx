@@ -20,7 +20,7 @@ export function ServicesPageContent() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-4xl md:text-5xl font-bold mb-6"
+              className="text-4xl md:text-5xl font-bold mb-6 text-white"
             >
               Locksmith, Car Lockout, and Garage Door Services
             </motion.h1>
@@ -119,7 +119,7 @@ export function ServicesPageContent() {
                     ) : (
                       <Button
                         as="link"
-                        href="/contact"
+                        href="/contact/"
                         variant="primary"
                         icon={ArrowRight}
                         iconPosition="right"
@@ -128,6 +128,16 @@ export function ServicesPageContent() {
                         Request This Service
                       </Button>
                     )}
+                    <Button
+                      as="link"
+                      href={`/services/${service.id}/`}
+                      variant="outline"
+                      icon={ArrowRight}
+                      iconPosition="right"
+                      size="lg"
+                    >
+                      View {service.name} Details
+                    </Button>
                   </div>
                 </motion.div>
 

@@ -3,3 +3,4 @@ export { ServiceCard } from "./ServiceCard";
 export { TestimonialCard } from "./TestimonialCard";
 export { TrustBadge } from "./TrustBadge";
 export { SectionHeading } from "./SectionHeading";
+export { Breadcrumbs } from "./Breadcrumbs";

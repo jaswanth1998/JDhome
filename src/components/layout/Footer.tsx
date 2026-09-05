@@ -6,16 +6,16 @@ import { theme } from "@/config/theme";
 
 const quickLinks = [
   { name: "Home", href: "/" },
-  { name: "Services", href: "/services" },
-  { name: "About Us", href: "/about" },
-  { name: "Contact", href: "/contact" },
+  { name: "Services", href: "/services/" },
+  { name: "Service Areas", href: "/service-areas/" },
+  { name: "About Us", href: "/about/" },
+  { name: "Contact", href: "/contact/" },
 ];
 
-const serviceLinks = [
-  { name: "Locksmith", href: "/services#locksmith" },
-  { name: "Car Lockout", href: "/services#car-lockout" },
-  { name: "Garage Door Repair & Installation", href: "/services#garage-door-repair-installation" },
-];
+const serviceLinks = theme.services.categories.map((service) => ({
+  name: service.name,
+  href: `/services/${service.id}/`,
+}));
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -162,7 +162,7 @@ export function Footer() {
             </p>
             <div className="flex items-center gap-4">
               <Link
-                href="/privacy-policy"
+                href="/privacy-policy/"
                 className="hover:text-[var(--accent-teal)] transition-colors"
               >
                 Privacy Policy
