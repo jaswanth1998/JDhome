@@ -605,18 +605,30 @@ async function main() {
   // ---- 12. Measurement gating
   {
     const expectId = process.env.VERIFY_SEO_EXPECT_GA_ID;
+    const themeText = readFileSync(path.join(ROOT, "src/config/theme.ts"), "utf8");
+    const analyticsOn = /analytics:\s*true/.test(themeText);
+    const gtmId = analyticsOn ? process.env.NEXT_PUBLIC_GTM_ID || themeText.match(/gtmId:\s*"([^"]*)"/)?.[1] || "" : "";
     const fails = [];
+    const home = pages.get("/")?.html ?? "";
+    if (gtmId) {
+      // next/script inlines the loader, which builds the gtm.js URL at runtime, so check the host and the ID separately.
+      for (const [file, html] of htmlText) {
+        if (!html.includes("googletagmanager.com/gtm.js") || !html.includes(gtmId)) fails.push(`${rel(file)} lacks the GTM loader for ${gtmId}`);
+        if (!html.includes(`googletagmanager.com/ns.html?id=${gtmId}`)) fails.push(`${rel(file)} lacks the GTM noscript iframe`);
+      }
+    } else {
+      for (const [file, html] of htmlText) if (html.includes("googletagmanager.com/gtm.js")) fails.push(`${rel(file)} contains GTM although none is configured`);
+    }
     if (expectId) {
-      const home = pages.get("/")?.html ?? "";
       if (!home.includes(`googletagmanager.com/gtag/js?id=${expectId}`)) fails.push(`gtag loader for ${expectId} not in out/index.html`);
-      verdict("12", `GA loader present for ${expectId}`, fails, [], `googletagmanager.com/gtag/js?id=${expectId} found in out/index.html`);
     } else {
       for (const [file, html] of htmlText) {
-        if (html.includes("googletagmanager.com")) fails.push(`${rel(file)} contains googletagmanager.com`);
+        if (html.includes("googletagmanager.com/gtag/js")) fails.push(`${rel(file)} contains a gtag loader without NEXT_PUBLIC_GA_MEASUREMENT_ID`);
         if (html.includes("google-site-verification")) fails.push(`${rel(file)} contains google-site-verification`);
       }
-      verdict("12", "No GA / site-verification without env vars", fails, [], `${htmlFiles.length} HTML files clean`);
     }
+    const detail = `${gtmId ? `GTM ${gtmId} on ${htmlFiles.length} HTML files` : "no GTM configured"}; direct GA ${expectId ? `expected ${expectId}` : "absent"}; no site-verification tag`;
+    verdict("12", "Measurement: GTM when configured, GA/site-verification only via env", fails, [], detail);
   }
 
   // ---- 13. Source hygiene

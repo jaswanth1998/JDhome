@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { theme } from "@/config/theme";
-import { GoogleAnalytics } from "@/components/analytics";
+import { GoogleAnalytics, GoogleTagManager, GoogleTagManagerNoScript } from "@/components/analytics";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -79,7 +79,9 @@ export default function RootLayout({
   return (
     <html lang="en-CA" className={`${inter.variable} ${poppins.variable}`}>
       <body className="antialiased">
+        <GoogleTagManagerNoScript />
         {children}
+        <GoogleTagManager />
         <GoogleAnalytics />
       </body>
     </html>

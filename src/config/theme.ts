@@ -485,6 +485,15 @@ export const theme = {
   serviceCities,
 
   /* ==========================================
+     ANALYTICS
+     ========================================== */
+  analytics: {
+    // Google Tag Manager container. Loads on every page while features.analytics is true;
+    // override at build time with NEXT_PUBLIC_GTM_ID. Configure GA4 inside GTM.
+    gtmId: "GTM-5Q937BVV",
+  },
+
+  /* ==========================================
      SEO & META INFORMATION
      ========================================== */
   seo: {

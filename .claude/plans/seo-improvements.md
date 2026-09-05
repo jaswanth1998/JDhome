@@ -8,6 +8,7 @@ completed_items:
   - "Phase 2B: /services/[slug]/ pages (unique metadata, h1, FAQ x5, areas, related services, Service+FAQPage+BreadcrumbList JSON-LD), /service-areas/ hub + 6 core city pages, Breadcrumbs component, nav/footer/card/chip links to new URLs, SmartLockSpotlight -> CarLockoutSpotlight, About 'Home Solutions' -> 'Home Services', contact h1, CLAUDE.md docs"
   - "Orchestrator fixes: force-static on sitemap/robots (Next 16 requirement), heading colour moved to @layer base + text-white on dark-section headings, Tailwind v3 bg-opacity-* converted to /10 modifiers, removed React-ignored !important inline styles, Poppins weights trimmed to 500/600/700, .gitignore !.env.example, city booking paragraph varied per city"
   - "Phase 3D: scripts/verify-seo.mjs (npm run verify:seo) - 30 checks, all PASS on 2026-09-05"
+  - "Follow-up 2026-09-05: Google Tag Manager container GTM-5Q937BVV wired via theme.analytics.gtmId and GoogleTagManager/GoogleTagManagerNoScript components (env override NEXT_PUBLIC_GTM_ID); verify:seo check 12 updated"
 notes:
   went_well:
     - "Disjoint file ownership let Agents A and C run in parallel without conflicts"

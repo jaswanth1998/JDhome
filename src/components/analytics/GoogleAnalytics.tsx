@@ -1,4 +1,5 @@
 import Script from "next/script";
+import { theme } from "@/config/theme";
 
 /**
  * Google Analytics 4 tag. Renders nothing unless NEXT_PUBLIC_GA_MEASUREMENT_ID
@@ -6,7 +7,7 @@ import Script from "next/script";
  */
 export function GoogleAnalytics() {
   const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
-  if (!measurementId) return null;
+  if (!theme.features.analytics || !measurementId) return null;
 
   return (
     <>

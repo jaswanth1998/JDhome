@@ -39,7 +39,7 @@ CSS custom properties mirroring the theme are defined in `src/app/globals.css` u
 - `src/components/layout/` - Header, Footer, MobileCallButton, MotionProvider (marketing layout pieces)
 - `src/components/sections/` - Homepage sections (Hero, ServicesGrid, Clients, CompanyPartners, WhyChooseUs, CarLockoutSpotlight, ServiceArea, Testimonials, FinalCTA)
 - `src/components/ui/` - Reusable primitives (Button, ServiceCard, TestimonialCard, TrustBadge, SectionHeading, Breadcrumbs)
-- `src/components/seo/` - `JsonLd` server component (structured data); `src/components/analytics/` - env-gated `GoogleAnalytics`
+- `src/components/seo/` - `JsonLd` server component (structured data); `src/components/analytics/` - `GoogleTagManager` (container from `theme.analytics.gtmId`, override `NEXT_PUBLIC_GTM_ID`) and env-gated `GoogleAnalytics`
 - `src/components/admin/` - Admin-specific components (LogoutButton, invoices/)
 - Each directory has an `index.ts` barrel export
 
@@ -49,7 +49,7 @@ The app uses Next.js route groups to separate marketing and admin layouts:
 
 ```
 src/app/
-  layout.tsx                      # Root: html/body/fonts/globals + GoogleAnalytics (no Header/Footer)
+  layout.tsx                      # Root: html/body/fonts/globals + GoogleTagManager/GoogleAnalytics (no Header/Footer)
   sitemap.ts, robots.ts           # sitemap.xml / robots.txt (force-static)
   og-image.png/route.tsx          # Pre-rendered 1200x630 OG image (force-static)
   (public)/                       # Marketing site
@@ -111,6 +111,7 @@ The contact form (`src/app/(public)/contact/ContactPageContent.tsx`) submits to 
 - Docker setup exists (`Dockerfile` + `docker-compose.yml`) mapping port 5006 -> 3000
 - **Environment variables** (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) are injected from GitHub Secrets during build. For local dev, use `.env.local` (gitignored). See `.env.example` for required vars.
 - Optional SEO/analytics vars: `NEXT_PUBLIC_GA_MEASUREMENT_ID` (GA4 tag renders only when set) and `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` (Search Console meta tag). Both are read at build time, so they must be GitHub Secrets too.
+- Google Tag Manager container `GTM-5Q937BVV` lives in `theme.analytics.gtmId` and loads on every page by default (`NEXT_PUBLIC_GTM_ID` overrides it; `theme.features.analytics: false` disables all tags). Configure GA4 inside GTM rather than also setting `NEXT_PUBLIC_GA_MEASUREMENT_ID`, which would double-count pageviews.
 
 ## Supabase Backend
 
