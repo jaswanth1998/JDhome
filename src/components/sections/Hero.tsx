@@ -7,7 +7,7 @@ import { Button } from "@/components/ui";
 
 const trustBadges = [
   { icon: ShieldCheck, text: "Licensed & Insured" },
-  { icon: Clock, text: "Fast Response Time" },
+  { icon: Clock, text: "24/7 Emergency Line" },
   { icon: Award, text: "100% Satisfaction Guaranteed" },
 ];
 

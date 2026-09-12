@@ -162,7 +162,7 @@ export function ContactPageContent() {
                       Message sent successfully!
                     </p>
                     <p className="text-sm text-green-700">
-                      We&apos;ll get back to you within 2 hours during business hours.
+                      We&apos;ll get back to you as soon as we can during business hours.
                     </p>
                   </div>
                 </motion.div>
@@ -464,7 +464,7 @@ export function ContactPageContent() {
               {/* Response Time */}
               <div className="mt-8 p-6 rounded-xl bg-[var(--bg-secondary)]">
                 <h3 className="font-semibold text-[var(--text-primary)] mb-2" style={{ fontSize: "1.125rem" }}>
-                  Response Time
+                  When You Call
                 </h3>
                 <p className="text-[var(--text-secondary)] text-sm">
                   {theme.contact.responseTime.regular}

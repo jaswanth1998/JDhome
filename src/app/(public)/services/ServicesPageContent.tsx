@@ -30,9 +30,9 @@ export function ServicesPageContent() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="text-lg md:text-xl text-white/80 mb-8"
             >
-              We focus on three core services: general locksmith work, rapid car
-              lockout assistance, and garage door repair and installation
-              throughout Durham and surrounding areas.
+              We focus on three core services: garage door repair and
+              installation, general locksmith work, and 24/7 car lockout
+              assistance throughout Durham and surrounding areas.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 30 }}

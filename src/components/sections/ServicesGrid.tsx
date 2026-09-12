@@ -20,7 +20,7 @@ export function ServicesGrid() {
       <div className="container">
         <SectionHeading
           title="Garage Door and Locksmith Services in Durham Region & Surrounding Areas"
-          subtitle="Three focused services, one reliable team: general locksmith work, fast car lockout response, and garage door repair and installation across Durham Region."
+          subtitle="Three focused services, one reliable team: garage door repair and installation, general locksmith work, and 24/7 car lockout assistance across Durham Region."
         />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

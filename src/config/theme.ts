@@ -469,13 +469,13 @@ export const theme = {
     },
 
     social: {
-      instagram: "https://instagram.com/jdhomesolutions",
-      facebook: "https://facebook.com/jdhomesolutions",
+      instagram: "https://www.instagram.com/jd.homeservices/",
+      facebook: "https://www.facebook.com/jd.homeservices/",
     },
 
     responseTime: {
-      regular: "Within 2 hours during business hours",
-      emergency: "Typically 20-30 minutes for emergency lockouts",
+      regular: "Call during business hours and we will confirm a realistic arrival window",
+      emergency: "Our emergency line is answered 24/7",
     },
   },
 
@@ -497,13 +497,15 @@ export const theme = {
      SEO & META INFORMATION
      ========================================== */
   seo: {
-    defaultTitle: "Locksmith & Garage Door Repair Oshawa | JD Home Services",
+    defaultTitle: "Garage Door Repair & Locksmith Oshawa | JD Home Services",
     titleTemplate: "%s | JD Home Services",
-    defaultDescription: "Oshawa locksmith for lock changes and rekeying, 24/7 car lockout help, and garage door repair and installation across Durham Region. Call (289) 991-3277.",
-    keywords: "locksmith Oshawa, car lockout Oshawa, garage door repair Oshawa, garage door installation Durham Region, locksmith Durham Region",
+    defaultDescription: "Garage door repair and installation across Oshawa and Durham Region — springs, openers, off-track and noisy doors, new installs. Also locksmith work and 24/7 car lockout help. Call (289) 991-3277.",
+    keywords: "garage door repair Oshawa, garage door installation Durham Region, garage door spring repair Oshawa, garage door opener repair Oshawa, locksmith Oshawa, car lockout Oshawa",
     siteUrl: "https://www.jdhomeservices.ca",
     ogImage: "/og-image.png",
-    twitterHandle: "@jdhomesolutions",
+    // No X/Twitter account exists for JD Home Services. Left empty on purpose —
+    // the old value pointed at an unrelated company (JD Homesolutions, San Antonio TX).
+    twitterHandle: "",
   },
 
   /* ==========================================
@@ -511,6 +513,56 @@ export const theme = {
      ========================================== */
   services: {
     categories: [
+      {
+        id: "garage-door-repair-installation",
+        name: "Garage Door Repair & Installation",
+        shortDescription: "Reliable garage door repair, replacement, and new installation for safe, smooth daily operation",
+        description: "We repair and install garage doors and related hardware for homeowners who need dependable performance and safe operation. Whether your system is off-track, noisy, damaged, or ready for replacement, we diagnose the issue clearly and complete the work with attention to safety, fit, and long-term reliability.",
+        icon: "Home",
+        color: "#4A5568",
+        featured: true,
+        features: [
+          "Garage door repair and troubleshooting",
+          "New garage door installation and replacement",
+          "Track, roller, cable, and hardware adjustments",
+          "Opener setup and operational checks",
+          "Safety inspection and balance testing",
+          "Professional recommendations for repair vs. replacement",
+        ],
+        seo: {
+          title: "Garage Door Repair & Installation Oshawa | JD Home Services",
+          description:
+            "Garage door repair, replacement, and new installation in Oshawa and Durham Region: track, roller, cable, and opener work with safety and balance checks.",
+          h1: "Garage Door Repair & Installation in Oshawa & Durham Region",
+        },
+        faqs: [
+          {
+            question: "Do you repair garage doors, or only install new ones?",
+            answer:
+              "We do both. Our garage door service covers repair and troubleshooting of existing doors as well as new door installation and replacement. If your door is off-track, noisy, or damaged, we diagnose the issue and let you know whether a repair or a replacement is the more sensible choice.",
+          },
+          {
+            question: "My garage door is off-track or noisy. Can that be repaired?",
+            answer:
+              "In many cases, yes. Off-track, noisy, and rough-running doors are often caused by worn or misaligned tracks, rollers, cables, or other hardware, and we handle those adjustments and replacements as part of our repair service. It is best to stop using the door until it has been inspected, since operating an off-track door can cause further damage. Once the work is done, we complete a safety inspection and balance test.",
+          },
+          {
+            question: "Do you install and set up garage door openers?",
+            answer:
+              "Yes. Opener setup and operational checks are part of our garage door service, whether the opener is going in with a new door or being added to an existing one. After installation we test the door's travel, balance, and safety features so the system runs smoothly and safely from the start.",
+          },
+          {
+            question: "How do I know whether to repair or replace my garage door?",
+            answer:
+              "It depends on the condition of the door, its hardware, and how it has been operating. Isolated problems such as a worn roller, a frayed cable, or a door that has come off its track can usually be repaired, while a door that is badly damaged, unsafe, or repeatedly failing may be better replaced. We inspect the whole system, explain what we find, and give you a straightforward recommendation for repair versus replacement.",
+          },
+          {
+            question: "Do you service garage doors outside Oshawa?",
+            answer:
+              "Yes. We repair and install garage doors from our Oshawa base across Durham Region, including Whitby, Ajax, Pickering, Courtice, and Bowmanville, and we also travel to nearby communities such as Port Perry, Uxbridge, Cobourg, Peterborough, and Lindsay. Call us with your location and we will confirm availability.",
+          },
+        ],
+      },
       {
         id: "locksmith",
         name: "Locksmith",
@@ -572,7 +624,7 @@ export const theme = {
         featured: true,
         features: [
           "24/7 emergency availability",
-          "Fast response across Durham and surrounding regions",
+          "Serving Oshawa, Durham Region and surrounding communities",
           "Damage-free vehicle entry whenever possible",
           "Help with keys locked inside or malfunctioning locks",
           "Service for most cars, SUVs, vans, and light trucks",
@@ -598,7 +650,7 @@ export const theme = {
           {
             question: "How quickly can you reach me in Oshawa or Durham Region?",
             answer:
-              "Response time is typically 20-30 minutes for emergency lockouts, depending on your location and traffic. Oshawa is our home base, so nearby areas are usually the quickest to reach, and we cover the rest of Durham Region and surrounding communities from there. When you call, we will confirm where you are and give you a realistic arrival estimate.",
+              "Oshawa is our home base, so nearby areas are usually the quickest to reach, and we cover the rest of Durham Region and surrounding communities from there. Arrival time depends on your location, the time of day, and traffic. When you call, we will confirm where you are and give you a realistic arrival estimate before we head out.",
           },
           {
             question: "What kinds of vehicles can you open?",
@@ -609,56 +661,6 @@ export const theme = {
             question: "What should I have ready when I call about a lockout?",
             answer:
               "Have your exact location ready, such as a street address, the nearest intersection, or the name of the parking lot, along with your vehicle's make, model, and colour. Let us know whether the keys are locked inside or the lock itself is not working, and keep your phone nearby so we can send arrival updates. We will confirm the details and explain the next steps before we head out.",
-          },
-        ],
-      },
-      {
-        id: "garage-door-repair-installation",
-        name: "Garage Door Repair & Installation",
-        shortDescription: "Reliable garage door repair, replacement, and new installation for safe, smooth daily operation",
-        description: "We repair and install garage doors and related hardware for homeowners who need dependable performance and safe operation. Whether your system is off-track, noisy, damaged, or ready for replacement, we diagnose the issue clearly and complete the work with attention to safety, fit, and long-term reliability.",
-        icon: "Home",
-        color: "#4A5568",
-        featured: true,
-        features: [
-          "Garage door repair and troubleshooting",
-          "New garage door installation and replacement",
-          "Track, roller, cable, and hardware adjustments",
-          "Opener setup and operational checks",
-          "Safety inspection and balance testing",
-          "Professional recommendations for repair vs. replacement",
-        ],
-        seo: {
-          title: "Garage Door Repair & Installation Oshawa | JD Home Services",
-          description:
-            "Garage door repair, replacement, and new installation in Oshawa and Durham Region: track, roller, cable, and opener work with safety and balance checks.",
-          h1: "Garage Door Repair & Installation in Oshawa & Durham Region",
-        },
-        faqs: [
-          {
-            question: "Do you repair garage doors, or only install new ones?",
-            answer:
-              "We do both. Our garage door service covers repair and troubleshooting of existing doors as well as new door installation and replacement. If your door is off-track, noisy, or damaged, we diagnose the issue and let you know whether a repair or a replacement is the more sensible choice.",
-          },
-          {
-            question: "My garage door is off-track or noisy. Can that be repaired?",
-            answer:
-              "In many cases, yes. Off-track, noisy, and rough-running doors are often caused by worn or misaligned tracks, rollers, cables, or other hardware, and we handle those adjustments and replacements as part of our repair service. It is best to stop using the door until it has been inspected, since operating an off-track door can cause further damage. Once the work is done, we complete a safety inspection and balance test.",
-          },
-          {
-            question: "Do you install and set up garage door openers?",
-            answer:
-              "Yes. Opener setup and operational checks are part of our garage door service, whether the opener is going in with a new door or being added to an existing one. After installation we test the door's travel, balance, and safety features so the system runs smoothly and safely from the start.",
-          },
-          {
-            question: "How do I know whether to repair or replace my garage door?",
-            answer:
-              "It depends on the condition of the door, its hardware, and how it has been operating. Isolated problems such as a worn roller, a frayed cable, or a door that has come off its track can usually be repaired, while a door that is badly damaged, unsafe, or repeatedly failing may be better replaced. We inspect the whole system, explain what we find, and give you a straightforward recommendation for repair versus replacement.",
-          },
-          {
-            question: "Do you service garage doors outside Oshawa?",
-            answer:
-              "Yes. We repair and install garage doors from our Oshawa base across Durham Region, including Whitby, Ajax, Pickering, Courtice, and Bowmanville, and we also travel to nearby communities such as Port Perry, Uxbridge, Cobourg, Peterborough, and Lindsay. Call us with your location and we will confirm availability.",
           },
         ],
       },
@@ -739,9 +741,9 @@ export const theme = {
         icon: "Award",
       },
       {
-        id: "fast-response",
-        text: "Fast Response Time",
-        description: "On-call service with quick response times, especially for emergency lockouts",
+        id: "emergency-line",
+        text: "24/7 Emergency Line",
+        description: "Our emergency line is answered around the clock, including evenings and weekends",
         icon: "Clock",
       },
       {
@@ -760,9 +762,9 @@ export const theme = {
 
     guarantees: [
       "Licensed, bonded, and insured",
-      "Upfront pricing with no hidden fees",
+      "Upfront communication before work begins",
       "Quality workmanship guarantee",
-      "Fast response times",
+      "100% satisfaction guaranteed",
       "Professional, courteous service",
     ],
   },

@@ -25,9 +25,9 @@ const whyChooseUs = [
   },
   {
     icon: Clock,
-    title: "Fast Response",
+    title: "24/7 Emergency Line",
     description:
-      "Quick response times with 24/7 emergency availability for car lockouts.",
+      "Our emergency line is answered around the clock for car lockouts.",
   },
   {
     icon: Award,

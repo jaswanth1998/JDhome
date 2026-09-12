@@ -316,7 +316,7 @@ function LoginForm() {
                   id="email"
                   autoComplete="email"
                   className="w-full h-12 pl-11 pr-4 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm placeholder:text-white/20 transition-all duration-200 focus:outline-none focus:border-cyan-500/40 focus:bg-white/[0.06] focus:shadow-[0_0_0_3px_rgba(6,182,212,0.08)] hover:border-white/[0.12]"
-                  placeholder="admin@jdhomesolutions.com"
+                  placeholder="admin@jdhomeservices.ca"
                 />
               </div>
               {errors.email && (

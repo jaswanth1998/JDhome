@@ -13,9 +13,9 @@ import {
 } from "@/components/sections";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Locksmith & Garage Door Repair Oshawa | JD Home Services",
+  title: "Garage Door Repair & Locksmith Oshawa | JD Home Services",
   description:
-    "Oshawa locksmith for lock changes and rekeying, 24/7 car lockout help, and garage door repair and installation across Durham Region. Call (289) 991-3277.",
+    "Garage door repair and installation across Oshawa and Durham Region — springs, openers, off-track and noisy doors, new installs. Also locksmith work and 24/7 car lockout help. Call (289) 991-3277.",
   path: "/",
 });
 

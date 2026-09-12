@@ -49,8 +49,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    site: theme.seo.twitterHandle,
-    creator: theme.seo.twitterHandle,
+    site: theme.seo.twitterHandle || undefined,
+    creator: theme.seo.twitterHandle || undefined,
     title: theme.seo.defaultTitle,
     description: theme.seo.defaultDescription,
     images: [theme.seo.ogImage],

@@ -71,8 +71,8 @@ export function buildMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      site: theme.seo.twitterHandle,
-      creator: theme.seo.twitterHandle,
+      site: theme.seo.twitterHandle || undefined,
+      creator: theme.seo.twitterHandle || undefined,
       title: socialTitle,
       description: socialDescription,
       images: [image],
