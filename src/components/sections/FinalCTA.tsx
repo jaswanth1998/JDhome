@@ -1,82 +1,42 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { Phone, FileText } from "lucide-react";
+import { Phone } from "lucide-react";
 import { theme } from "@/config/theme";
-import { Button } from "@/components/ui";
+import { InquiryButton } from "@/components/inquiry";
+import type { InquiryService } from "@/lib/inquiries/schema";
 
-export function FinalCTA() {
+interface FinalCTAProps {
+  title?: string;
+  subtitle?: string;
+  service?: InquiryService;
+}
+
+export function FinalCTA({
+  title = "Ready when you are",
+  subtitle = "Tell us about your garage door or camera project and we'll get back to you with clear options and a free quote.",
+  service,
+}: FinalCTAProps) {
   return (
-    <section className="section bg-gradient-hero text-white" id="contact-cta">
+    <section className="bg-white py-14 md:py-20">
       <div className="container">
-        <div className="text-center max-w-3xl mx-auto">
-          {/* Heading */}
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5 }}
-            className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-white"
-          >
-            Need Locksmith, Car Lockout, or Garage Door Help?
-          </motion.h2>
-
-          {/* Subheading */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-lg md:text-xl text-white/80 mb-10"
-          >
-            Call now for urgent service or request a quote for planned locksmith
-            or garage door work.
-          </motion.p>
-
-          {/* CTA Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
-          >
-            <Button
-              as="a"
-              href={`tel:${theme.contact.phone.tel}`}
-              variant="emergency"
-              icon={Phone}
-              size="lg"
-              className="min-w-[240px]"
-            >
-              Call Now: {theme.contact.phone.display}
-            </Button>
-
-            <Button
-              as="link"
-              href="/contact"
-              variant="primary"
-              icon={FileText}
-              size="lg"
-              
-            >
-              Get Free Quote
-            </Button>
-          </motion.div>
-
-          {/* Emergency Notice */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="mt-8 text-white/70 text-sm"
-          >
-            <span className="text-[var(--accent-orange)] font-semibold">
-              24/7 Emergency Service
-            </span>{" "}
-            available for car lockouts in Oshawa & Durham Region
-          </motion.p>
+        <div className="relative overflow-hidden rounded-[var(--radius-xl)] bg-grid-dark px-6 py-12 md:px-14 md:py-16">
+          <div
+            className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-gold-500/15 blur-3xl"
+            aria-hidden="true"
+          />
+          <div className="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-xl">
+              <h2 className="text-balance text-3xl text-white md:text-4xl">{title}</h2>
+              <p className="mt-4 text-lg leading-relaxed text-white/75">{subtitle}</p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <InquiryButton service={service} size="lg">
+                Get a free quote
+              </InquiryButton>
+              <a href={`tel:${theme.contact.phone.tel}`} className="btn btn-ghost-light btn-lg">
+                <Phone className="h-[18px] w-[18px]" aria-hidden="true" />
+                {theme.contact.phone.display}
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </section>

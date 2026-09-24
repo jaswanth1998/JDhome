@@ -1,6 +1,13 @@
 import type { Metadata, MetadataRoute } from "next";
 import { theme, type ServiceCity } from "@/config/theme";
 
+/**
+ * Date the static (non-guide) pages were last meaningfully changed. Bump it when
+ * page content changes so sitemap <lastmod> stays honest instead of using the
+ * build time on every deploy.
+ */
+export const SITE_CONTENT_UPDATED = "2026-09-23";
+
 /** Canonical site origin, without a trailing slash. */
 export const SITE_URL = theme.seo.siteUrl;
 
@@ -27,6 +34,13 @@ export type BuildMetadataInput = {
   ogTitle?: string;
   ogDescription?: string;
   noIndex?: boolean;
+  /** Site-relative path of a PNG share image (defaults to the site-wide OG image). */
+  ogImage?: string;
+  keywords?: readonly string[];
+  /** Article pages get og:type=article plus published/modified times. */
+  article?: { publishedTime: string; modifiedTime: string; section: string; tags?: readonly string[] };
+  /** Extra <link rel="alternate"> entries, e.g. the RSS feed. */
+  alternateTypes?: Record<string, { url: string; title: string }[]>;
 };
 
 /**
@@ -43,18 +57,32 @@ export function buildMetadata({
   ogTitle,
   ogDescription,
   noIndex,
+  ogImage,
+  keywords,
+  article,
+  alternateTypes,
 }: BuildMetadataInput): Metadata {
   const url = absoluteUrl(path);
-  const image = absoluteUrl(theme.seo.ogImage);
+  const image = absoluteUrl(ogImage ?? theme.seo.ogImage);
   const socialTitle = ogTitle ?? title;
   const socialDescription = ogDescription ?? description;
 
   return {
     title: { absolute: title },
     description,
-    alternates: { canonical: url },
+    ...(keywords?.length ? { keywords: [...keywords] } : {}),
+    alternates: { canonical: url, ...(alternateTypes ? { types: alternateTypes } : {}) },
     openGraph: {
-      type: "website",
+      ...(article
+        ? {
+            type: "article" as const,
+            publishedTime: article.publishedTime,
+            modifiedTime: article.modifiedTime,
+            section: article.section,
+            tags: article.tags ? [...article.tags] : undefined,
+            authors: [theme.brand.name],
+          }
+        : { type: "website" as const }),
       locale: "en_CA",
       siteName: theme.brand.name,
       url,
@@ -65,7 +93,7 @@ export function buildMetadata({
           url: image,
           width: 1200,
           height: 630,
-          alt: `${theme.brand.name} - ${theme.brand.tagline}`,
+          alt: socialTitle,
         },
       ],
     },

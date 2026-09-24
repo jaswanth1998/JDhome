@@ -1,88 +1,57 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Link from "next/link";
-import * as Icons from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import type { SiteImageKey } from "@/config/images";
 import { cn } from "@/lib/utils";
-import { ArrowRight } from "lucide-react";
+import { Photo } from "./Photo";
+import { ServiceIcon } from "./ServiceIcon";
 
 interface ServiceCardProps {
   id: string;
   name: string;
   shortDescription: string;
   icon: string;
-  color: string;
+  image: SiteImageKey;
   badge?: string;
-  featured?: boolean;
   className?: string;
 }
 
-export function ServiceCard({
-  id,
-  name,
-  shortDescription,
-  icon,
-  color,
-  badge,
-  className,
-}: ServiceCardProps) {
-  // Dynamically get the icon component
-  const IconComponent = Icons[icon as keyof typeof Icons] as Icons.LucideIcon;
-
+/** Photo card linking to a service page. */
+export function ServiceCard({ id, name, shortDescription, icon, image, badge, className }: ServiceCardProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5 }}
+    <Link
+      href={`/services/${id}/`}
+      className={cn(
+        "group flex h-full flex-col overflow-hidden rounded-[var(--radius-xl)] border border-line bg-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]",
+        className,
+      )}
     >
-      <Link href={`/services/${id}/`} className="block h-full">
-        <div
-          className={cn(
-            "group relative h-full bg-white rounded-lg border border-[var(--border-light)] p-6",
-            "transition-all duration-300 ease-in-out",
-            "hover:shadow-lg hover:-translate-y-1",
-            className
-          )}
-        >
-          {/* Badge */}
-          {badge && (
-            <span className="absolute top-4 right-4 badge badge-emergency text-xs">
-              {badge}
-            </span>
-          )}
-
-          {/* Icon */}
-          <div
-            className="w-14 h-14 rounded-lg flex items-center justify-center mb-4"
-            style={{ backgroundColor: `${color}15` }}
-          >
-            {IconComponent && (
-              <IconComponent
-                className="w-7 h-7"
-                style={{ color }}
-                strokeWidth={1.5}
-              />
-            )}
-          </div>
-
-          {/* Content */}
-          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2 group-hover:text-[var(--accent-teal)] transition-colors">
-            {name}
-          </h3>
-
-          <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-4">
-            {shortDescription}
-          </p>
-
-          {/* Link */}
-          <div className="flex items-center text-[var(--accent-teal)] text-sm font-medium group-hover:gap-2 transition-all">
-            <span>{badge ? "Call Now" : "Learn More"}</span>
-            <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-          </div>
+      <div className="relative">
+        <Photo
+          image={image}
+          aspect={16 / 10}
+          sizes="(min-width: 1024px) 380px, (min-width: 768px) 50vw, 100vw"
+          className="aspect-[16/10] rounded-none"
+          imgClassName="transition-transform duration-500 group-hover:scale-[1.03]"
+        />
+        {badge && <span className="badge badge-gold absolute left-4 top-4">{badge}</span>}
+      </div>
+      <div className="flex flex-1 flex-col p-6">
+        <div className="mb-3 flex items-center gap-3">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-navy-800 text-gold-500">
+            <ServiceIcon name={icon} className="h-[18px] w-[18px]" />
+          </span>
+          <h3 className="text-lg text-ink">{name}</h3>
         </div>
-      </Link>
-    </motion.div>
+        <p className="flex-1 text-[0.9375rem] leading-relaxed text-ink-2">{shortDescription}</p>
+        <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-navy-700">
+          Learn more
+          <ArrowUpRight
+            className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+            aria-hidden="true"
+          />
+        </span>
+      </div>
+    </Link>
   );
 }
 

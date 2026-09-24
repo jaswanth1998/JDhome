@@ -5,9 +5,9 @@ import { buildMetadata } from "@/lib/seo";
 import { ContactPageContent } from "./ContactPageContent";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Contact JD Home Services | Locksmith Oshawa | Free Quote",
+  title: "Contact JD Home Services | Free Quote | Oshawa",
   description:
-    "Call (289) 991-3277 or send a message to book locksmith service, 24/7 car lockout help, or garage door repair in Oshawa and Durham Region.",
+    "Request a free quote for garage door repair, security cameras, locksmith work, or car lockout help in Oshawa and Durham Region. Call (289) 991-3277.",
   path: "/contact/",
 });
 

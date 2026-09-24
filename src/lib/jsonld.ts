@@ -30,10 +30,10 @@ export function areaServedNodes(): JsonLdObject[] {
 
 export function businessNode(): JsonLdObject {
   return {
-    "@type": "Locksmith",
+    "@type": ["HomeAndConstructionBusiness", "Locksmith"],
     "@id": BUSINESS_ID,
     name: theme.brand.name,
-    description: `${theme.brand.description} Emergency car lockout help is available 24/7.`,
+    description: `${theme.brand.description} Car lockout help is available 24/7.`,
     url: `${SITE_URL}/`,
     telephone: theme.contact.phone.tel,
     email: theme.contact.email,
@@ -63,7 +63,7 @@ export function businessNode(): JsonLdObject {
     sameAs: [theme.contact.social.instagram, theme.contact.social.facebook],
     hasOfferCatalog: {
       "@type": "OfferCatalog",
-      name: "Locksmith and Garage Door Services",
+      name: "Garage Door, Security Camera, and Locksmith Services",
       itemListElement: theme.services.categories.map((service) => ({
         "@type": "Offer",
         itemOffered: {
@@ -149,4 +149,67 @@ export function breadcrumbNode(
 
 export function withGraph(nodes: JsonLdObject[]): JsonLdObject {
   return { "@context": "https://schema.org", "@graph": nodes };
+}
+
+type ArticleLike = {
+  slug: string;
+  title: string;
+  description: string;
+  published: string;
+  updated: string;
+  keywords: readonly string[];
+  wordCount: number;
+  category: { name: string };
+  imageUrl: string;
+};
+
+/** BlogPosting for a guide; the business is both author and publisher. */
+export function blogPostingNode(post: ArticleLike): JsonLdObject {
+  const url = absoluteUrl(`/blog/${post.slug}/`);
+  return {
+    "@type": "BlogPosting",
+    "@id": `${url}#article`,
+    headline: post.title,
+    description: post.description,
+    url,
+    mainEntityOfPage: url,
+    image: [post.imageUrl, absoluteUrl(`/og/blog/${post.slug}.png`)],
+    datePublished: post.published,
+    dateModified: post.updated,
+    articleSection: post.category.name,
+    keywords: post.keywords.join(", "),
+    wordCount: post.wordCount,
+    inLanguage: "en-CA",
+    author: { "@id": BUSINESS_ID },
+    publisher: { "@id": BUSINESS_ID },
+    isPartOf: { "@id": WEBSITE_ID },
+  };
+}
+
+/** CollectionPage + ItemList for the guides index and category pages. */
+export function collectionPageNode(
+  path: string,
+  name: string,
+  description: string,
+  posts: readonly { slug: string; title: string }[]
+): JsonLdObject {
+  const url = absoluteUrl(path);
+  return {
+    "@type": "CollectionPage",
+    "@id": `${url}#collection`,
+    url,
+    name,
+    description,
+    inLanguage: "en-CA",
+    isPartOf: { "@id": WEBSITE_ID },
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: posts.map((post, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: absoluteUrl(`/blog/${post.slug}/`),
+        name: post.title,
+      })),
+    },
+  };
 }

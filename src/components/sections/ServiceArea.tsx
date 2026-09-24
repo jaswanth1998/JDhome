@@ -1,89 +1,44 @@
-"use client";
-
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { MapPin, ArrowRight } from "lucide-react";
+import { ArrowUpRight, MapPin } from "lucide-react";
 import { theme, type ServiceCity } from "@/config/theme";
-import { Button } from "@/components/ui";
+import { coreCities } from "@/lib/seo";
+import { Photo, SectionHeading } from "@/components/ui";
 
-const serviceCities: readonly ServiceCity[] = theme.serviceCities;
+const otherCities: readonly ServiceCity[] = theme.serviceCities.filter((c) => !c.core);
 
 export function ServiceArea() {
   return (
-    <section className="section bg-[var(--primary-main)]" id="service-area">
+    <section className="section bg-paper-cool">
       <div className="container">
-        <div className="text-center text-white">
-          {/* Icon */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5 }}
-            className="w-16 h-16 mx-auto mb-6 rounded-full bg-white/10 flex items-center justify-center"
-          >
-            <MapPin className="w-8 h-8 text-[var(--accent-teal)]" />
-          </motion.div>
-
-          {/* Heading */}
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-3xl md:text-4xl font-bold mb-4 text-white"
-          >
-           Serving Durham & Surrounding areas
-          </motion.h2>
-
-          {/* Description */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-lg text-white/80 mb-8 max-w-2xl mx-auto"
-          >
-            Based in Oshawa, we provide locksmith service, car lockout response,
-            and garage door repair and installation throughout Durham Region.
-          </motion.p>
-
-          {/* Service Areas */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex flex-wrap items-center justify-center gap-4 mb-10"
-          >
-            {serviceCities.map((city) => (
-              <Link
-                key={city.slug}
-                href={city.core ? `/service-areas/${city.slug}/` : "/service-areas/"}
-                className="px-4 py-2 rounded-full bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors"
-              >
-                {city.name}
+        <div className="grid items-center gap-12 lg:grid-cols-2">
+          <div>
+            <SectionHeading
+              eyebrow="Service area"
+              title="Based in Oshawa, working across Durham Region"
+              subtitle="Oshawa is home base, so the core Durham communities below are the quickest for us to reach. We also travel farther afield; just ask."
+            />
+            <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {coreCities.map((city) => (
+                <li key={city.slug}>
+                  <Link
+                    href={`/service-areas/${city.slug}/`}
+                    className="group flex items-center gap-2 rounded-lg border border-line bg-white px-4 py-3 font-medium text-ink transition-colors hover:border-navy-600"
+                  >
+                    <MapPin className="h-4 w-4 text-gold-600" aria-hidden="true" />
+                    {city.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-6 text-sm leading-relaxed text-ink-3">
+              Also serving {otherCities.map((c) => c.name).join(", ")}.{" "}
+              <Link href="/service-areas/" className="inline-flex items-center gap-0.5 font-semibold text-navy-700">
+                All areas
+                <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
               </Link>
-            ))}
-          </motion.div>
-
-          {/* CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-          >
-            <Button
-              as="link"
-              href="/service-areas/"
-              variant="primary"
-              icon={ArrowRight}
-              iconPosition="right"
-              size="lg"
-            >
-              See All Service Areas
-            </Button>
-          </motion.div>
+            </p>
+          </div>
+          <Photo image="garageDark" aspect={4 / 3} sizes="(min-width: 1024px) 560px, 100vw" className="aspect-[4/3]" />
         </div>
       </div>
     </section>

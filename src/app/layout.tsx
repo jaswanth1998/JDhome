@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Poppins } from "next/font/google";
+import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 import { theme } from "@/config/theme";
 import { GoogleAnalytics, GoogleTagManager, GoogleTagManagerNoScript } from "@/components/analytics";
@@ -10,10 +10,10 @@ const inter = Inter({
   display: "swap",
 });
 
-const poppins = Poppins({
+const manrope = Manrope({
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-poppins",
+  weight: ["600", "700", "800"],
+  variable: "--font-manrope",
   display: "swap",
 });
 
@@ -77,7 +77,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en-CA" className={`${inter.variable} ${poppins.variable}`}>
+    <html lang="en-CA" className={`${inter.variable} ${manrope.variable}`}>
       <body className="antialiased">
         <GoogleTagManagerNoScript />
         {children}

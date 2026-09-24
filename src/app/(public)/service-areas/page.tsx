@@ -5,18 +5,15 @@ import { theme, type ServiceCity } from "@/config/theme";
 import { JsonLd } from "@/components/seo";
 import { breadcrumbNode, withGraph } from "@/lib/jsonld";
 import { buildMetadata, coreCities } from "@/lib/seo";
-import { Breadcrumbs, ServiceCard } from "@/components/ui";
-import { FinalCTA } from "@/components/sections";
+import { SectionHeading, ServiceCard } from "@/components/ui";
+import { FinalCTA, PageHero } from "@/components/sections";
 
 export const metadata: Metadata = buildMetadata({
   title: "Areas We Serve | Oshawa & Durham Region | JD Home Services",
   description:
-    "Locksmith, car lockout, and garage door service for Oshawa, Whitby, Ajax, Pickering, Courtice, Bowmanville, and nearby areas in and around Durham Region.",
+    "Garage door repair, security cameras, locksmith, and car lockout service for Oshawa, Whitby, Ajax, Pickering, Courtice, Bowmanville, and nearby areas.",
   path: "/service-areas/",
 });
-
-const sectionHeading =
-  "text-3xl md:text-4xl font-bold text-[var(--text-primary)]";
 
 const allCities: readonly ServiceCity[] = theme.serviceCities;
 
@@ -56,69 +53,39 @@ export default function ServiceAreasPage() {
         ])}
       />
 
-      {/* Hero */}
-      <section className="section bg-gradient-primary text-white">
-        <div className="container">
-          <Breadcrumbs
-            light
-            className="mb-8"
-            items={[
-              { name: "Home", href: "/" },
-              { name: "Service Areas", href: "/service-areas/" },
-            ]}
-          />
-          <div className="max-w-3xl">
-            <h1
-              className="text-4xl md:text-5xl font-bold mb-6"
-              style={{ color: "white" }}
-            >
-              Areas We Serve Across Durham Region and Beyond
-            </h1>
-            <p className="text-lg md:text-xl text-white/80">
-              Based in Oshawa, we provide locksmith service, 24/7 car lockout
-              help, and garage door repair and installation throughout Durham
-              Region and nearby communities.
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Service areas"
+        title="Areas we serve across Durham Region and beyond"
+        subtitle="Based in Oshawa, we provide garage door repair and installation and security camera systems throughout Durham Region and nearby communities, with locksmith and 24/7 car lockout help as add-ons."
+        image="garageDark"
+        breadcrumbs={[
+          { name: "Home", href: "/" },
+          { name: "Service Areas", href: "/service-areas/" },
+        ]}
+      />
 
-      {/* Core cities */}
       <section className="section bg-white">
         <div className="container">
-          <h2 className={`${sectionHeading} mb-4 text-center`}>
-            Core Durham Region Communities
-          </h2>
-          <p className="text-lg text-[var(--text-secondary)] text-center max-w-2xl mx-auto mb-12">
-            These are the communities closest to our Oshawa base. Each one has
-            its own page with details on the services available there.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <SectionHeading
+            eyebrow="Core communities"
+            title="Closest to our Oshawa base"
+            subtitle="Each of these communities has its own page with details on the services available there."
+          />
+          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {coreCities.map((city) => (
               <Link
                 key={city.slug}
                 href={`/service-areas/${city.slug}/`}
-                className="group block h-full bg-white rounded-2xl border border-[var(--border-light)] p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                className="group flex h-full flex-col rounded-[var(--radius-xl)] border border-line bg-white p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[var(--shadow-lg)]"
               >
-                <div className="w-12 h-12 rounded-lg bg-[var(--bg-secondary)] flex items-center justify-center mb-4">
-                  <MapPin
-                    className="w-6 h-6 text-[var(--accent-teal)]"
-                    aria-hidden="true"
-                  />
-                </div>
-                <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2 group-hover:text-[var(--accent-teal)] transition-colors">
-                  {city.name}
-                </h3>
-                <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-4">
-                  {city.blurb}
-                </p>
-                <span className="inline-flex items-center gap-1 text-[var(--accent-teal)] text-sm font-medium">
+                <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-navy-800 text-gold-500">
+                  <MapPin className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <h3 className="text-lg text-ink">{city.name}</h3>
+                <p className="mt-2 flex-1 text-[0.9375rem] leading-relaxed text-ink-2">{city.blurb}</p>
+                <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-navy-700">
                   Services in {city.name}
-                  <ArrowRight
-                    className="w-4 h-4 transition-transform group-hover:translate-x-1"
-                    aria-hidden="true"
-                  />
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                 </span>
               </Link>
             ))}
@@ -126,57 +93,35 @@ export default function ServiceAreasPage() {
         </div>
       </section>
 
-      {/* Other communities */}
-      <section className="section bg-[var(--bg-secondary)]">
+      <section className="section bg-paper-cool">
         <div className="container">
-          <div className="max-w-4xl mx-auto">
-            <h2 className={`${sectionHeading} mb-4 text-center`}>
-              Other Communities We Travel To
-            </h2>
-            <p className="text-lg text-[var(--text-secondary)] text-center max-w-2xl mx-auto mb-12">
-              We also travel to these communities for locksmith, car lockout,
-              and garage door work. Call us with your location and we will
-              confirm availability.
-            </p>
-
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {otherRegions.map((group) => (
-                <div
-                  key={group.region}
-                  className="bg-white rounded-2xl border border-[var(--border-light)] p-6"
-                >
-                  <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-3">
-                    {group.region}
-                  </h3>
-                  <ul className="space-y-2">
-                    {group.cities.map((city) => (
-                      <li
-                        key={city.slug}
-                        className="flex items-center gap-2 text-[var(--text-secondary)]"
-                      >
-                        <MapPin
-                          className="w-4 h-4 text-[var(--accent-teal)] flex-shrink-0"
-                          aria-hidden="true"
-                        />
-                        {city.name}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
+          <SectionHeading
+            eyebrow="Farther afield"
+            title="Other communities we travel to"
+            subtitle="Call us with your location and we will confirm availability."
+          />
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {otherRegions.map((group) => (
+              <div key={group.region} className="rounded-[var(--radius-lg)] border border-line bg-white p-6">
+                <h3 className="text-base text-ink">{group.region}</h3>
+                <ul className="mt-3 space-y-2">
+                  {group.cities.map((city) => (
+                    <li key={city.slug} className="flex items-center gap-2 text-ink-2">
+                      <MapPin className="h-4 w-4 flex-shrink-0 text-gold-600" aria-hidden="true" />
+                      {city.name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Services */}
       <section className="section bg-white">
         <div className="container">
-          <h2 className={`${sectionHeading} mb-4 text-center`}>Our Services</h2>
-          <p className="text-lg text-[var(--text-secondary)] text-center max-w-2xl mx-auto mb-12">
-            Three focused services from one Oshawa-based team.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <SectionHeading eyebrow="Services" title="What we do in every area" />
+          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {theme.services.categories.map((service) => (
               <ServiceCard
                 key={service.id}
@@ -184,7 +129,7 @@ export default function ServiceAreasPage() {
                 name={service.name}
                 shortDescription={service.shortDescription}
                 icon={service.icon}
-                color={service.color}
+                image={service.image}
                 badge={"badge" in service ? service.badge : undefined}
               />
             ))}

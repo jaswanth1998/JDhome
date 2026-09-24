@@ -11,7 +11,7 @@
  * Dependencies: none (node:fs, node:fs/promises, node:path only).
  */
 import { readFile, readdir } from "node:fs/promises";
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 
 const ROOT = process.cwd();
@@ -22,6 +22,7 @@ const SERVICE_PATHS = [
   "/services/locksmith/",
   "/services/car-lockout/",
   "/services/garage-door-repair-installation/",
+  "/services/security-camera-installation/",
 ];
 const CITY_PATHS = [
   "/service-areas/oshawa/",
@@ -31,7 +32,30 @@ const CITY_PATHS = [
   "/service-areas/courtice/",
   "/service-areas/bowmanville/",
 ];
+// Guides: discovered from src/content/blog/*.md (slug = file name, category from frontmatter).
+const BLOG_DIR = path.join(ROOT, "src", "content", "blog");
+const BLOG_POSTS = existsSync(BLOG_DIR)
+  ? readdirSync(BLOG_DIR)
+      .filter((f) => f.endsWith(".md"))
+      .map((f) => {
+        const text = readFileSync(path.join(BLOG_DIR, f), "utf8");
+        const category = text.match(/^category:\s*(.+)$/m)?.[1].trim();
+        const hasFaq = /^## Frequently asked questions\s*$/m.test(text);
+        return { slug: f.replace(/\.md$/, ""), category, hasFaq };
+      })
+  : [];
+// twitter:site is only expected when theme.seo.twitterHandle is set (the business has no X account today).
+const TWITTER_HANDLE = (() => {
+  const themeSrc = existsSync(path.join(ROOT, "src", "config", "theme.ts"))
+    ? readFileSync(path.join(ROOT, "src", "config", "theme.ts"), "utf8")
+    : "";
+  return themeSrc.match(/twitterHandle:\s*"([^"]*)"/)?.[1] ?? "";
+})();
+const BLOG_POST_PATHS = BLOG_POSTS.map((p) => `/blog/${p.slug}/`);
+const BLOG_CATEGORY_PATHS = [...new Set(BLOG_POSTS.map((p) => `/blog/category/${p.category}/`))];
+
 const TWO_CRUMB_PATHS = [
+  "/blog/",
   "/services/",
   "/service-areas/",
   "/about/",
@@ -47,6 +71,9 @@ const EXPECTED_PATHS = [
   "/about/",
   "/contact/",
   "/privacy-policy/",
+  "/blog/",
+  ...BLOG_CATEGORY_PATHS,
+  ...BLOG_POST_PATHS,
 ];
 const EXCLUDED_DIRS = [
   /^_next(\/|$)/,
@@ -262,7 +289,9 @@ async function main() {
     const noLastmod = urlBlocks.filter((m) => !/<lastmod>[^<]+<\/lastmod>/.test(m[1]));
     if (noLastmod.length) hygiene.push(`${noLastmod.length} <url> entries lack <lastmod>`);
     if (urlBlocks.length !== locs.length) hygiene.push("<url>/<loc> count mismatch");
-    verdict("1b", "Sitemap hygiene (no admin/share, host+slash, lastmod)", hygiene, [], `${locs.length} entries`);
+    const rawAmp = xml.match(/&(?!amp;|lt;|gt;|quot;|apos;|#\d+;)/g);
+    if (rawAmp) hygiene.push(`${rawAmp.length} unescaped "&" (invalid XML)`);
+    verdict("1b", "Sitemap hygiene (no admin/share, host+slash, lastmod, valid XML)", hygiene, [], `${locs.length} entries`);
   }
 
   // ---- 2. Per-page metadata
@@ -314,7 +343,7 @@ async function main() {
       if (og.locale !== "en_CA") f.og.push(`${p} og:locale=${og.locale}`);
       if (!og.siteName) f.og.push(`${p} og:site_name missing`);
       if (twitterCard !== "summary_large_image") f.og.push(`${p} twitter:card=${twitterCard}`);
-      if (!twitterSite) f.og.push(`${p} twitter:site missing`);
+      if (TWITTER_HANDLE && !twitterSite) f.og.push(`${p} twitter:site missing`);
 
       if (og.image) {
         const local = localFileForUrl(og.image);
@@ -330,7 +359,7 @@ async function main() {
       if (robots && /noindex/i.test(robots)) f.robots.push(`${p} robots=${robots}`);
       if (!/<html[^>]*\slang="en-CA"/.test(html)) f.lang.push(`${p} html lang != en-CA`);
       const themeColor = metaByName(html, "theme-color");
-      if (themeColor !== "#1B3A5F") f.theme.push(`${p} theme-color=${themeColor}`);
+      if (themeColor !== "#0E2A4D") f.theme.push(`${p} theme-color=${themeColor}`);
       if (!html.includes('href="#main"')) f.skip.push(`${p} lacks href="#main"`);
       if (!html.includes('id="main"')) f.skip.push(`${p} lacks id="main"`);
     }
@@ -346,7 +375,7 @@ async function main() {
     verdict("2f", "og:image on site host and maps to a PNG in out/", f.ogImage, [], `${n} pages`);
     verdict("2g", "No noindex on public pages", f.robots, [], `${n} pages`);
     verdict("2h", '<html lang="en-CA">', f.lang, [], `${n} pages`);
-    verdict("2i", "theme-color #1B3A5F", f.theme, [], `${n} pages`);
+    verdict("2i", "theme-color #0E2A4D", f.theme, [], `${n} pages`);
     verdict("2j", 'Skip link href="#main" + id="main"', f.skip, [], `${n} pages`);
   }
 
@@ -433,9 +462,30 @@ async function main() {
       if (lists.length !== 1 || items !== expected) crumbFails.push(`${p}: ${lists.length} BreadcrumbList(s), ${items} items (expected ${expected})`);
     };
     for (const p of CITY_PATHS) expectCrumbs(p, 3);
+    for (const p of [...BLOG_CATEGORY_PATHS, ...BLOG_POST_PATHS]) expectCrumbs(p, 3);
     for (const p of TWO_CRUMB_PATHS) expectCrumbs(p, 2);
     expectCrumbs("/", 0);
-    verdict("3f", "BreadcrumbList counts (cities 3, hubs 2, home none)", crumbFails, [], `${CITY_PATHS.length + TWO_CRUMB_PATHS.length + 1} pages`);
+    verdict("3f", "BreadcrumbList counts (cities/guides 3, hubs 2, home none)", crumbFails, [], `${CITY_PATHS.length + TWO_CRUMB_PATHS.length + BLOG_CATEGORY_PATHS.length + BLOG_POST_PATHS.length + 1} pages`);
+
+    const articleFails = [];
+    for (const post of BLOG_POSTS) {
+      const p = `/blog/${post.slug}/`;
+      if (!pages.has(p)) { articleFails.push(`${p} not built`); continue; }
+      const nodes = nodesOf(p);
+      const article = nodes.find((node) => hasType(node, "BlogPosting"));
+      if (!article) { articleFails.push(`${p}: no BlogPosting`); continue; }
+      for (const key of ["headline", "description", "datePublished", "dateModified", "image", "url"]) {
+        if (!article[key]) articleFails.push(`${p}: BlogPosting.${key} missing`);
+      }
+      if (article.url !== SITE + p) articleFails.push(`${p}: BlogPosting.url=${article.url}`);
+      if (!String(article.publisher?.["@id"] ?? "").endsWith("/#business")) articleFails.push(`${p}: publisher.@id=${article.publisher?.["@id"]}`);
+      if (String(article.headline).length > 110) articleFails.push(`${p}: headline over 110 chars`);
+      const faq = nodes.find((node) => hasType(node, "FAQPage"));
+      if (post.hasFaq && !faq) articleFails.push(`${p}: FAQ section but no FAQPage`);
+      const ogType = metaByProperty(pages.get(p).html, "og:type");
+      if (ogType !== "article") articleFails.push(`${p}: og:type=${ogType}`);
+    }
+    verdict("3g", "Guides: BlogPosting (+FAQPage) and og:type=article", articleFails, [], `${BLOG_POSTS.length} guides`);
 
     const ratingFails = [];
     for (const [file, blocks] of blocksByFile) {
@@ -587,16 +637,17 @@ async function main() {
     verdict("10", "Deleted assets absent from out/", fails, [], `${gone.length} paths absent`);
   }
 
-  // ---- 11. Partner images
+  // ---- 11. Home page images
+  // alt="" is allowed (decorative); above-the-fold images marked fetchpriority="high" may load eagerly.
   {
     const fails = [];
     const imgs = tagsOf(pages.get("/")?.html ?? "", "img");
     for (const img of imgs) {
       const problems = [];
-      if (!img.alt) problems.push("alt");
+      if (img.alt == null) problems.push("alt");
       if (!img.width) problems.push("width");
       if (!img.height) problems.push("height");
-      if (img.loading !== "lazy") problems.push("loading=lazy");
+      if (img.loading !== "lazy" && (img.fetchpriority ?? img.fetchPriority) !== "high") problems.push("loading=lazy");
       if (problems.length) fails.push(`${img.src ?? "(no src)"} missing ${problems.join(", ")}`);
     }
     verdict("11", "<img> on home: alt, width, height, loading=lazy", fails, [], `${imgs.length} images`);
