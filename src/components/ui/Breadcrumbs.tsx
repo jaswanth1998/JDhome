@@ -21,41 +21,25 @@ interface BreadcrumbsProps {
 export function Breadcrumbs({ items, light = false, className }: BreadcrumbsProps) {
   return (
     <nav aria-label="Breadcrumb" className={className}>
-      <ol
-        className={cn(
-          "flex flex-wrap items-center gap-2 text-sm",
-          light ? "text-white/70" : "text-[var(--text-muted)]"
-        )}
-      >
+      <ol className={cn("flex flex-wrap items-center gap-2 text-sm", light ? "text-white/65" : "text-ink-3")}>
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
 
           return (
             <li key={item.href} className="flex items-center gap-2">
               {isLast ? (
-                <span
-                  aria-current="page"
-                  className={cn(
-                    "font-medium",
-                    light ? "text-white" : "text-[var(--text-primary)]"
-                  )}
-                >
+                <span aria-current="page" className={cn("font-medium", light ? "text-white" : "text-ink")}>
                   {item.name}
                 </span>
               ) : (
                 <Link
                   href={item.href}
-                  className={cn(
-                    "transition-colors",
-                    light ? "hover:text-white" : "hover:text-[var(--accent-teal)]"
-                  )}
+                  className={cn("transition-colors", light ? "hover:text-white" : "hover:text-navy-700")}
                 >
                   {item.name}
                 </Link>
               )}
-              {!isLast && (
-                <ChevronRight className="w-4 h-4 opacity-60" aria-hidden="true" />
-              )}
+              {!isLast && <ChevronRight className="w-4 h-4 opacity-60" aria-hidden="true" />}
             </li>
           );
         })}

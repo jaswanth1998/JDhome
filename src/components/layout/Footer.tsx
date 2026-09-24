@@ -1,59 +1,57 @@
-"use client";
-
 import Link from "next/link";
-import { Phone, Mail, MapPin, Clock, Instagram, Facebook } from "lucide-react";
+import Image from "next/image";
+import { Clock, Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
 import { theme } from "@/config/theme";
+import { coreCities } from "@/lib/seo";
+import { getPost } from "@/lib/blog";
 
-const quickLinks = [
-  { name: "Home", href: "/" },
-  { name: "Services", href: "/services/" },
-  { name: "Service Areas", href: "/service-areas/" },
+const companyLinks = [
   { name: "About Us", href: "/about/" },
+  { name: "All Services", href: "/services/" },
+  { name: "Service Areas", href: "/service-areas/" },
+  { name: "Guides & Advice", href: "/blog/" },
   { name: "Contact", href: "/contact/" },
 ];
 
-const serviceLinks = theme.services.categories.map((service) => ({
-  name: service.name,
-  href: `/services/${service.id}/`,
-}));
+const popularGuideSlugs = [
+  "broken-garage-door-spring",
+  "garage-door-wont-open",
+  "home-security-camera-system-guide",
+  "poe-vs-wifi-security-cameras",
+];
+
+const linkClass = "text-white/65 transition-colors hover:text-gold-500";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const popularGuides = popularGuideSlugs.map(getPost).filter((post) => post !== undefined);
 
   return (
-    <footer className="bg-[var(--bg-dark)] text-[var(--neutral-light-gray)]">
-      {/* Main Footer Content */}
-      <div className="container section">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
-          {/* Column 1: Company Info */}
-          <div>
-            {/* Logo */}
-            <Link
-              href="/"
-              className="flex items-center gap-2 font-bold text-xl text-white mb-4"
-            >
-              <div className="w-10 h-10 bg-[var(--accent-teal)] rounded-lg flex items-center justify-center text-white font-bold">
-                JD
-              </div>
-              <span>{theme.brand.name}</span>
+    <footer className="bg-navy-950 text-white/70">
+      <div className="container py-16">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-12">
+          {/* Brand */}
+          <div className="lg:col-span-4">
+            <Link href="/" className="mb-5 flex items-center gap-3">
+              <Image src={theme.brand.logo.markLight} alt={`${theme.brand.name} logo`} width={403} height={337} className="h-10 w-auto" />
+              <span className="font-[family-name:var(--font-heading)] text-lg font-extrabold text-white">
+                {theme.brand.name}
+              </span>
             </Link>
-
-            {/* Tagline */}
-            <p className="text-[var(--neutral-gray)] mb-6">
-              {theme.brand.tagline}
+            <p className="max-w-sm text-[0.9375rem] leading-relaxed">
+              Garage door repair and installation and smart security camera systems for homes and businesses across
+              Durham Region. {theme.brand.tagline}
             </p>
-
-            {/* Social Links */}
-            <div className="flex gap-3">
+            <div className="mt-6 flex gap-2">
               {theme.contact.social.instagram && (
                 <a
                   href={theme.contact.social.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center hover:bg-[var(--accent-teal)] transition-colors"
-                  aria-label="Follow us on Instagram"
+                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/15 transition-colors hover:border-gold-500 hover:text-gold-500"
+                  aria-label="JD Home Services on Instagram"
                 >
-                  <Instagram className="w-5 h-5" />
+                  <Instagram className="h-[18px] w-[18px]" aria-hidden="true" />
                 </a>
               )}
               {theme.contact.social.facebook && (
@@ -61,25 +59,32 @@ export function Footer() {
                   href={theme.contact.social.facebook}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center hover:bg-[var(--accent-teal)] transition-colors"
-                  aria-label="Follow us on Facebook"
+                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/15 transition-colors hover:border-gold-500 hover:text-gold-500"
+                  aria-label="JD Home Services on Facebook"
                 >
-                  <Facebook className="w-5 h-5" />
+                  <Facebook className="h-[18px] w-[18px]" aria-hidden="true" />
                 </a>
               )}
             </div>
           </div>
 
-          {/* Column 2: Quick Links */}
-          <div>
-            <h3 className="text-white font-semibold text-lg mb-4">Quick Links</h3>
-            <ul className="space-y-3">
-              {quickLinks.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-[var(--neutral-gray)] hover:text-[var(--accent-teal)] transition-colors"
-                  >
+          {/* Services */}
+          <div className="lg:col-span-3">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.14em] text-white">Services</h2>
+            <ul className="space-y-2.5">
+              {theme.services.categories.map((s) => (
+                <li key={s.id}>
+                  <Link href={`/services/${s.id}/`} className={linkClass}>
+                    {s.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <h2 className="mb-4 mt-8 text-sm font-semibold uppercase tracking-[0.14em] text-white">Company</h2>
+            <ul className="space-y-2.5">
+              {companyLinks.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className={linkClass}>
                     {link.name}
                   </Link>
                 </li>
@@ -87,90 +92,86 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Column 3: Services */}
-          <div>
-            <h3 className="text-white font-semibold text-lg mb-4">Services</h3>
-            <ul className="space-y-3">
-              {serviceLinks.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-[var(--neutral-gray)] hover:text-[var(--accent-teal)] transition-colors"
-                  >
-                    {link.name}
+          {/* Areas */}
+          <div className="lg:col-span-2">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.14em] text-white">Areas</h2>
+            <ul className="space-y-2.5">
+              {coreCities.map((city) => (
+                <li key={city.slug}>
+                  <Link href={`/service-areas/${city.slug}/`} className={linkClass}>
+                    {city.name}
                   </Link>
                 </li>
               ))}
-            </ul>
-          </div>
-
-          {/* Column 4: Contact Info */}
-          <div>
-            <h3 className="text-white font-semibold text-lg mb-4">Contact</h3>
-            <ul className="space-y-4">
-              {/* Phone */}
               <li>
-                <a
-                  href={`tel:${theme.contact.phone.tel}`}
-                  className="flex items-start gap-3 text-[var(--neutral-gray)] hover:text-[var(--accent-teal)] transition-colors group"
-                >
-                  <Phone className="w-5 h-5 mt-0.5 text-[var(--accent-teal)]" />
-                  <span className="font-medium text-white group-hover:text-[var(--accent-teal)]">
+                <Link href="/service-areas/" className={linkClass}>
+                  More areas →
+                </Link>
+              </li>
+            </ul>
+            <h2 className="mb-4 mt-8 text-sm font-semibold uppercase tracking-[0.14em] text-white">Popular guides</h2>
+            <ul className="space-y-2.5">
+              {popularGuides.map((post) => (
+                <li key={post.slug}>
+                  <Link href={`/blog/${post.slug}/`} className={linkClass}>
+                    {post.seoTitle.split(/[?:]/)[0]}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div className="lg:col-span-3">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.14em] text-white">Contact</h2>
+            <ul className="space-y-4 text-[0.9375rem]">
+              <li>
+                <a href={`tel:${theme.contact.phone.tel}`} className="group flex items-start gap-3">
+                  <Phone className="mt-0.5 h-[18px] w-[18px] text-gold-500" aria-hidden="true" />
+                  <span className="font-semibold text-white group-hover:text-gold-500">
                     {theme.contact.phone.display}
                   </span>
                 </a>
               </li>
-
-              {/* Email */}
               <li>
-                <a
-                  href={`mailto:${theme.contact.email}`}
-                  className="flex items-start gap-3 text-[var(--neutral-gray)] hover:text-[var(--accent-teal)] transition-colors"
-                >
-                  <Mail className="w-5 h-5 mt-0.5 text-[var(--accent-teal)]" />
-                  <span>{theme.contact.email}</span>
+                <a href={`mailto:${theme.contact.email}`} className="group flex items-start gap-3">
+                  <Mail className="mt-0.5 h-[18px] w-[18px] text-gold-500" aria-hidden="true" />
+                  <span className="group-hover:text-gold-500">{theme.contact.email}</span>
                 </a>
               </li>
-
-              {/* Service Area */}
               <li className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 mt-0.5 text-[var(--accent-teal)]" />
-                <span>{theme.contact.address.serviceArea}</span>
+                <MapPin className="mt-0.5 h-[18px] w-[18px] text-gold-500" aria-hidden="true" />
+                <span>
+                  {theme.contact.address.city}, {theme.contact.address.region}
+                  <br />
+                  {theme.contact.address.serviceArea}
+                </span>
               </li>
-
-              {/* Hours */}
               <li className="flex items-start gap-3">
-                <Clock className="w-5 h-5 mt-0.5 text-[var(--accent-teal)]" />
-                <div>
-                  <p>{theme.contact.hours.regular.display}</p>
-                  <p className="text-[var(--accent-orange)] font-medium">
-                    {theme.contact.hours.emergency.display}
-                  </p>
-                </div>
+                <Clock className="mt-0.5 h-[18px] w-[18px] text-gold-500" aria-hidden="true" />
+                <span>
+                  {theme.contact.hours.regular.display}
+                  <br />
+                  <span className="text-gold-500">{theme.contact.hours.emergency.display}</span>
+                </span>
               </li>
             </ul>
           </div>
         </div>
       </div>
 
-      {/* Bottom Bar */}
       <div className="border-t border-white/10">
-        <div className="container py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-[var(--neutral-gray)]">
-            <p>
-              &copy; {currentYear} {theme.brand.name}. All rights reserved.
-            </p>
-            <div className="flex items-center gap-4">
-              <Link
-                href="/privacy-policy/"
-                className="hover:text-[var(--accent-teal)] transition-colors"
-              >
-                Privacy Policy
-              </Link>
-              <span>
-                Proudly serving {theme.contact.address.city}, {theme.contact.address.region}
-              </span>
-            </div>
+        <div className="container flex flex-col items-center justify-between gap-3 py-6 text-sm text-white/50 md:flex-row">
+          <p>
+            &copy; {currentYear} {theme.brand.name}. All rights reserved.
+          </p>
+          <div className="flex items-center gap-5">
+            <Link href="/privacy-policy/" className="hover:text-gold-500">
+              Privacy Policy
+            </Link>
+            <span>
+              {theme.contact.address.city}, {theme.contact.address.region}
+            </span>
           </div>
         </div>
       </div>

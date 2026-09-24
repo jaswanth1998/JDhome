@@ -1,60 +1,42 @@
-"use client";
-
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface SectionHeadingProps {
-  title: string;
-  subtitle?: string;
-  centered?: boolean;
+  eyebrow?: string;
+  title: React.ReactNode;
+  subtitle?: React.ReactNode;
+  align?: "left" | "center";
+  /** Use on dark (navy) backgrounds. */
   light?: boolean;
+  /** Heading level; defaults to h2. */
+  as?: "h1" | "h2";
   className?: string;
-  as?: "h1" | "h2" | "h3";
 }
 
 export function SectionHeading({
+  eyebrow,
   title,
   subtitle,
-  centered = true,
+  align = "left",
   light = false,
+  as: Tag = "h2",
   className,
-  as = "h2",
 }: SectionHeadingProps) {
-  const Tag = as;
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5 }}
-      className={cn(
-        "mb-12",
-        centered && "text-center",
-        className
+    <div className={cn("max-w-2xl", align === "center" && "mx-auto text-center", className)}>
+      {eyebrow && (
+        <p className={cn("eyebrow mb-4", light && "eyebrow-light", align === "center" && "justify-center")}>
+          {eyebrow}
+        </p>
       )}
-    >
-      <Tag
-        className={cn(
-          "text-3xl md:text-4xl font-bold mb-4",
-          light ? "text-white" : "text-[var(--text-primary)]"
-        )}
-      >
+      <Tag className={cn("text-balance text-3xl md:text-[2.5rem] md:leading-[1.1]", light ? "text-white" : "text-ink")}>
         {title}
       </Tag>
-
       {subtitle && (
-        <p
-          className={cn(
-            "text-lg max-w-2xl",
-            centered && "mx-auto",
-            light ? "text-white/80" : "text-[var(--text-secondary)]"
-          )}
-        >
+        <p className={cn("mt-4 text-pretty text-lg leading-relaxed", light ? "text-white/75" : "text-ink-2")}>
           {subtitle}
         </p>
       )}
-    </motion.div>
+    </div>
   );
 }
 

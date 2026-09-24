@@ -1,14 +1,14 @@
 /**
- * JD Home Services - CENTRALIZED THEME CONFIGURATION
+ * JD Home Services - CENTRALIZED BUSINESS CONFIGURATION
  *
- * This file contains ALL customizable branding elements for the website.
- * Edit colors, typography, logos, contact info, and spacing from this single file.
- *
- * How to use:
- * 1. Update values in this file to change branding across the entire site
- * 2. Import this theme in components: import { theme } from '@/config/theme'
- * 3. Access values: theme.colors.primary.main, theme.typography.fontFamily.heading, etc.
+ * Brand, contact details, services, service areas, SEO copy and feature flags
+ * for the whole site. Components import from here instead of hardcoding values.
+ * Colours used in CSS live in `src/app/globals.css`; the few values below are
+ * only for places CSS can't reach (the OG image and the browser theme colour).
+ * Photos are configured separately in `src/config/images.ts`.
  */
+
+import type { SiteImageKey } from "@/config/images";
 
 export type ServiceCity = {
   slug: string;
@@ -20,6 +20,9 @@ export type ServiceCity = {
 
 export type ServiceFaq = { question: string; answer: string };
 
+/** Primary services lead the site; add-ons are listed as extra services. */
+export type ServiceTier = "primary" | "addon";
+
 /* ==========================================
    SERVICE CITIES
    Core cities get dedicated service-area pages; the rest are listed only.
@@ -30,14 +33,14 @@ const serviceCities = [
     name: "Oshawa",
     region: "Durham Region",
     core: true,
-    blurb: "Oshawa is our home base, so it is the area we can usually reach most quickly for locksmith work, car lockouts, and garage door repair.",
+    blurb: "Oshawa is our home base, so it is the area we can usually reach most quickly for garage door repairs, security camera installs, and add-on locksmith work.",
   },
   {
     slug: "whitby",
     name: "Whitby",
     region: "Durham Region",
     core: true,
-    blurb: "Whitby sits directly west of Oshawa along the Highway 401 corridor, a short trip from our base for lock changes, car lockouts, and garage door work, including Brooklin to the north.",
+    blurb: "Whitby sits directly west of Oshawa along the Highway 401 corridor, a short trip from our base for garage door repair and security camera installation, including Brooklin to the north.",
   },
   {
     slug: "ajax",
@@ -51,7 +54,7 @@ const serviceCities = [
     name: "Pickering",
     region: "Durham Region",
     core: true,
-    blurb: "Pickering is the westernmost lakeshore city in Durham Region and borders Toronto. We serve Pickering from our Oshawa base with the same three services we offer at home.",
+    blurb: "Pickering is the westernmost lakeshore city in Durham Region and borders Toronto. We serve Pickering from our Oshawa base with the same services we offer at home.",
   },
   {
     slug: "courtice",
@@ -65,7 +68,7 @@ const serviceCities = [
     name: "Bowmanville",
     region: "Durham Region",
     core: true,
-    blurb: "Bowmanville is the largest community in Clarington, east of Courtice along Highway 401. We serve Bowmanville from our Oshawa base for lock changes, car lockouts, and garage door repair and installation.",
+    blurb: "Bowmanville is the largest community in Clarington, east of Courtice along Highway 401. We serve Bowmanville from our Oshawa base for garage door repair and installation and security camera systems.",
   },
   { slug: "cobourg", name: "Cobourg", region: "Northumberland County", core: false },
   { slug: "millbrook", name: "Millbrook", region: "Peterborough County", core: false },
@@ -77,6 +80,22 @@ const serviceCities = [
   { slug: "stouffville", name: "Stouffville", region: "York Region", core: false },
 ] as const satisfies readonly ServiceCity[];
 
+type ServiceDefinition = {
+  id: string;
+  tier: ServiceTier;
+  name: string;
+  /** Short label for navigation and form options. */
+  shortName: string;
+  shortDescription: string;
+  description: string;
+  icon: string;
+  image: SiteImageKey;
+  badge?: string;
+  features: readonly string[];
+  seo: { title: string; description: string; h1: string };
+  faqs: readonly ServiceFaq[];
+};
+
 export const theme = {
   /* ==========================================
      BRAND IDENTITY
@@ -84,10 +103,12 @@ export const theme = {
   brand: {
     name: "JD Home Services",
     tagline: "From Install to Repair. Finished to Perfection.",
-    description: "Professional locksmith, car lockout, and garage door repair services in Oshawa, Ontario.",
+    description: "Garage door repair and installation and smart security camera systems in Oshawa and Durham Region, with locksmith and car lockout help as add-on services.",
 
     logo: {
       primary: "/images/logo.png",
+      mark: "/images/logo-mark.png",
+      markLight: "/images/logo-mark-light.png",
       pdf: "/images/logo-pdf.png",
     },
 
@@ -95,341 +116,15 @@ export const theme = {
   },
 
   /* ==========================================
-     COLOR PALETTE
+     COLOURS (non-CSS consumers only)
      ========================================== */
   colors: {
     primary: {
-      main: "#1B3A5F",
-      light: "#2B4A6F",
-      dark: "#0B2A4F",
-      contrast: "#FFFFFF",
+      main: "#0E2A4D",
+      dark: "#081B33",
     },
-
-    secondary: {
-      main: "#4A5568",
-      light: "#5A6578",
-      dark: "#3A4558",
-      contrast: "#FFFFFF",
-    },
-
     accent: {
-      teal: "#06B6D4",
-      tealHover: "#0891B2",
-      orange: "#F59E0B",
-      orangeHover: "#D97706",
-    },
-
-    neutral: {
-      white: "#FFFFFF",
-      offWhite: "#FAFAFA",
-      lightestGray: "#F9FAFB",
-      lightGray: "#F3F4F6",
-      gray: "#9CA3AF",
-      mediumGray: "#6B7280",
-      darkGray: "#4B5563",
-      charcoal: "#1F2937",
-      black: "#111827",
-    },
-
-    text: {
-      primary: "#1F2937",
-      secondary: "#4A5568",
-      muted: "#6B7280",
-      inverse: "#FFFFFF",
-    },
-
-    background: {
-      primary: "#FFFFFF",
-      secondary: "#F3F4F6",
-      dark: "#1F2937",
-      darker: "#111827",
-    },
-
-    button: {
-      primary: {
-        bg: "#06B6D4",
-        text: "#FFFFFF",
-        hover: "#0891B2",
-        active: "#0E7490",
-      },
-      emergency: {
-        bg: "#F59E0B",
-        text: "#FFFFFF",
-        hover: "#D97706",
-        active: "#B45309",
-      },
-      secondary: {
-        bg: "#4A5568",
-        text: "#FFFFFF",
-        hover: "#374151",
-        active: "#1F2937",
-      },
-      outline: {
-        bg: "transparent",
-        text: "#1B3A5F",
-        border: "#1B3A5F",
-        hover: "#1B3A5F",
-        hoverText: "#FFFFFF",
-      },
-    },
-
-    border: {
-      light: "#E5E7EB",
-      medium: "#D1D5DB",
-      dark: "#9CA3AF",
-      focus: "#06B6D4",
-    },
-
-    states: {
-      success: "#10B981",
-      error: "#EF4444",
-      warning: "#F59E0B",
-      info: "#3B82F6",
-    },
-
-    serviceCategories: {
-      smartLock: "#06B6D4",
-      emergency: "#F59E0B",
-      traditional: "#1B3A5F",
-      garageDoor: "#8B5CF6",
-    },
-  },
-
-  /* ==========================================
-     TYPOGRAPHY
-     ========================================== */
-  typography: {
-    fontFamily: {
-      heading: "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-      body: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-      mono: "'Courier New', monospace",
-    },
-
-    fontWeight: {
-      light: 300,
-      regular: 400,
-      medium: 500,
-      semibold: 600,
-      bold: 700,
-      extrabold: 800,
-      black: 900,
-    },
-
-    fontSize: {
-      xs: "0.75rem",
-      sm: "0.875rem",
-      base: "1rem",
-      lg: "1.125rem",
-      xl: "1.25rem",
-      "2xl": "1.5rem",
-      "3xl": "1.875rem",
-      "4xl": "2.25rem",
-      "5xl": "3rem",
-      "6xl": "3.75rem",
-      "7xl": "4.5rem",
-    },
-
-    lineHeight: {
-      none: 1,
-      tight: 1.25,
-      snug: 1.375,
-      normal: 1.5,
-      relaxed: 1.625,
-      loose: 2,
-    },
-
-    letterSpacing: {
-      tighter: "-0.05em",
-      tight: "-0.025em",
-      normal: "0",
-      wide: "0.025em",
-      wider: "0.05em",
-      widest: "0.1em",
-    },
-
-    headings: {
-      h1: {
-        fontSize: "3rem",
-        fontWeight: 700,
-        lineHeight: 1.2,
-        letterSpacing: "-0.02em",
-      },
-      h2: {
-        fontSize: "2.25rem",
-        fontWeight: 600,
-        lineHeight: 1.3,
-        letterSpacing: "-0.01em",
-      },
-      h3: {
-        fontSize: "1.5rem",
-        fontWeight: 600,
-        lineHeight: 1.4,
-      },
-      h4: {
-        fontSize: "1.25rem",
-        fontWeight: 500,
-        lineHeight: 1.5,
-      },
-    },
-
-    headingsMobile: {
-      h1: {
-        fontSize: "2.25rem",
-        fontWeight: 700,
-        lineHeight: 1.2,
-      },
-      h2: {
-        fontSize: "1.75rem",
-        fontWeight: 600,
-        lineHeight: 1.3,
-      },
-      h3: {
-        fontSize: "1.25rem",
-        fontWeight: 600,
-        lineHeight: 1.4,
-      },
-    },
-  },
-
-  /* ==========================================
-     SPACING & LAYOUT
-     ========================================== */
-  spacing: {
-    0: "0",
-    px: "1px",
-    0.5: "0.125rem",
-    1: "0.25rem",
-    1.5: "0.375rem",
-    2: "0.5rem",
-    2.5: "0.625rem",
-    3: "0.75rem",
-    3.5: "0.875rem",
-    4: "1rem",
-    5: "1.25rem",
-    6: "1.5rem",
-    7: "1.75rem",
-    8: "2rem",
-    9: "2.25rem",
-    10: "2.5rem",
-    11: "2.75rem",
-    12: "3rem",
-    14: "3.5rem",
-    16: "4rem",
-    20: "5rem",
-    24: "6rem",
-    28: "7rem",
-    32: "8rem",
-  },
-
-  layout: {
-    breakpoints: {
-      sm: "640px",
-      md: "768px",
-      lg: "1024px",
-      xl: "1280px",
-      "2xl": "1536px",
-    },
-
-    container: {
-      sm: "640px",
-      md: "768px",
-      lg: "1024px",
-      xl: "1200px",
-      "2xl": "1400px",
-      full: "100%",
-    },
-
-    section: {
-      paddingY: {
-        mobile: "2.5rem",
-        tablet: "4rem",
-        desktop: "5rem",
-      },
-      paddingX: {
-        mobile: "1rem",
-        tablet: "1.5rem",
-        desktop: "2rem",
-      },
-    },
-
-    grid: {
-      gap: {
-        mobile: "1.25rem",
-        desktop: "1.875rem",
-      },
-      columns: {
-        mobile: 1,
-        tablet: 2,
-        desktop: 3,
-      },
-    },
-
-    header: {
-      height: "80px",
-      heightMobile: "64px",
-    },
-    footer: {
-      minHeight: "400px",
-    },
-  },
-
-  /* ==========================================
-     BORDER RADIUS
-     ========================================== */
-  borderRadius: {
-    none: "0",
-    sm: "0.25rem",
-    md: "0.5rem",
-    lg: "0.75rem",
-    xl: "1rem",
-    "2xl": "1.5rem",
-    "3xl": "2rem",
-    full: "9999px",
-  },
-
-  /* ==========================================
-     SHADOWS
-     ========================================== */
-  shadows: {
-    none: "none",
-    sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-    md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-    lg: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-    xl: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-    "2xl": "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-    inner: "inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)",
-    primaryGlow: "0 10px 30px -5px rgba(6, 182, 212, 0.3)",
-    emergencyGlow: "0 10px 30px -5px rgba(245, 158, 11, 0.3)",
-  },
-
-  /* ==========================================
-     ANIMATION & TRANSITIONS
-     ========================================== */
-  animation: {
-    duration: {
-      instant: "75ms",
-      fast: "150ms",
-      normal: "300ms",
-      slow: "500ms",
-      slower: "700ms",
-      slowest: "1000ms",
-    },
-
-    easing: {
-      linear: "linear",
-      ease: "ease",
-      easeIn: "ease-in",
-      easeOut: "ease-out",
-      easeInOut: "ease-in-out",
-      smooth: "cubic-bezier(0.4, 0, 0.2, 1)",
-      spring: "cubic-bezier(0.68, -0.55, 0.265, 1.55)",
-    },
-
-    transitions: {
-      default: "all 300ms ease-in-out",
-      fast: "all 150ms ease-in-out",
-      color: "color 300ms ease-in-out, background-color 300ms ease-in-out",
-      transform: "transform 300ms ease-in-out",
+      gold: "#D9A93A",
     },
   },
 
@@ -457,12 +152,12 @@ export const theme = {
 
     hours: {
       regular: {
-        display: "Mon-Fri 8AM-6PM",
+        display: "Mon–Fri 8AM–6PM",
         days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
         time: "8:00 AM - 6:00 PM",
       },
       emergency: {
-        display: "24/7 Available",
+        display: "24/7 car lockout line",
         days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
         time: "24 Hours",
       },
@@ -475,7 +170,7 @@ export const theme = {
 
     responseTime: {
       regular: "Call during business hours and we will confirm a realistic arrival window",
-      emergency: "Our emergency line is answered 24/7",
+      emergency: "Our car lockout line is answered 24/7",
     },
   },
 
@@ -497,10 +192,10 @@ export const theme = {
      SEO & META INFORMATION
      ========================================== */
   seo: {
-    defaultTitle: "Garage Door Repair & Locksmith Oshawa | JD Home Services",
+    defaultTitle: "Garage Door Repair & Security Cameras Oshawa | JD Home",
     titleTemplate: "%s | JD Home Services",
-    defaultDescription: "Garage door repair and installation across Oshawa and Durham Region — springs, openers, off-track and noisy doors, new installs. Also locksmith work and 24/7 car lockout help. Call (289) 991-3277.",
-    keywords: "garage door repair Oshawa, garage door installation Durham Region, garage door spring repair Oshawa, garage door opener repair Oshawa, locksmith Oshawa, car lockout Oshawa",
+    defaultDescription: "Garage door repair and installation plus smart security cameras in Oshawa and Durham Region. Locksmith and 24/7 car lockout too. Call (289) 991-3277.",
+    keywords: "garage door repair Oshawa, garage door installation Durham Region, garage door spring repair Oshawa, security camera installation Oshawa, CCTV installation Durham Region, PoE camera system, locksmith Oshawa, car lockout Oshawa",
     siteUrl: "https://www.jdhomeservices.ca",
     ogImage: "/og-image.png",
     // No X/Twitter account exists for JD Home Services. Left empty on purpose —
@@ -509,30 +204,32 @@ export const theme = {
   },
 
   /* ==========================================
-     SERVICES CONFIGURATION
+     SERVICES
+     Order matters: primary services first, then add-ons.
      ========================================== */
   services: {
     categories: [
       {
         id: "garage-door-repair-installation",
+        tier: "primary",
         name: "Garage Door Repair & Installation",
-        shortDescription: "Reliable garage door repair, replacement, and new installation for safe, smooth daily operation",
-        description: "We repair and install garage doors and related hardware for homeowners who need dependable performance and safe operation. Whether your system is off-track, noisy, damaged, or ready for replacement, we diagnose the issue clearly and complete the work with attention to safety, fit, and long-term reliability.",
-        icon: "Home",
-        color: "#4A5568",
-        featured: true,
+        shortName: "Garage Doors",
+        shortDescription: "Repairs, spring and cable work, openers, and new door installation for safe, smooth daily operation.",
+        description: "We repair and install garage doors and related hardware for homeowners and businesses who need dependable performance and safe operation. Whether your door is stuck, off-track, noisy, damaged, or ready for replacement, we diagnose the issue clearly, explain your options, and complete the work with attention to safety, fit, and long-term reliability.",
+        icon: "Warehouse",
+        image: "garageService",
         features: [
           "Garage door repair and troubleshooting",
+          "Broken spring and cable replacement",
+          "Track, roller, and hinge adjustments",
+          "Opener installation, repair, and remote setup",
           "New garage door installation and replacement",
-          "Track, roller, cable, and hardware adjustments",
-          "Opener setup and operational checks",
-          "Safety inspection and balance testing",
-          "Professional recommendations for repair vs. replacement",
+          "Safety inspection and balance testing on every visit",
         ],
         seo: {
-          title: "Garage Door Repair & Installation Oshawa | JD Home Services",
+          title: "Garage Door Repair & Installation Oshawa | JD Home",
           description:
-            "Garage door repair, replacement, and new installation in Oshawa and Durham Region: track, roller, cable, and opener work with safety and balance checks.",
+            "Garage door repair, spring and cable replacement, opener work, and new door installation in Oshawa and Durham Region, with safety and balance checks.",
           h1: "Garage Door Repair & Installation in Oshawa & Durham Region",
         },
         faqs: [
@@ -564,13 +261,67 @@ export const theme = {
         ],
       },
       {
+        id: "security-camera-installation",
+        tier: "primary",
+        name: "CCTV & Smart Security Cameras",
+        shortName: "Security Cameras",
+        shortDescription: "AI-powered camera systems for homes and businesses: PoE wiring, local recording, smart search, and live view on your phone.",
+        description: "We design and install security camera systems for homes, workplaces, and rental properties. Our installs use modern smart cameras with AI person and vehicle detection, wired with Power over Ethernet (PoE) so a single cable carries both power and video. Footage records to a network video recorder (NVR) kept at your property, and you can watch live, play back recordings, and search your footage from your phone.",
+        icon: "Cctv",
+        image: "cctvInstall",
+        features: [
+          "Indoor and outdoor camera installation for homes and businesses",
+          "AI person and vehicle detection to cut down on false alerts",
+          "Smart search: describe what you are looking for and find matching snapshots",
+          "Power over Ethernet (PoE) wiring: one cable for power and video",
+          "Local recording to an NVR at your property",
+          "Live view, playback, and alerts on your phone",
+          "Dome, bullet, turret, PTZ, 360° panoramic, and doorbell cameras",
+          "Camera placement planning and a full walkthrough of your system",
+        ],
+        seo: {
+          title: "Security Camera & CCTV Installation Oshawa | JD Home",
+          description:
+            "Smart CCTV installation in Oshawa and Durham Region: AI person detection, smart footage search, PoE wiring, local NVR recording, and phone access.",
+          h1: "Security Camera & CCTV Installation in Oshawa & Durham Region",
+        },
+        faqs: [
+          {
+            question: "What does AI person detection actually do?",
+            answer:
+              "Smart cameras analyse what they see and can tell a person or a vehicle apart from things like swaying branches, headlights, or passing animals. That means your phone alerts are about the events you care about instead of every bit of movement, and recordings are tagged so they are easier to review later.",
+          },
+          {
+            question: "Can I really search my footage instead of scrubbing through hours of video?",
+            answer:
+              "Yes, on systems that support smart search. Recordings are indexed as snapshots, so you can type a short description, such as a person near the side door or a vehicle in the driveway, and jump straight to matching moments across your cameras. We set this up during installation and show you how to use it.",
+          },
+          {
+            question: "What is PoE, and why do you recommend wired cameras?",
+            answer:
+              "PoE stands for Power over Ethernet. A single network cable delivers both power and the video signal to each camera, so there is no need for a power outlet at every camera location. Wired PoE cameras avoid the dropouts and battery changes that can come with Wi-Fi cameras, which makes them a dependable choice for continuous recording.",
+          },
+          {
+            question: "Where is my footage stored, and can I watch it on my phone?",
+            answer:
+              "Footage records to a network video recorder (NVR) installed at your home or business, so your recordings stay on your property. Once the system is connected to your internet, you can view live video, play back recordings, and receive alerts from the camera app on your phone.",
+          },
+          {
+            question: "Do you install cameras for businesses as well as homes?",
+            answer:
+              "Yes. We install camera systems for houses, rental properties, offices, storefronts, and other workspaces. Every property is different, so we talk through what you want to cover, such as entrances, driveways, parking areas, or stock rooms, and recommend a camera layout that fits.",
+          },
+        ],
+      },
+      {
         id: "locksmith",
+        tier: "addon",
         name: "Locksmith",
-        shortDescription: "Residential and commercial locksmith service for lock changes, repairs, rekeying, and new hardware installs",
-        description: "Our general locksmith service covers the everyday security work property owners rely on. We handle lock changes, rekeying, deadbolt and knob replacement, hardware upgrades, lock repairs, and security checks for homes, offices, storefronts, and rental properties throughout Durham and surrounding areas.",
-        icon: "Lock",
-        color: "#1B3A5F",
-        featured: true,
+        shortName: "Locksmith",
+        shortDescription: "Lock changes, rekeying, repairs, and new hardware for homes, rentals, and businesses.",
+        description: "Our locksmith service covers the everyday security work property owners rely on. We handle lock changes, rekeying, deadbolt and knob replacement, hardware upgrades, lock repairs, and security checks for homes, offices, storefronts, and rental properties throughout Durham and surrounding areas. It pairs naturally with a camera install when you are upgrading a property's security.",
+        icon: "KeyRound",
+        image: "locksmith",
         features: [
           "Residential and commercial lock changes",
           "Lock repair, replacement, and alignment",
@@ -609,21 +360,22 @@ export const theme = {
           {
             question: "How do I get a quote for locksmith work?",
             answer:
-              "Call us at (289) 991-3277 or send a message through our contact page with a short description of the job, such as how many doors are involved and whether you need rekeying, repair, or new hardware. We will talk through the options and give you clear recommendations before any work begins. Our regular hours are Monday to Friday, 8 AM to 6 PM.",
+              "Call us at (289) 991-3277 or send a request through our contact page with a short description of the job, such as how many doors are involved and whether you need rekeying, repair, or new hardware. We will talk through the options and give you clear recommendations before any work begins. Our regular hours are Monday to Friday, 8 AM to 6 PM.",
           },
         ],
       },
       {
         id: "car-lockout",
+        tier: "addon",
         name: "Car Lockout",
-        shortDescription: "Fast, damage-free vehicle entry when you are locked out anywhere in Durham and surrounding regions",
-        description: "Locked your keys in the car or dealing with a stuck vehicle lock? We provide rapid-response car lockout assistance with non-destructive entry methods whenever possible. Our goal is simple: get you back into your vehicle quickly, safely, and without adding more stress to your day.",
+        shortName: "Car Lockout",
+        shortDescription: "Damage-free vehicle entry, any time, anywhere in Durham and surrounding regions.",
+        description: "Locked your keys in the car or dealing with a stuck vehicle lock? We provide car lockout assistance with non-destructive entry methods whenever possible. Our goal is simple: get you back into your vehicle quickly, safely, and without adding more stress to your day.",
         icon: "Car",
-        color: "#F59E0B",
-        badge: "24/7 AVAILABLE",
-        featured: true,
+        image: "carLockout",
+        badge: "24/7",
         features: [
-          "24/7 emergency availability",
+          "24/7 availability, including evenings and weekends",
           "Serving Oshawa, Durham Region and surrounding communities",
           "Damage-free vehicle entry whenever possible",
           "Help with keys locked inside or malfunctioning locks",
@@ -631,7 +383,7 @@ export const theme = {
           "Upfront communication before work begins",
         ],
         seo: {
-          title: "24/7 Car Lockout Service Oshawa & Durham | JD Home Services",
+          title: "24/7 Car Lockout Service Oshawa & Durham | JD Home",
           description:
             "Locked out of your car in Oshawa or Durham Region? Get 24/7 car lockout help with damage-free entry when possible. Call JD Home Services: (289) 991-3277.",
           h1: "24/7 Car Lockout Service in Oshawa & Durham Region",
@@ -664,7 +416,7 @@ export const theme = {
           },
         ],
       },
-    ],
+    ] as const satisfies readonly ServiceDefinition[],
   },
 
   /* ==========================================
@@ -675,30 +427,20 @@ export const theme = {
       {
         id: "homeowners",
         name: "Homeowners",
-        description: "Lock changes, rekeying, garage door repairs, and practical security upgrades for day-to-day peace of mind.",
+        description: "Garage door repairs and new doors, camera systems you can check from your phone, and lock changes after a move.",
         icon: "Home",
-        highlights: ["Move-ins & lock changes", "Garage door repair"],
       },
       {
         id: "landlords",
         name: "Landlords & Property Managers",
-        description: "Dependable service for rental turnovers, tenant lock issues, hardware updates, and access control needs.",
+        description: "Cameras for entrances and parking, garage door upkeep, and rekeying between tenants.",
         icon: "Building2",
-        highlights: ["Rekeying between tenants", "Common entry hardware"],
       },
       {
         id: "businesses",
         name: "Retail & Small Business",
-        description: "Commercial locksmith support for storefronts, offices, service doors, and everyday security maintenance.",
+        description: "Camera coverage for storefronts, stock rooms, and lots, plus commercial doors and entry hardware.",
         icon: "Store",
-        highlights: ["Lock repair & replacement", "Entry door hardware"],
-      },
-      {
-        id: "drivers",
-        name: "Drivers Across Durham",
-        description: "Fast car lockout help for commuters, families, and working drivers who need careful, damage-aware entry.",
-        icon: "Car",
-        highlights: ["Emergency lockout response", "Clear arrival updates"],
       },
     ],
   },
@@ -730,54 +472,14 @@ export const theme = {
   },
 
   /* ==========================================
-     TRUST INDICATORS
-     ========================================== */
-  trustIndicators: {
-    badges: [
-      {
-        id: "licensed",
-        text: "Licensed & Insured",
-        description: "Fully licensed, bonded, and insured for your protection and peace of mind",
-        icon: "Award",
-      },
-      {
-        id: "emergency-line",
-        text: "24/7 Emergency Line",
-        description: "Our emergency line is answered around the clock, including evenings and weekends",
-        icon: "Clock",
-      },
-      {
-        id: "smart-home",
-        text: "Focused Service Line",
-        description: "Specialized in locksmith work, car lockouts, and garage door repair and installation",
-        icon: "Cpu",
-      },
-      {
-        id: "satisfaction",
-        text: "100% Satisfaction",
-        description: "From install to repair, every job is finished to perfection or we make it right",
-        icon: "Star",
-      },
-    ],
-
-    guarantees: [
-      "Licensed, bonded, and insured",
-      "Upfront communication before work begins",
-      "Quality workmanship guarantee",
-      "100% satisfaction guaranteed",
-      "Professional, courteous service",
-    ],
-  },
-
-  /* ==========================================
      TESTIMONIALS
      ========================================== */
   testimonials: [
     {
-      id: 1,
-      quote: "Fast, professional service when we got locked out at 11 PM. They arrived within 30 minutes and had us back inside quickly. Highly recommend!",
-      author: "Sarah M.",
-      service: "Car Lockout",
+      id: 3,
+      quote: "Reliable and trustworthy. They fixed our garage door issue quickly and explained exactly what needed repair. Quality work at a fair price.",
+      author: "Jennifer L.",
+      service: "Garage Door Repair & Installation",
       rating: 5,
     },
     {
@@ -788,86 +490,20 @@ export const theme = {
       rating: 5,
     },
     {
-      id: 3,
-      quote: "Reliable and trustworthy. They fixed our garage door issue quickly and explained exactly what needed repair. Quality work at a fair price.",
-      author: "Jennifer L.",
-      service: "Garage Door Repair & Installation",
+      id: 1,
+      quote: "Fast, professional service when we got locked out at 11 PM. They arrived within 30 minutes and had us back inside quickly. Highly recommend!",
+      author: "Sarah M.",
+      service: "Car Lockout",
       rating: 5,
     },
   ],
 
   /* ==========================================
-     UI COMPONENTS SETTINGS
-     ========================================== */
-  components: {
-    button: {
-      sizes: {
-        sm: {
-          padding: "0.5rem 1rem",
-          fontSize: "0.875rem",
-          height: "36px",
-        },
-        md: {
-          padding: "0.75rem 1.5rem",
-          fontSize: "1rem",
-          height: "44px",
-        },
-        lg: {
-          padding: "1rem 2rem",
-          fontSize: "1.125rem",
-          height: "52px",
-        },
-      },
-      minWidth: {
-        sm: "80px",
-        md: "120px",
-        lg: "160px",
-      },
-    },
-
-    input: {
-      height: "48px",
-      padding: "0.75rem 1rem",
-      fontSize: "1rem",
-      borderRadius: "0.5rem",
-      borderWidth: "1px",
-      focusRing: "2px",
-      focusOffset: "2px",
-    },
-
-    card: {
-      padding: {
-        sm: "1rem",
-        md: "1.5rem",
-        lg: "2rem",
-      },
-      borderRadius: "0.5rem",
-      borderWidth: "1px",
-      shadow: "md",
-      hoverShadow: "lg",
-    },
-
-    icon: {
-      sm: "1rem",
-      md: "1.5rem",
-      lg: "2rem",
-      xl: "3rem",
-      "2xl": "4rem",
-    },
-  },
-
-  /* ==========================================
      FEATURE FLAGS
      ========================================== */
   features: {
-    darkMode: false,
-    blog: false,
     testimonials: true,
-    liveChat: false,
-    bookingSystem: false,
-    multiLanguage: false,
     analytics: true,
-    cookieConsent: true,
   },
 } as const;
 

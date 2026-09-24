@@ -3,6 +3,7 @@ import { theme } from "@/config/theme";
 import { JsonLd } from "@/components/seo";
 import { breadcrumbNode, withGraph } from "@/lib/jsonld";
 import { buildMetadata } from "@/lib/seo";
+import { PageHero } from "@/components/sections";
 
 export const metadata: Metadata = buildMetadata({
   title: "Privacy Policy | JD Home Services",
@@ -11,29 +12,22 @@ export const metadata: Metadata = buildMetadata({
   path: "/privacy-policy/",
 });
 
-const LAST_UPDATED = "June 30, 2026";
+const LAST_UPDATED = "September 23, 2026";
 
 export default function PrivacyPolicyPage() {
   return (
     <>
       <JsonLd data={withGraph([breadcrumbNode([{ name: "Home", path: "/" }, { name: "Privacy Policy", path: "/privacy-policy/" }])])} />
-      {/* Hero */}
-      <section className="section bg-gradient-primary text-white">
-        <div className="container">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">
-              Privacy Policy
-            </h1>
-            <p className="text-lg text-white/80">
-              How {theme.brand.name} collects, uses, and protects your personal
-              information.
-            </p>
-            <p className="text-sm text-white/60 mt-4">
-              Last updated: {LAST_UPDATED}
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow={`Last updated: ${LAST_UPDATED}`}
+        title="Privacy Policy"
+        subtitle={`How ${theme.brand.name} collects, uses, and protects your personal information.`}
+        hideActions
+        breadcrumbs={[
+          { name: "Home", href: "/" },
+          { name: "Privacy Policy", href: "/privacy-policy/" },
+        ]}
+      />
 
       {/* Content */}
       <section className="section bg-white">
@@ -44,8 +38,8 @@ export default function PrivacyPolicyPage() {
                 {theme.brand.name} (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or
                 &ldquo;our&rdquo;) operates the website{" "}
                 <a href={theme.seo.siteUrl}>{theme.seo.siteUrl}</a> and provides
-                locksmith, car lockout, and garage door repair and installation
-                services in {theme.contact.address.city},{" "}
+                garage door repair and installation, security camera
+                installation, locksmith, and car lockout services in {theme.contact.address.city},{" "}
                 {theme.contact.address.region}, {theme.contact.address.country}.
                 This Privacy Policy explains how we collect, use, disclose, and
                 safeguard your information when you visit our website, contact
@@ -63,7 +57,7 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+              <h2 className="text-2xl text-ink">
                 1. Information We Collect
               </h2>
               <p>
@@ -105,7 +99,7 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+              <h2 className="text-2xl text-ink">
                 2. How We Use Your Information
               </h2>
               <p>We use the information we collect to:</p>
@@ -132,7 +126,7 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+              <h2 className="text-2xl text-ink">
                 3. WhatsApp Messaging Service
               </h2>
               <p>
@@ -183,7 +177,7 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+              <h2 className="text-2xl text-ink">
                 4. How We Share Your Information
               </h2>
               <p>
@@ -195,9 +189,10 @@ export default function PrivacyPolicyPage() {
                 <li>
                   <strong>Service providers</strong> — with trusted third parties
                   that help us operate our business, such as messaging platforms
-                  (WhatsApp/Meta), website hosting, database and storage providers,
-                  and email delivery services, only to the extent needed to
-                  perform their services on our behalf.
+                  (WhatsApp/Meta), website hosting, database and storage providers
+                  (including Google Firebase, which stores quote requests sent
+                  through our website), and email delivery services, only to the
+                  extent needed to perform their services on our behalf.
                 </li>
                 <li>
                   <strong>Legal requirements</strong> — when required to comply
@@ -213,7 +208,7 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+              <h2 className="text-2xl text-ink">
                 5. Data Retention
               </h2>
               <p>
@@ -226,7 +221,7 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+              <h2 className="text-2xl text-ink">
                 6. Data Security
               </h2>
               <p>
@@ -239,7 +234,7 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+              <h2 className="text-2xl text-ink">
                 7. Your Privacy Rights
               </h2>
               <p>
@@ -267,7 +262,7 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+              <h2 className="text-2xl text-ink">
                 8. Children&rsquo;s Privacy
               </h2>
               <p>
@@ -279,7 +274,7 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+              <h2 className="text-2xl text-ink">
                 9. Third-Party Links
               </h2>
               <p>
@@ -291,7 +286,7 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+              <h2 className="text-2xl text-ink">
                 10. Changes to This Privacy Policy
               </h2>
               <p>
@@ -303,7 +298,7 @@ export default function PrivacyPolicyPage() {
             </div>
 
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+              <h2 className="text-2xl text-ink">
                 11. Contact Us
               </h2>
               <p>

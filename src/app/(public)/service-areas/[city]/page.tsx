@@ -27,11 +27,11 @@ export async function generateMetadata({
   const phone = theme.contact.phone.display;
   const description =
     city.slug === "oshawa"
-      ? `Locksmith, 24/7 car lockout, and garage door repair and installation in Oshawa, our home base in Durham Region. Call JD Home Services at ${phone}.`
-      : `Locksmith, 24/7 car lockout, and garage door repair and installation in ${city.name}, served from our Oshawa base. Call JD Home Services at ${phone}.`;
+      ? `Garage door repair and installation and smart security camera systems in Oshawa, our home base. Locksmith and 24/7 car lockout too. Call ${phone}.`
+      : `Garage door repair and installation and smart security camera systems in ${city.name}, served from Oshawa. Locksmith and lockouts too. Call ${phone}.`;
 
   return buildMetadata({
-    title: `${city.name} Locksmith, Car Lockout & Garage Door Services`,
+    title: `${city.name} Garage Door Repair & Security Cameras`,
     description,
     path: `/service-areas/${city.slug}/`,
   });

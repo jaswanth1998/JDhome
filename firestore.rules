@@ -1,0 +1,56 @@
+rules_version = '2';
+
+// Website inquiries: the public site may only CREATE well-formed documents.
+// Nobody can read, edit, or delete them from the browser; view them in the
+// Firebase console (or with the Admin SDK, which bypasses these rules).
+// Keep the field list in sync with src/lib/inquiries/schema.ts + submit.ts.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isShortString(v, min, max) {
+      return v is string && v.size() >= min && v.size() <= max;
+    }
+
+    function validDetails(d) {
+      return d is map
+        && d.keys().hasOnly(['garageIssue', 'propertyType', 'cameraCount', 'cameraFeatures'])
+        && (!('garageIssue' in d) || isShortString(d.garageIssue, 1, 60))
+        && (!('propertyType' in d) || isShortString(d.propertyType, 1, 60))
+        && (!('cameraCount' in d) || isShortString(d.cameraCount, 1, 40))
+        && (!('cameraFeatures' in d) || (d.cameraFeatures is list && d.cameraFeatures.size() <= 10));
+    }
+
+    match /inquiries/{inquiryId} {
+      allow create: if request.resource.data.keys().hasOnly([
+            'service', 'serviceLabel', 'details', 'city', 'timing', 'message',
+            'name', 'phone', 'email', 'preferredContact', 'page', 'status', 'createdAt'
+          ])
+        && request.resource.data.keys().hasAll([
+            'service', 'serviceLabel', 'city', 'timing', 'name', 'phone',
+            'preferredContact', 'status', 'createdAt'
+          ])
+        && request.resource.data['service'] in [
+            'garage-repair', 'garage-install', 'security-cameras', 'locksmith', 'car-lockout', 'other'
+          ]
+        && isShortString(request.resource.data.serviceLabel, 1, 60)
+        && validDetails(request.resource.data.get('details', {}))
+        && isShortString(request.resource.data.city, 1, 60)
+        && isShortString(request.resource.data.timing, 1, 60)
+        && isShortString(request.resource.data.get('message', ''), 0, 1500)
+        && isShortString(request.resource.data.name, 2, 80)
+        && isShortString(request.resource.data.phone, 7, 30)
+        && isShortString(request.resource.data.get('email', ''), 0, 120)
+        && request.resource.data.preferredContact in ['phone', 'text', 'email']
+        && isShortString(request.resource.data.get('page', ''), 0, 200)
+        && request.resource.data.status == 'new'
+        && request.resource.data.createdAt == request.time;
+
+      allow read, update, delete: if false;
+    }
+
+    // Everything else is closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

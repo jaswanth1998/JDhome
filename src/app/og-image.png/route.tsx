@@ -31,7 +31,8 @@ export async function GET() {
               width: "120px",
               height: "120px",
               borderRadius: "28px",
-              backgroundColor: theme.colors.accent.teal,
+              backgroundColor: theme.colors.accent.gold,
+              color: theme.colors.primary.dark,
               fontSize: "56px",
             }}
           >
@@ -47,7 +48,7 @@ export async function GET() {
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ fontSize: "32px" }}>{theme.contact.phone.display}</div>
           <div style={{ marginTop: "12px", fontSize: "26px", opacity: 0.85 }}>
-            Oshawa · Durham Region · Locksmith · Car Lockout · Garage Doors
+            Oshawa · Durham Region · Garage Doors · Security Cameras
           </div>
         </div>
       </div>

@@ -5,9 +5,9 @@ import { buildMetadata } from "@/lib/seo";
 import { AboutPageContent } from "./AboutPageContent";
 
 export const metadata: Metadata = buildMetadata({
-  title: "About JD Home Services | Locksmith & Garage Doors, Oshawa",
+  title: "About JD Home Services | Garage Doors & Cameras, Oshawa",
   description:
-    "JD Home Services is an Oshawa, Ontario team focused on locksmith work, car lockout response, and garage door repair and installation across Durham Region.",
+    "JD Home Services is an Oshawa, Ontario team focused on garage door repair and installation and smart security camera systems across Durham Region.",
   path: "/about/",
 });
 

@@ -1,110 +1,87 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { Phone, FileText, ShieldCheck, Clock, Award } from "lucide-react";
+import { Car, Cctv, CheckCircle2, Phone, Warehouse, Wrench } from "lucide-react";
 import { theme } from "@/config/theme";
-import { Button } from "@/components/ui";
+import { InquiryButton } from "@/components/inquiry";
+import { Photo } from "@/components/ui";
+import type { InquiryService } from "@/lib/inquiries/schema";
 
-const trustBadges = [
-  { icon: ShieldCheck, text: "Licensed & Insured" },
-  { icon: Clock, text: "24/7 Emergency Line" },
-  { icon: Award, text: "100% Satisfaction Guaranteed" },
+const quickPicks: { label: string; service: InquiryService; icon: typeof Wrench }[] = [
+  { label: "Garage door repair", service: "garage-repair", icon: Wrench },
+  { label: "New garage door", service: "garage-install", icon: Warehouse },
+  { label: "Security cameras", service: "security-cameras", icon: Cctv },
+  { label: "Car lockout", service: "car-lockout", icon: Car },
+];
+
+const assurances = [
+  "Free, no-obligation quotes",
+  "Clear options before any work begins",
+  "Safety check on every garage door job",
 ];
 
 export function Hero() {
   return (
-    <section className="relative min-h-[90vh] flex items-center bg-gradient-primary overflow-hidden">
-      <div className="absolute inset-0 opacity-10">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        />
-      </div>
+    <section className="relative isolate overflow-hidden bg-navy-950">
+      <Photo
+        image="heroGarage"
+        priority
+        sizes="100vw"
+        className="absolute inset-0 -z-10 rounded-none"
+        imgClassName="object-[70%_50%]"
+      />
+      {/* Readability overlay: solid navy on the text side, fading toward the photo */}
+      <div
+        className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(6,20,42,0.96)_0%,rgba(6,20,42,0.88)_45%,rgba(6,20,42,0.35)_100%)] max-lg:bg-[linear-gradient(180deg,rgba(6,20,42,0.82)_0%,rgba(6,20,42,0.94)_100%)]"
+        aria-hidden="true"
+      />
 
-      <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary-main)] via-[var(--primary-dark)] to-[var(--primary-main)] opacity-95" />
+      <div className="container py-16 md:py-24 lg:py-28">
+        <div className="max-w-2xl">
+          <p className="eyebrow eyebrow-light mb-5">Oshawa &amp; Durham Region</p>
+          <h1 className="text-balance text-[2.5rem] leading-[1.05] text-white md:text-6xl">
+            Garage doors fixed right. <span className="text-gold-500">Cameras</span> that keep watch.
+          </h1>
+          <p className="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-white/80">
+            Local technicians for garage door repair and installation, and smart CCTV systems with AI detection, PoE
+            wiring, and phone access, for homes and businesses across Durham Region.
+          </p>
 
-      <div className="container relative z-10">
-        <div className="max-w-4xl mx-auto text-center text-white">
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance"
-            style={{ color: "white" }}
-          >
-            Durham&apos;s Trusted{" "}
-            <span className="text-[var(--accent-teal)]">Garage Door Technicians</span>{" "} &
-            Locksmiths.
-          </motion.h1>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <InquiryButton size="lg">Get a free quote</InquiryButton>
+            <a href={`tel:${theme.contact.phone.tel}`} className="btn btn-ghost-light btn-lg">
+              <Phone className="h-[18px] w-[18px]" aria-hidden="true" />
+              {theme.contact.phone.display}
+            </a>
+          </div>
 
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-xl md:text-2xl text-white/80 mb-10"
-          >
-            General Garage door repairs and installation, locksmith services, House and car lockout service across Durham and surrounding areas.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12"
-          >
-            <Button
-              as="a"
-              href={`tel:${theme.contact.phone.tel}`}
-              variant="emergency"
-              icon={Phone}
-              size="lg"
-              className="min-w-[240px]"
-            >
-              Call Now: {theme.contact.phone.display}
-            </Button>
-
-            <Button
-              as="link"
-              href="/contact"
-              variant="primary"
-              icon={FileText}
-              size="lg"
-              className="min-w-[240px]"
-            >
-              Get a Free Quote
-            </Button>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex flex-wrap items-center justify-center gap-6 md:gap-10"
-          >
-            {trustBadges.map((badge, index) => (
-              <div key={index} className="flex items-center gap-2 text-sm text-white/90">
-                <badge.icon className="w-5 h-5 text-[var(--accent-teal)]" />
-                <span>{badge.text}</span>
-              </div>
+          <ul className="mt-8 flex flex-col gap-2.5 text-sm text-white/80 sm:flex-row sm:flex-wrap sm:gap-x-6">
+            {assurances.map((item) => (
+              <li key={item} className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-gold-500" aria-hidden="true" />
+                {item}
+              </li>
             ))}
-          </motion.div>
+          </ul>
         </div>
-      </div>
 
-      <div className="absolute bottom-0 left-0 right-0">
-        <svg
-          className="w-full h-16 md:h-24"
-          viewBox="0 0 1440 100"
-          fill="none"
-          preserveAspectRatio="none"
-        >
-          <path
-            d="M0 50L48 45.7C96 41.3 192 32.7 288 30.2C384 27.7 480 31.3 576 39.2C672 47 768 59 864 59C960 59 1056 47 1152 41.3C1248 35.7 1344 36.3 1392 36.7L1440 37V100H1392C1344 100 1248 100 1152 100C1056 100 960 100 864 100C768 100 672 100 576 100C480 100 384 100 288 100C192 100 96 100 48 100H0V50Z"
-            fill="white"
-          />
-        </svg>
+        {/* Quick start */}
+        <div className="mt-12 max-w-3xl rounded-[var(--radius-xl)] border border-white/10 bg-white/[0.06] p-4 backdrop-blur-md md:mt-16 md:p-5">
+          <p className="mb-3 px-1 text-sm font-semibold text-white">What can we help with?</p>
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+            {quickPicks.map(({ label, service, icon: Icon }) => (
+              <InquiryButton
+                key={service}
+                service={service}
+                variant="ghost-light"
+                icon={null}
+                className="!justify-start !whitespace-normal !px-3 !py-3 text-left"
+              >
+                <span className="flex items-center gap-2.5">
+                  <Icon className="h-[18px] w-[18px] flex-shrink-0 text-gold-500" aria-hidden="true" />
+                  {label}
+                </span>
+              </InquiryButton>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );

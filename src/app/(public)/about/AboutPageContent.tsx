@@ -1,55 +1,39 @@
-"use client";
-
 import Link from "next/link";
-import { motion } from "framer-motion";
-import {
-  ShieldCheck,
-  Award,
-  Clock,
-  Users,
-  MapPin,
-  Phone,
-  ArrowRight,
-  CheckCircle,
-} from "lucide-react";
+import { CheckCircle2, ClipboardCheck, Handshake, MessageSquareText, ShieldCheck } from "lucide-react";
 import { theme, type ServiceCity } from "@/config/theme";
-import { Button, SectionHeading } from "@/components/ui";
-import { FinalCTA } from "@/components/sections";
+import { FinalCTA, PageHero } from "@/components/sections";
+import { Photo, Reveal, SectionHeading } from "@/components/ui";
 
-const whyChooseUs = [
+const principles = [
+  {
+    icon: MessageSquareText,
+    title: "Straight answers",
+    body: "We explain what we find in plain language and give you options before any work begins.",
+  },
+  {
+    icon: ClipboardCheck,
+    title: "Tested before we leave",
+    body: "Garage doors get a safety and balance check; camera systems get a full walkthrough on your phone.",
+  },
+  {
+    icon: Handshake,
+    title: "No overselling",
+    body: "If a repair makes more sense than a replacement, or two cameras will do instead of six, we'll say so.",
+  },
   {
     icon: ShieldCheck,
-    title: "Licensed & Insured",
-    description:
-      "Fully licensed, bonded, and insured for your protection and peace of mind.",
-  },
-  {
-    icon: Clock,
-    title: "24/7 Emergency Line",
-    description:
-      "Our emergency line is answered around the clock for car lockouts.",
-  },
-  {
-    icon: Award,
-    title: "Expert Technicians",
-    description:
-      "Skilled professionals with practical experience in locksmith and garage door service.",
-  },
-  {
-    icon: Users,
-    title: "Customer Focused",
-    description:
-      "Dedicated to providing exceptional service and complete satisfaction.",
+    title: "Respect for your property",
+    body: "Clean, tidy installs with cabling done properly and the work area left the way we found it.",
   },
 ];
 
 const values = [
   "Integrity in every interaction",
-  "Quality workmanship guaranteed",
-  "Transparent and fair pricing",
+  "Quality workmanship",
+  "Transparent, upfront communication",
   "Practical recommendations based on real needs",
-  "Commitment to customer satisfaction",
   "Respect for your property and time",
+  "Follow-through after the job is done",
 ];
 
 const serviceCities: readonly ServiceCity[] = theme.serviceCities;
@@ -57,274 +41,113 @@ const serviceCities: readonly ServiceCity[] = theme.serviceCities;
 export function AboutPageContent() {
   return (
     <>
-      <section className="section bg-gradient-primary text-white">
-        <div className="container">
-          <div className="max-w-3xl mx-auto text-center">
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-4xl md:text-5xl font-bold mb-6 text-white"
-            >
-              Trusted Locksmith Services in Durham and surrounding areas
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-lg md:text-xl text-white/80"
-            >
-              Focused on locksmith work, car lockout response, and garage door
-              repair and installation
-            </motion.p>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="About us"
+        title="A local team for garage doors and home security"
+        subtitle="JD Home Services is based in Oshawa and focused on two things: garage doors that run safely and smoothly, and security camera systems people can rely on."
+        image="modernHome"
+        breadcrumbs={[
+          { name: "Home", href: "/" },
+          { name: "About", href: "/about/" },
+        ]}
+      />
 
       <section className="section bg-white">
         <div className="container">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6 }}
-            >
-              <span className="inline-block px-4 py-1 rounded-full bg-[var(--accent-teal)]/10 text-[var(--accent-teal)] text-sm font-medium mb-4">
-                Our Story
-              </span>
-
-              <h2 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-6">
-                {theme.brand.tagline}
-              </h2>
-
-              <div className="space-y-4 text-[var(--text-secondary)] leading-relaxed">
+          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+            <div>
+              <SectionHeading eyebrow="Our story" title={theme.brand.tagline} />
+              <div className="mt-6 space-y-4 text-lg leading-relaxed text-ink-2">
                 <p>
-                  {theme.brand.name} was founded with a simple mission: provide
-                  Oshawa residents with trustworthy, professional service they
-                  can rely on. From lock changes and rekeying to urgent car
-                  lockouts, we treat every job with the same dedication to
-                  quality and customer satisfaction.
+                  {theme.brand.name} was founded with a simple mission: give Durham Region homeowners and businesses
+                  trustworthy, professional service they can rely on, with the same care on every job.
                 </p>
                 <p>
-                  We have built our service around three core needs customers
-                  call for most often: dependable locksmith work, rapid vehicle
-                  lockout help, and garage door repair and installation.
-                  Whether you need a lock changed, a car opened, or a garage
-                  door system repaired, we deliver results that are finished to
-                  perfection.
+                  Today our work centres on garage door repair and installation, and on smart security camera systems
+                  with AI detection, PoE wiring, local recording, and phone access. We also help with locksmith work and
+                  24/7 car lockouts, so one call covers the doors, locks, and cameras that keep a property secure.
                 </p>
                 <p>
-                  Our commitment to ongoing training and practical field
-                  experience helps us provide the right solution for your home,
-                  business, or vehicle without overselling work you do not need.
+                  Ongoing training and practical field experience help us recommend the right solution for your home or
+                  business without selling you work you don&apos;t need.
                 </p>
               </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6 }}
-              className="relative"
-            >
-              <div className="relative aspect-square max-w-md mx-auto">
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[var(--primary-main)] to-[var(--accent-teal)] opacity-10" />
-                <div className="relative h-full flex items-center justify-center">
-                  <div className="w-48 h-48 md:w-64 md:h-64 rounded-full bg-[var(--primary-main)] flex items-center justify-center text-white">
-                    <div className="text-center">
-                      <div className="text-5xl md:text-6xl font-bold">JD</div>
-                      <div className="text-sm md:text-base mt-2 text-white/80">
-                        Home Services
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Photo
+                image="garageService"
+                aspect={3 / 4}
+                sizes="(min-width: 1024px) 280px, 50vw"
+                className="aspect-[3/4]"
+              />
+              <Photo
+                image="cctvWall"
+                aspect={3 / 4}
+                sizes="(min-width: 1024px) 280px, 50vw"
+                className="mt-10 aspect-[3/4]"
+              />
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="section bg-[var(--bg-secondary)]">
+      <section className="section bg-paper-cool">
         <div className="container">
           <SectionHeading
-            title="Why Choose Us"
-            subtitle="We are committed to delivering exceptional service with integrity and professionalism."
+            align="center"
+            eyebrow="How we work"
+            title="What you can expect from us"
+            subtitle="The same standards on every job, whether it's a noisy garage door or an eight-camera install."
           />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {whyChooseUs.map((item, index) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="text-center"
+          <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {principles.map(({ icon: Icon, title, body }, i) => (
+              <Reveal
+                as="li"
+                key={title}
+                delay={i * 0.06}
+                className="rounded-[var(--radius-lg)] border border-line bg-white p-6"
               >
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--accent-teal)]/10 flex items-center justify-center">
-                  <item.icon className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
-                  {item.title}
-                </h3>
-                <p className="text-sm text-[var(--text-secondary)]">
-                  {item.description}
-                </p>
-              </motion.div>
+                <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-navy-800 text-gold-500">
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <h3 className="text-lg text-ink">{title}</h3>
+                <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-2">{body}</p>
+              </Reveal>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
 
       <section className="section bg-white">
         <div className="container">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { icon: ShieldCheck, label: "Trusted" },
-                  { icon: Award, label: "Professional" },
-                  { icon: Clock, label: "Reliable" },
-                  { icon: Users, label: "Dedicated" },
-                ].map((item, index) => (
-                  <motion.div
-                    key={item.label}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                    className="aspect-square rounded-2xl bg-[var(--bg-secondary)] flex flex-col items-center justify-center p-6"
-                  >
-                    <item.icon className="w-12 h-12 text-[var(--accent-teal)] mb-3" />
-                    <span className="font-semibold text-[var(--text-primary)]">
-                      {item.label}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.6 }}
-            >
-              <span className="inline-block px-4 py-1 rounded-full bg-[var(--accent-teal)]/10 text-[var(--accent-teal)] text-sm font-medium mb-4">
-                Our Values
-              </span>
-
-              <h2 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-6">
-                What We Stand For
-              </h2>
-
-              <ul className="space-y-4">
-                {values.map((value, index) => (
-                  <motion.li
-                    key={index}
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                    className="flex items-center gap-3"
-                  >
-                    <CheckCircle className="w-5 h-5 text-[var(--accent-teal)] flex-shrink-0" />
-                    <span className="text-[var(--text-secondary)]">{value}</span>
-                  </motion.li>
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+            <div>
+              <SectionHeading eyebrow="Our values" title="What we stand for" />
+              <ul className="mt-8 grid gap-4 sm:grid-cols-2">
+                {values.map((value) => (
+                  <li key={value} className="flex items-start gap-3 text-ink-2">
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-gold-600" aria-hidden="true" />
+                    {value}
+                  </li>
                 ))}
               </ul>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      <section className="section bg-[var(--primary-main)] text-white">
-        <div className="container">
-          <div className="text-center max-w-3xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5 }}
-              className="w-16 h-16 mx-auto mb-6 rounded-full bg-white/10 flex items-center justify-center"
-            >
-              <MapPin className="w-8 h-8 text-[var(--accent-teal)]" />
-            </motion.div>
-
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-3xl md:text-4xl font-bold mb-4 text-white"
-            >
-              Our Service Area
-            </motion.h2>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-lg text-white/80 mb-8"
-            >
-              Proudly serving Oshawa and communities throughout Durham Region
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex flex-wrap items-center justify-center gap-4 mb-10"
-            >
-              {serviceCities.map((city) => (
-                <Link
-                  key={city.slug}
-                  href={city.core ? `/service-areas/${city.slug}/` : "/service-areas/"}
-                  className="px-4 py-2 rounded-full bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors"
-                >
-                  {city.name}
-                </Link>
-              ))}
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4"
-            >
-              <Button
-                as="a"
-                href={`tel:${theme.contact.phone.tel}`}
-                variant="emergency"
-                icon={Phone}
-                size="lg"
-              >
-                Call: {theme.contact.phone.display}
-              </Button>
-
-              <Button
-                as="link"
-                href="/contact/"
-                variant="primary"
-                icon={ArrowRight}
-                iconPosition="right"
-                size="lg"
-              >
-                Get in Touch
-              </Button>
-            </motion.div>
+            </div>
+            <div className="rounded-[var(--radius-xl)] bg-navy-900 p-8 text-white md:p-10">
+              <p className="eyebrow eyebrow-light mb-4">Service area</p>
+              <h2 className="text-2xl text-white md:text-3xl">Proudly serving Oshawa and Durham Region</h2>
+              <ul className="mt-6 flex flex-wrap gap-2">
+                {serviceCities.map((city) => (
+                  <li key={city.slug}>
+                    <Link
+                      href={city.core ? `/service-areas/${city.slug}/` : "/service-areas/"}
+                      className="block rounded-full border border-white/15 px-3 py-1.5 text-sm text-white/85 transition-colors hover:border-gold-500 hover:text-gold-500"
+                    >
+                      {city.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </section>

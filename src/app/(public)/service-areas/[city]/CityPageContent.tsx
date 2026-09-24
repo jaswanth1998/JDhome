@@ -1,17 +1,16 @@
 import Link from "next/link";
-import { ArrowRight, Clock, MapPin, Phone } from "lucide-react";
+import { Clock, MapPin, Phone } from "lucide-react";
 import { theme, type ServiceCity } from "@/config/theme";
 import { coreCities } from "@/lib/seo";
-import { Breadcrumbs, ServiceCard } from "@/components/ui";
-import { FinalCTA } from "@/components/sections";
+import { InquiryButton } from "@/components/inquiry";
+import { SectionHeading, ServiceCard } from "@/components/ui";
+import { FinalCTA, PageHero } from "@/components/sections";
+import { GuidesStrip } from "@/components/blog";
+import { getPost } from "@/lib/blog";
 
-const sectionHeading =
-  "text-3xl md:text-4xl font-bold text-[var(--text-primary)]";
+const cityGuideSlugs = ["garage-door-wont-open", "where-to-place-security-cameras", "winter-garage-door-maintenance-ontario"];
 
-const inlineLink =
-  "text-[var(--accent-teal)] underline underline-offset-2 hover:text-[var(--accent-teal-hover)] transition-colors";
-// Inline colour because the global `a { color: inherit }` rule is unlayered and beats text utilities.
-const inlineLinkStyle = { color: "var(--accent-teal)" };
+const inlineLink = "font-semibold text-navy-700 underline underline-offset-2 hover:text-navy-900";
 
 interface CityPageContentProps {
   city: ServiceCity;
@@ -24,9 +23,11 @@ export function CityPageContent({ city }: CityPageContentProps) {
     oshawa: "Because we are based right here in Oshawa, you are calling your local team directly.",
     whitby: "Whitby is a short drive west of our Oshawa base, so booking a visit is straightforward.",
     ajax: "For Ajax jobs we head west along Highway 401 from Oshawa, so calling ahead with your address helps us plan the trip.",
-    pickering: "Pickering is the farthest west of our core Durham communities, so please share your location when you call so we can plan the drive from Oshawa.",
+    pickering:
+      "Pickering is the farthest west of our core Durham communities, so please share your location when you call so we can plan the drive from Oshawa.",
     courtice: "Courtice sits right next door to Oshawa, so it is one of the shortest trips we make.",
-    bowmanville: "For Bowmanville and the rest of Clarington we travel east from Oshawa along Highway 401, so let us know your address when you call.",
+    bowmanville:
+      "For Bowmanville and the rest of Clarington we travel east from Oshawa along Highway 401, so let us know your address when you call.",
   };
   const bookingLead = bookingLeads[city.slug] ?? `We are happy to help in ${city.name}.`;
   const nearbyCities = coreCities.filter((other) => other.slug !== city.slug);
@@ -34,150 +35,82 @@ export function CityPageContent({ city }: CityPageContentProps) {
 
   return (
     <>
-      {/* Hero */}
-      <section className="section bg-gradient-primary text-white">
-        <div className="container">
-          <Breadcrumbs
-            light
-            className="mb-8"
-            items={[
-              { name: "Home", href: "/" },
-              { name: "Service Areas", href: "/service-areas/" },
-              { name: city.name, href: `/service-areas/${city.slug}/` },
-            ]}
-          />
+      <PageHero
+        eyebrow={city.region}
+        title={`Garage Door & Security Camera Services in ${city.name}`}
+        subtitle={city.blurb}
+        image="garageHome"
+        breadcrumbs={[
+          { name: "Home", href: "/" },
+          { name: "Service Areas", href: "/service-areas/" },
+          { name: city.name, href: `/service-areas/${city.slug}/` },
+        ]}
+      />
 
-          <div className="max-w-3xl">
-            <h1
-              className="text-4xl md:text-5xl font-bold mb-6"
-              style={{ color: "white" }}
-            >
-              Locksmith, Car Lockout &amp; Garage Door Services in {city.name}
-            </h1>
-
-            {city.blurb && (
-              <p className="text-lg md:text-xl text-white/80 mb-8">
-                {city.blurb}
-              </p>
-            )}
-
-            <div className="flex flex-wrap gap-4">
-              <a href={`tel:${phone.tel}`} className="btn btn-emergency btn-lg">
-                <Phone className="w-5 h-5" aria-hidden="true" />
-                <span>Call Now: {phone.display}</span>
-              </a>
-              <Link href="/contact/" className="btn btn-primary btn-lg">
-                <span>Get a Free Quote</span>
-                <ArrowRight className="w-5 h-5" aria-hidden="true" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* What we do here + how to reach us */}
       <section className="section bg-white">
         <div className="container">
-          <div className="grid lg:grid-cols-3 gap-12 items-start">
+          <div className="grid items-start gap-12 lg:grid-cols-3">
             <div className="lg:col-span-2">
-              <h2 className={`${sectionHeading} mb-6`}>
-                What We Do in {city.name}
-              </h2>
-              <div className="space-y-5 text-lg text-[var(--text-secondary)] leading-relaxed">
+              <SectionHeading eyebrow="Local service" title={`What we do in ${city.name}`} />
+              <div className="mt-6 space-y-5 text-lg leading-relaxed text-ink-2">
                 <p>
                   {isHomeBase
-                    ? "Oshawa is our home base, so it is where we handle all three of our services most often."
-                    : `In ${city.name}, we provide the same three services we offer at home in Oshawa.`}{" "}
-                  That means residential and commercial locksmith work such as
-                  lock changes, rekeying, lock repair, and new deadbolt and
-                  entry hardware for houses, rental units, offices, and
-                  storefronts; 24/7 car lockout help with damage-free entry
-                  whenever possible; and garage door repair and installation,
-                  including track, roller, cable, and opener work backed by
-                  safety and balance checks.
+                    ? "Oshawa is our home base, so it is where we handle our services most often."
+                    : `In ${city.name}, we provide the same services we offer at home in Oshawa.`}{" "}
+                  That starts with garage door repair and installation, including spring, cable, track, roller, and
+                  opener work backed by safety and balance checks, and smart security camera systems with AI detection,
+                  PoE wiring, local recording, and phone access for homes and businesses. We also offer residential and
+                  commercial locksmith work and 24/7 car lockout help as add-on services.
                 </p>
                 <p>
                   {bookingLead} To book a visit or ask a question, call us at{" "}
-                  <a
-                    href={`tel:${phone.tel}`}
-                    className={inlineLink}
-                    style={inlineLinkStyle}
-                  >
+                  <a href={`tel:${phone.tel}`} className={inlineLink}>
                     {phone.display}
                   </a>{" "}
-                  or send a message through our{" "}
-                  <Link
-                    href="/contact/"
-                    className={inlineLink}
-                    style={inlineLinkStyle}
-                  >
+                  or send a request through our{" "}
+                  <Link href="/contact/" className={inlineLink}>
                     contact page
                   </Link>
-                  . Regular hours are {hours.regular.display}, and car lockout
-                  help is available 24/7. When you call, we confirm your
-                  location and give you a clear arrival estimate before we head
-                  out.
+                  . Regular hours are {hours.regular.display}, and car lockout help is available 24/7. When you call, we
+                  confirm your location and give you a clear arrival estimate before we head out.
                 </p>
               </div>
             </div>
 
-            <aside className="rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-light)] p-6">
-              <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
-                Reach Us
-              </h3>
-              <ul className="space-y-4 text-[var(--text-secondary)]">
+            <aside className="rounded-[var(--radius-xl)] border border-line bg-paper-warm p-7">
+              <h2 className="text-lg text-ink">Reach us</h2>
+              <ul className="mt-5 space-y-4 text-ink-2">
                 <li className="flex items-start gap-3">
-                  <Phone
-                    className="w-5 h-5 mt-0.5 text-[var(--accent-teal)] flex-shrink-0"
-                    aria-hidden="true"
-                  />
-                  <a
-                    href={`tel:${phone.tel}`}
-                    className="font-medium text-[var(--text-primary)] hover:text-[var(--accent-teal)] transition-colors"
-                  >
+                  <Phone className="mt-0.5 h-5 w-5 flex-shrink-0 text-gold-600" aria-hidden="true" />
+                  <a href={`tel:${phone.tel}`} className="font-semibold text-ink hover:text-navy-700">
                     {phone.display}
                   </a>
                 </li>
                 <li className="flex items-start gap-3">
-                  <Clock
-                    className="w-5 h-5 mt-0.5 text-[var(--accent-teal)] flex-shrink-0"
-                    aria-hidden="true"
-                  />
-                  <div>
-                    <p>{hours.regular.display}</p>
-                    <p className="text-[var(--accent-orange)] font-medium">
-                      24/7 for car lockouts
-                    </p>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <MapPin
-                    className="w-5 h-5 mt-0.5 text-[var(--accent-teal)] flex-shrink-0"
-                    aria-hidden="true"
-                  />
+                  <Clock className="mt-0.5 h-5 w-5 flex-shrink-0 text-gold-600" aria-hidden="true" />
                   <span>
-                    {isHomeBase
-                      ? "Based in Oshawa, Durham Region"
-                      : `Serving ${city.name} from our Oshawa base`}
+                    {hours.regular.display}
+                    <br />
+                    <span className="text-sm text-ink-3">{hours.emergency.display}</span>
                   </span>
                 </li>
+                <li className="flex items-start gap-3">
+                  <MapPin className="mt-0.5 h-5 w-5 flex-shrink-0 text-gold-600" aria-hidden="true" />
+                  <span>{isHomeBase ? "Based in Oshawa, Durham Region" : `Serving ${city.name} from our Oshawa base`}</span>
+                </li>
               </ul>
-              <Link href="/contact/" className="btn btn-primary w-full mt-6">
-                <span>Request a Quote</span>
-                <ArrowRight className="w-5 h-5" aria-hidden="true" />
-              </Link>
+              <InquiryButton variant="navy" fullWidth className="mt-7">
+                Request a quote
+              </InquiryButton>
             </aside>
           </div>
         </div>
       </section>
 
-      {/* Services available here */}
-      <section className="section bg-[var(--bg-secondary)]">
+      <section className="section bg-paper-cool">
         <div className="container">
-          <h2 className={`${sectionHeading} mb-8 text-center`}>
-            Services Available in {city.name}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <SectionHeading eyebrow="Services" title={`Services available in ${city.name}`} />
+          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {theme.services.categories.map((service) => (
               <ServiceCard
                 key={service.id}
@@ -185,7 +118,7 @@ export function CityPageContent({ city }: CityPageContentProps) {
                 name={service.name}
                 shortDescription={service.shortDescription}
                 icon={service.icon}
-                color={service.color}
+                image={service.image}
                 badge={"badge" in service ? service.badge : undefined}
               />
             ))}
@@ -193,35 +126,43 @@ export function CityPageContent({ city }: CityPageContentProps) {
         </div>
       </section>
 
-      {/* Nearby areas */}
       <section className="section bg-white">
         <div className="container">
-          <div className="text-center max-w-3xl mx-auto">
-            <h2 className={`${sectionHeading} mb-4`}>Nearby Areas</h2>
-            <p className="text-lg text-[var(--text-secondary)] mb-8">
-              We also serve these Durham Region communities from Oshawa.
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              {nearbyCities.map((other) => (
+          <SectionHeading
+            align="center"
+            eyebrow="Nearby"
+            title="Nearby areas"
+            subtitle="We also serve these Durham Region communities from Oshawa."
+          />
+          <ul className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            {nearbyCities.map((other) => (
+              <li key={other.slug}>
                 <Link
-                  key={other.slug}
                   href={`/service-areas/${other.slug}/`}
-                  className="px-4 py-2 rounded-full bg-[var(--bg-secondary)] text-[var(--text-primary)] text-sm font-medium hover:bg-[var(--border-medium)] transition-colors"
+                  className="flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-navy-600"
                 >
+                  <MapPin className="h-4 w-4 text-gold-600" aria-hidden="true" />
                   {other.name}
                 </Link>
-              ))}
+              </li>
+            ))}
+            <li>
               <Link
                 href="/service-areas/"
-                className="px-4 py-2 rounded-full bg-[var(--accent-teal)] text-white text-sm font-medium hover:bg-[var(--accent-teal-hover)] transition-colors"
-                style={{ color: "white" }}
+                className="block rounded-full bg-navy-800 px-4 py-2 text-sm font-medium text-white hover:bg-navy-700"
               >
                 All service areas
               </Link>
-            </div>
-          </div>
+            </li>
+          </ul>
         </div>
       </section>
+
+      <GuidesStrip
+        posts={cityGuideSlugs.map(getPost).filter((post) => post !== undefined)}
+        title={`Guides for ${city.name} homeowners`}
+        className="section bg-paper-warm"
+      />
 
       <FinalCTA />
     </>
