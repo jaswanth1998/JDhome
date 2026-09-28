@@ -480,6 +480,116 @@
     object-fit: cover;
   }
 
+  /* Call-to-action attention effects (disabled by the reduced-motion rule below) */
+  .cta-shine {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .cta-shine::after {
+    content: "";
+    position: absolute;
+    inset: -2px auto -2px 0;
+    width: 45%;
+    z-index: -1;
+    background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0.55) 50%, transparent 100%);
+    transform: translateX(-160%) skewX(-18deg);
+    animation: cta-shine 4.5s ease-in-out 1.2s infinite;
+    pointer-events: none;
+  }
+
+  .cta-pulse {
+    animation: cta-pulse 2.6s ease-out 0.8s infinite;
+  }
+
+  .cta-pulse:hover,
+  .cta-pulse:focus-visible {
+    animation: none;
+  }
+
+  /* Hero entrance: pure CSS so it plays before JavaScript loads */
+  .anim-rise {
+    animation: hero-rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.25s both;
+  }
+
+  .anim-pop {
+    /* `backwards` (not `both`): once finished, framer-motion's highlight scale takes over */
+    animation: hero-pop 0.45s cubic-bezier(0.2, 1.3, 0.4, 1) backwards;
+  }
+
+  /* Gentle "tap me" nudge every few seconds; the arrow flicks forward with it */
+  .cta-nudge {
+    animation: cta-nudge 5s ease-in-out 2.2s infinite;
+  }
+
+  .cta-nudge svg {
+    animation: cta-nudge-arrow 5s ease-in-out 2.2s infinite;
+  }
+
+  .cta-nudge:hover,
+  .cta-nudge:hover svg,
+  .cta-nudge:focus-visible,
+  .cta-nudge:focus-visible svg {
+    animation: none;
+  }
+
+  /*
+   * "Tap here" hint for the sticky mobile quote button: every 5.5 s a hand slides in and
+   * taps the button, the button presses and springs back, a ripple splashes from the
+   * fingertip and a gold ring bursts outward. All four share one timeline.
+   */
+  .tap-hint {
+    --tap-cycle: 5.5s;
+    --tap-delay: 3s;
+  }
+
+  .tap-hint .tap-hint-button {
+    position: relative;
+    overflow: hidden;
+    animation: tap-press var(--tap-cycle) ease-in-out var(--tap-delay) infinite;
+  }
+
+  .tap-hint .tap-hint-ripple {
+    position: absolute;
+    left: calc(91% - 30px);
+    top: calc(50% - 10px);
+    width: 24px;
+    height: 24px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.75);
+    opacity: 0;
+    pointer-events: none;
+    animation: tap-ripple var(--tap-cycle) ease-out var(--tap-delay) infinite;
+  }
+
+  .tap-hint .tap-hint-hand {
+    position: absolute;
+    right: 9%;
+    top: 50%;
+    z-index: 1;
+    width: 30px;
+    height: 30px;
+    fill: #fff;
+    stroke: var(--navy-900);
+    stroke-width: 1.75;
+    filter: drop-shadow(0 3px 4px rgba(8, 27, 51, 0.35));
+    opacity: 0;
+    pointer-events: none;
+    animation: tap-hand var(--tap-cycle) ease-in-out var(--tap-delay) infinite;
+  }
+
+  /* Hidden until the hint runs (and after the visitor has tapped) */
+  .tap-hint-hand,
+  .tap-hint-ripple {
+    display: none;
+  }
+
+  .tap-hint .tap-hint-hand,
+  .tap-hint .tap-hint-ripple {
+    display: block;
+  }
+
   /* Long-form guide articles (direct children only, so embedded widgets keep their own styles) */
   .prose-article {
     font-size: 1.0625rem;
@@ -632,6 +742,153 @@
   border-right-color: currentColor;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
+}
+
+@keyframes cta-shine {
+  0% {
+    transform: translateX(-160%) skewX(-18deg);
+  }
+  35%,
+  100% {
+    transform: translateX(320%) skewX(-18deg);
+  }
+}
+
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes hero-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cta-nudge {
+  0%,
+  14%,
+  100% {
+    transform: none;
+    box-shadow: none;
+  }
+  3% {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 12px 24px -10px rgba(217, 169, 58, 0.7);
+  }
+  6% {
+    transform: translateY(0) scale(0.98);
+  }
+  9% {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 8px 18px -10px rgba(217, 169, 58, 0.6);
+  }
+}
+
+@keyframes cta-nudge-arrow {
+  0%,
+  14%,
+  100% {
+    transform: none;
+  }
+  4%,
+  10% {
+    transform: translateX(5px);
+  }
+  7% {
+    transform: translateX(1px);
+  }
+}
+
+/* Tap hint timeline (5.5 s): hand in 0-9%, tap at ~12%, hand out by 30% */
+@keyframes tap-hand {
+  0% {
+    opacity: 0;
+    transform: translate(18px, 22px) rotate(-12deg);
+  }
+  8% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(-12deg);
+  }
+  11% {
+    transform: translate(0, 2px) rotate(-12deg) scale(0.86);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(-12deg) scale(1);
+  }
+  24% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(-12deg);
+  }
+  32%,
+  100% {
+    opacity: 0;
+    transform: translate(12px, 18px) rotate(-12deg);
+  }
+}
+
+@keyframes tap-press {
+  0%,
+  10%,
+  24%,
+  100% {
+    transform: none;
+    box-shadow: 0 0 0 0 rgba(217, 169, 58, 0);
+  }
+  12% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(217, 169, 58, 0.7);
+  }
+  16% {
+    transform: scale(1.04);
+  }
+  19% {
+    transform: scale(1);
+  }
+  23% {
+    box-shadow: 0 0 0 12px rgba(217, 169, 58, 0);
+  }
+}
+
+@keyframes tap-ripple {
+  0%,
+  11% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  12% {
+    opacity: 0.9;
+    transform: scale(0.4);
+  }
+  26%,
+  100% {
+    opacity: 0;
+    transform: scale(9);
+  }
+}
+
+@keyframes cta-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(217, 169, 58, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(217, 169, 58, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(217, 169, 58, 0);
+  }
 }
 
 @keyframes spin {

@@ -54,7 +54,7 @@ With cloud recording, each camera uploads video over your internet connection to
 
 ## How long does an NVR keep footage?
 
-It depends on drive size, number of cameras, resolution, and whether recording is continuous or event-based. Modern compression formats (such as H.265) stretch storage significantly. When the drive fills up, the NVR overwrites the oldest footage automatically. We size the storage so you keep a sensible number of days for your needs.
+It depends on drive size, number of cameras, resolution, and whether recording is continuous or event-based. Modern cameras shrink their video files (using formats such as H.265), so a drive holds far more footage than it used to. When the drive fills up, the NVR overwrites the oldest footage automatically. We size the storage so you keep a sensible number of days for your needs.
 
 [[cta]]
 

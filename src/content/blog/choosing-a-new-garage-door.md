@@ -44,7 +44,7 @@ Insulation affects comfort, noise, and how solid the door feels.
 - **Polystyrene-insulated** doors add insulating panels inside the steel.
 - **Polyurethane-insulated** doors have foam injected between steel layers, bonding them into a stiffer, quieter door with a higher insulating value.
 
-For attached garages in our climate, an insulated door is usually worth it. Look at the door's R-value when comparing, and remember good weatherstripping matters too.
+For attached garages in our climate, an insulated door is usually worth it. Look at the door's R-value (its insulation rating; higher means warmer) when comparing, and remember good weatherstripping matters too.
 
 ## 4. Pick a style
 
@@ -83,7 +83,7 @@ A professional installation from our [garage door installation service](/service
 2. Removing and disposing of the old door
 3. Installing sections, tracks, springs, and hardware
 4. Setting up or installing the opener
-5. Balancing the door and adjusting travel limits
+5. Balancing the door and setting how far it opens and closes
 6. Testing safety sensors and the auto-reverse
 7. Walking you through the new door and remotes
 

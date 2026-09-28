@@ -6,7 +6,7 @@ import { theme, type ServiceCity } from "@/config/theme";
  * page content changes so sitemap <lastmod> stays honest instead of using the
  * build time on every deploy.
  */
-export const SITE_CONTENT_UPDATED = "2026-09-23";
+export const SITE_CONTENT_UPDATED = "2026-09-28";
 
 /** Canonical site origin, without a trailing slash. */
 export const SITE_URL = theme.seo.siteUrl;

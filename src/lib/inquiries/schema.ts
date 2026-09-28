@@ -11,7 +11,7 @@ import { theme } from "@/config/theme";
 export const INQUIRY_SERVICES = [
   { value: "garage-repair", label: "Garage door repair", hint: "Stuck, noisy, off-track, springs, openers", group: "garage" },
   { value: "garage-install", label: "New garage door", hint: "Replacement or new installation", group: "garage" },
-  { value: "security-cameras", label: "Security cameras", hint: "CCTV, smart AI cameras, PoE systems", group: "cameras" },
+  { value: "security-cameras", label: "Security cameras", hint: "New camera system or upgrade", group: "cameras" },
   { value: "locksmith", label: "Locksmith", hint: "Lock changes, rekeying, hardware", group: "other" },
   { value: "car-lockout", label: "Car lockout", hint: "Locked out of your vehicle", group: "other" },
   { value: "other", label: "Something else", hint: "Tell us what you need", group: "other" },
@@ -35,12 +35,12 @@ export const PROPERTY_TYPES = ["House", "Rental / multi-unit", "Business / offic
 export const CAMERA_COUNTS = ["1–2 cameras", "3–4 cameras", "5–8 cameras", "9+ cameras", "Not sure yet"] as const;
 
 export const CAMERA_FEATURES = [
-  "AI person detection",
-  "Search footage by description",
+  "Alerts for people and cars",
+  "Easy footage search",
   "View on my phone",
-  "Local recording (NVR)",
-  "PoE wired cameras",
-  "360° / PTZ cameras",
+  "Recorder at my property",
+  "Wired cameras (most reliable)",
+  "Wide-view or turn-and-zoom cameras",
   "Doorbell camera",
 ] as const;
 

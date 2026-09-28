@@ -136,7 +136,7 @@ export default async function BlogPostPage({ params }: PostPageProps) {
                 <div>
                   <p className="font-semibold text-ink">Written by the {theme.brand.name} team</p>
                   <p className="mt-1 text-[0.9375rem] leading-relaxed text-ink-2">
-                    We&apos;re a local Oshawa team that repairs and installs garage doors and security camera systems
+                    We&apos;re a local team that repairs and installs garage doors and security camera systems
                     across Durham Region. These guides answer the questions we hear most on the job.{" "}
                     <Link href="/about/" className="font-semibold text-navy-700 underline underline-offset-2">
                       More about us
@@ -166,7 +166,7 @@ export default async function BlogPostPage({ params }: PostPageProps) {
               <div className="rounded-[var(--radius-lg)] bg-navy-900 p-6 text-white">
                 <p className="font-[family-name:var(--font-heading)] text-lg font-bold text-white">Need a hand?</p>
                 <p className="mt-2 text-sm leading-relaxed text-white/75">
-                  Get a free, no-obligation quote from our Oshawa-based team.
+                  Get a free, no-obligation quote from our local team.
                 </p>
                 <InquiryButton service={inquiryService} fullWidth className="mt-5">
                   Get a free quote

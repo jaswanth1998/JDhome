@@ -25,7 +25,7 @@ If the wall button works but the remote doesn't, start here. Replace the remote 
 
 ## 2. The opener isn't getting power
 
-Check that the opener is plugged in and that the outlet has power. Plug a lamp or phone charger into the same outlet to test it. Many garage outlets are on a GFCI circuit, so look for a tripped GFCI outlet in the garage, basement, or near the front entrance and press reset. A tripped breaker in the panel is another common culprit.
+Check that the opener is plugged in and that the outlet has power. Plug a lamp or phone charger into the same outlet to test it. Many garages use a safety outlet (the kind with Test and Reset buttons, called a GFCI). Look for one that has tripped in the garage, basement, or near the front entrance and press Reset. A tripped breaker in the panel is another common culprit.
 
 ## 3. The lock button or vacation mode is on
 
@@ -91,7 +91,7 @@ The most common cause is the photo-eye safety sensors. If they're blocked, dirty
 
 ### Why does my garage door only open a few inches?
 
-That usually points to a broken spring or a travel limit problem. If you heard a bang or the door feels very heavy, assume it's a spring, unplug the opener, and call a technician.
+That usually points to a broken spring or a problem with the opener's open and close settings. If you heard a bang or the door feels very heavy, assume it's a spring, unplug the opener, and call a technician.
 
 ### Can cold weather stop a garage door from opening?
 

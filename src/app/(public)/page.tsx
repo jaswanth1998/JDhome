@@ -5,21 +5,17 @@ import { getPost } from "@/lib/blog";
 import {
   Hero,
   TrustStrip,
-  CoreServices,
-  SmartSecurity,
-  GarageProblems,
-  Process,
-  AddOnServices,
-  WhoWeHelp,
+  ServicesShowcase,
+  HowItWorks,
   Testimonials,
   ServiceArea,
   FinalCTA,
 } from "@/components/sections";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Garage Door Repair & Security Cameras Oshawa | JD Home",
+  title: "Garage Door & Camera Installation & Repair Oshawa | JD Home",
   description:
-    "Garage door repair and installation plus smart security cameras in Oshawa and Durham Region. Locksmith and 24/7 car lockout too. Call (289) 991-3277.",
+    "Garage door and security camera installation and repair in Oshawa, Durham Region, and surrounding areas. Local experts, free quotes: (289) 991-3277.",
   path: "/",
 });
 
@@ -31,12 +27,8 @@ export default function Home() {
     <>
       <Hero />
       <TrustStrip />
-      <CoreServices />
-      <SmartSecurity />
-      <GarageProblems />
-      <Process />
-      <AddOnServices />
-      <WhoWeHelp />
+      <ServicesShowcase />
+      <HowItWorks />
       <Testimonials />
       <ServiceArea />
       <GuidesStrip

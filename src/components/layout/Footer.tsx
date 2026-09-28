@@ -39,7 +39,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="max-w-sm text-[0.9375rem] leading-relaxed">
-              Garage door repair and installation and smart security camera systems for homes and businesses across
+              Garage door installation and repair and smart security camera systems for homes and businesses across
               Durham Region. {theme.brand.tagline}
             </p>
             <div className="mt-6 flex gap-2">

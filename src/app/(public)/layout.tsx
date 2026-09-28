@@ -4,7 +4,7 @@ import {
   MobileCallButton,
   MotionProvider,
 } from "@/components/layout";
-import { InquiryProvider } from "@/components/inquiry";
+import { FloatingQuoteButton, InquiryProvider } from "@/components/inquiry";
 import { JsonLd } from "@/components/seo";
 import { buildSiteGraph } from "@/lib/jsonld";
 
@@ -28,6 +28,7 @@ export default function PublicLayout({
           <Footer />
         </div>
         <MobileCallButton />
+        <FloatingQuoteButton />
         <JsonLd data={buildSiteGraph()} />
       </InquiryProvider>
     </MotionProvider>

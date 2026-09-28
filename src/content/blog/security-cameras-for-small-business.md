@@ -74,7 +74,7 @@ Cameras record problems; locks and doors prevent them. Many businesses combine a
 
 ## How we install business systems
 
-Our [security camera installation service](/services/security-camera-installation/) includes a walkthrough to identify risks and blind spots, a camera plan, professional cabling, NVR setup, AI detection zones, user accounts, and training for owners and managers. We schedule work to limit disruption to your business.
+Our [security camera installation service](/services/security-camera-installation/) includes a walkthrough to identify risks and blind spots, a camera plan, professional cabling, recorder setup, smart alert areas, user accounts, and training for owners and managers. We schedule work to limit disruption to your business.
 
 ## Frequently asked questions
 

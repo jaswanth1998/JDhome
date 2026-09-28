@@ -1,11 +1,22 @@
 rules_version = '2';
 
 // Website inquiries: the public site may only CREATE well-formed documents.
-// Nobody can read, edit, or delete them from the browser; view them in the
-// Firebase console (or with the Admin SDK, which bypasses these rules).
+// The n8n lead-alert automation signs in as the Firebase Auth email/password
+// user in isLeadBot() to read inquiries and mark them notified. Nobody else
+// can read, edit, or delete them from the browser; view them in the Firebase
+// console (or with the Admin SDK, which bypasses these rules).
 // Keep the field list in sync with src/lib/inquiries/schema.ts + submit.ts.
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Create this user in Firebase console > Authentication > Users BEFORE
+    // deploying, and turn off public sign-up (Authentication > Settings >
+    // User actions) so nobody else can register this address.
+    function isLeadBot() {
+      return request.auth != null
+        && request.auth.token.firebase.sign_in_provider == 'password'
+        && request.auth.token.email == 'n8n-leads-bot@jd-home-services-prod.firebaseapp.com';
+    }
 
     function isShortString(v, min, max) {
       return v is string && v.size() >= min && v.size() <= max;
@@ -45,7 +56,11 @@ service cloud.firestore {
         && request.resource.data.status == 'new'
         && request.resource.data.createdAt == request.time;
 
-      allow read, update, delete: if false;
+      allow read: if isLeadBot();
+      allow update: if isLeadBot()
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['status', 'notifiedAt', 'telegramMessageId']);
+      allow delete: if false;
     }
 
     // Everything else is closed.

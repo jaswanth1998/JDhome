@@ -15,7 +15,7 @@ You have two options: **rekey** the existing locks or **replace** them. Here's h
 
 ## What rekeying means
 
-Inside most pin-tumbler locks is a set of small pins sized to match a specific key. Rekeying means a locksmith takes the lock cylinder apart and replaces those pins with a new set that matches a new key.
+Inside most household locks is a set of small pins sized to match a specific key. Rekeying means a locksmith takes the lock cylinder apart and replaces those pins with a new set that matches a new key.
 
 - The lock hardware stays on your door
 - Old keys stop working
@@ -53,9 +53,9 @@ Replacing means removing the lock hardware entirely and installing a new deadbol
 If you replace, look for:
 
 - **A proper deadbolt** on every exterior door, with a full-length bolt throw
-- **Quality ratings.** Locks are often graded under ANSI/BHMA standards; higher grades are built for more demanding use.
+- **Quality ratings.** Locks carry an industry grade (ANSI/BHMA Grade 1, 2, or 3). Grade 1 is the toughest.
 - **Reinforced strike plates** fastened with long screws into the door frame, not just the trim
-- **Matching keyways** so one key can work several doors
+- **Matching key types** so one key can work several doors
 
 A lock is only as strong as the door and frame it's mounted in. Loose frames and short screws are common weak points.
 
@@ -89,7 +89,7 @@ Generally yes, because the existing hardware stays in place and only the interna
 
 ### Can all my locks use the same key?
 
-Often, yes, if they share a compatible keyway. A locksmith can rekey them to one key or advise on replacement hardware that will.
+Often, yes, if they use a compatible key type. A locksmith can rekey them to one key or advise on replacement hardware that will.
 
 ### Should I change my locks after buying a house?
 

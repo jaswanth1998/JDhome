@@ -44,7 +44,7 @@ export function AboutPageContent() {
       <PageHero
         eyebrow="About us"
         title="A local team for garage doors and home security"
-        subtitle="JD Home Services is based in Oshawa and focused on two things: garage doors that run safely and smoothly, and security camera systems people can rely on."
+        subtitle="JD Home Services serves Durham Region and surrounding areas, focused on two things: garage doors that run safely and smoothly, and security camera systems people can rely on."
         image="modernHome"
         breadcrumbs={[
           { name: "Home", href: "/" },
@@ -63,8 +63,8 @@ export function AboutPageContent() {
                   trustworthy, professional service they can rely on, with the same care on every job.
                 </p>
                 <p>
-                  Today our work centres on garage door repair and installation, and on smart security camera systems
-                  with AI detection, PoE wiring, local recording, and phone access. We also help with locksmith work and
+                  Today our work centres on installing and repairing garage doors and openers, and on installing smart
+                  security cameras that send alerts and live video to your phone. We also help with locksmith work and
                   24/7 car lockouts, so one call covers the doors, locks, and cameras that keep a property secure.
                 </p>
                 <p>
@@ -134,7 +134,7 @@ export function AboutPageContent() {
             </div>
             <div className="rounded-[var(--radius-xl)] bg-navy-900 p-8 text-white md:p-10">
               <p className="eyebrow eyebrow-light mb-4">Service area</p>
-              <h2 className="text-2xl text-white md:text-3xl">Proudly serving Oshawa and Durham Region</h2>
+              <h2 className="text-2xl text-white md:text-3xl">Proudly serving Durham Region and surrounding areas</h2>
               <ul className="mt-6 flex flex-wrap gap-2">
                 {serviceCities.map((city) => (
                   <li key={city.slug}>
