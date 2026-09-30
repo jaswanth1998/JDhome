@@ -186,6 +186,9 @@ export const theme = {
     // Google Tag Manager container. Loads on every page while features.analytics is true;
     // override at build time with NEXT_PUBLIC_GTM_ID. Configure GA4 inside GTM.
     gtmId: "GTM-5Q937BVV",
+    // Meta (Facebook/Instagram) Pixel. Loads on public pages only while features.analytics is true;
+    // override at build time with NEXT_PUBLIC_META_PIXEL_ID. Don't also add it inside GTM (double counts).
+    metaPixelId: "1677401130679689",
   },
 
   /* ==========================================

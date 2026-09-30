@@ -24,6 +24,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { theme } from "@/config/theme";
+import { trackMetaEvent } from "@/components/analytics";
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import {
@@ -158,6 +159,7 @@ export function InquiryForm({ defaultService, onClose, className }: InquiryFormP
         }),
       ]).finally(() => clearTimeout(timer));
       window.dataLayer?.push({ event: "inquiry_submitted", inquiry_service: values.service });
+      trackMetaEvent("Lead", { content_name: values.service });
       hasNavigated.current = true;
       setSubmit({ status: "done", name: values.name.split(" ")[0] });
     } catch (error) {
