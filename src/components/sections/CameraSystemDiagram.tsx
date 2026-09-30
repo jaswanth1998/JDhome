@@ -5,17 +5,17 @@ const stages = [
   {
     icon: Cctv,
     title: "Smart cameras",
-    body: "AI cameras placed to cover entrances, driveways, yards, and work areas.",
+    body: "Smart cameras placed to cover entrances, driveways, yards, and work areas.",
   },
   {
     icon: Cable,
-    title: "PoE cabling",
-    body: "One ethernet cable per camera delivers power and video. Tidy and reliable.",
+    title: "One cable per camera",
+    body: "A single wired cable carries power and video (called PoE). Tidy and reliable.",
   },
   {
     icon: HardDrive,
-    title: "NVR at your property",
-    body: "Records every camera locally and indexes snapshots for smart search.",
+    title: "Recorder at your property",
+    body: "Saves footage from every camera on site, ready to search in seconds.",
   },
   {
     icon: Smartphone,

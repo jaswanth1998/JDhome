@@ -1,6 +1,6 @@
 # Website inquiries: Firebase setup
 
-When someone submits **Get a free quote** on the website, the browser saves the request to **Cloud Firestore** in the `inquiries` collection of the `jd-home-services-prod` project. Notifications about new inquiries are handled separately (not part of this repo).
+When someone submits **Get a free quote** on the website, the browser saves the request to **Cloud Firestore** in the `inquiries` collection of the `jd-home-services-prod` project. Notifications about new inquiries are handled separately (not part of this repo): an n8n workflow signs in as the Firebase Auth user `n8n-leads-bot@jd-home-services-prod.firebaseapp.com`, posts `status: "new"` inquiries to Telegram, then sets `status: "notified"`, `notifiedAt` and `telegramMessageId`. `firestore.rules` lets only that user read inquiries and change those three fields.
 
 ## How it's wired
 

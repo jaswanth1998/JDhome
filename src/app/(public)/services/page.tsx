@@ -7,7 +7,7 @@ import { ServicesPageContent } from "./ServicesPageContent";
 export const metadata: Metadata = buildMetadata({
   title: "Garage Door, CCTV & Locksmith Services | Oshawa, ON",
   description:
-    "Garage door repair and installation and smart security camera systems from an Oshawa-based team, plus locksmith work and 24/7 car lockout help as add-ons.",
+    "Garage door installation and repair and smart security camera systems from an Oshawa-based team, plus locksmith work and 24/7 car lockout help as add-ons.",
   path: "/services/",
 });
 

@@ -4,6 +4,7 @@ import {
   MobileCallButton,
   MotionProvider,
 } from "@/components/layout";
+import { FloatingQuoteButton, InquiryProvider } from "@/components/inquiry";
 import { MetaPixel } from "@/components/analytics";
 import { InquiryProvider } from "@/components/inquiry";
 import { JsonLd } from "@/components/seo";
@@ -29,6 +30,7 @@ export default function PublicLayout({
           <Footer />
         </div>
         <MobileCallButton />
+        <FloatingQuoteButton />
         <JsonLd data={buildSiteGraph()} />
         <MetaPixel />
       </InquiryProvider>

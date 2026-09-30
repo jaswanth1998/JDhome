@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { theme } from "@/config/theme";
 import { InquiryButton } from "@/components/inquiry";
-import { FinalCTA, PageHero } from "@/components/sections";
-import { Photo, SectionHeading, ServiceIcon } from "@/components/ui";
+import { FeatureRow, FinalCTA, PageHero } from "@/components/sections";
+import { SectionHeading } from "@/components/ui";
 import { inquiryServiceForPage } from "@/lib/inquiries/schema";
-import { cn } from "@/lib/utils";
 
 type ServiceCategory = (typeof theme.services.categories)[number];
 
@@ -13,35 +12,18 @@ const primaryServices = theme.services.categories.filter((s) => s.tier === "prim
 const addonServices = theme.services.categories.filter((s) => s.tier === "addon");
 
 function ServiceRow({ service, reverse }: { service: ServiceCategory; reverse: boolean }) {
-  const features: readonly string[] = service.features;
-  const badge = "badge" in service ? service.badge : undefined;
-
   return (
-    <article id={service.id} className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-      <Photo
-        image={service.image}
-        aspect={4 / 3}
-        sizes="(min-width: 1024px) 560px, 100vw"
-        className={cn("aspect-[4/3]", reverse && "lg:order-2")}
-      />
-      <div>
-        <div className="mb-4 flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-navy-800 text-gold-500">
-            <ServiceIcon name={service.icon} className="h-5 w-5" />
-          </span>
-          {badge && <span className="badge badge-gold">{badge}</span>}
-        </div>
-        <h2 className="text-3xl text-ink">{service.name}</h2>
-        <p className="mt-4 text-lg leading-relaxed text-ink-2">{service.description}</p>
-        <ul className="mt-6 grid gap-2.5 sm:grid-cols-2">
-          {features.map((feature) => (
-            <li key={feature} className="flex items-start gap-2 text-[0.9375rem] text-ink-2">
-              <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-gold-600" aria-hidden="true" />
-              {feature}
-            </li>
-          ))}
-        </ul>
-        <div className="mt-8 flex flex-wrap items-center gap-3">
+    <FeatureRow
+      id={service.id}
+      image={service.image}
+      icon={service.icon}
+      badge={"badge" in service ? service.badge : undefined}
+      title={service.name}
+      description={service.description}
+      points={service.features}
+      reverse={reverse}
+      actions={
+        <>
           <InquiryButton service={inquiryServiceForPage(service.id)} variant="navy">
             Get a quote
           </InquiryButton>
@@ -52,9 +34,9 @@ function ServiceRow({ service, reverse }: { service: ServiceCategory; reverse: b
             Details &amp; FAQs
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
-        </div>
-      </div>
-    </article>
+        </>
+      }
+    />
   );
 }
 
@@ -64,7 +46,7 @@ export function ServicesPageContent() {
       <PageHero
         eyebrow="Our services"
         title="Garage doors and security cameras, plus the extras"
-        subtitle="Two core specialties from one Oshawa-based team: garage door repair and installation, and smart CCTV systems. Locksmith work and 24/7 car lockout help are available as add-ons."
+        subtitle="Two core specialties from one local team serving Durham Region and surrounding areas: garage door installation and repair, and smart security camera installation. Locksmith work and 24/7 car lockout help are available as add-ons."
         breadcrumbs={[
           { name: "Home", href: "/" },
           { name: "Services", href: "/services/" },

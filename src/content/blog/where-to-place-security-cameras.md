@@ -64,7 +64,7 @@ Durham Region winters bring snow, ice, and road salt. Mount outdoor cameras unde
 - **Only covering the front.** Most homes need side and back coverage too.
 - **Mounting too high**, so faces aren't identifiable.
 - **Wide shots only**, with no close views of entry points.
-- **Pointing at the neighbour's property.** Aim at your own; use privacy masking if a view unavoidably includes a neighbour's window.
+- **Pointing at the neighbour's property.** Aim at your own; use privacy masking (blacking out part of the camera's view) if it unavoidably includes a neighbour's window.
 - **Relying on Wi-Fi at the far corner** of a brick house. See [PoE vs Wi-Fi](/blog/poe-vs-wifi-security-cameras/).
 - **Leaving the recorder in plain sight.** Hide the NVR in a closet or basement.
 

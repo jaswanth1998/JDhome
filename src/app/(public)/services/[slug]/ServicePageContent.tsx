@@ -128,7 +128,7 @@ export function ServicePageContent({ service }: ServicePageContentProps) {
             align="center"
             eyebrow="Service area"
             title="Areas we serve"
-            subtitle="Based in Oshawa, we offer this service throughout Durham Region and nearby communities."
+            subtitle="We offer this service throughout Durham Region and surrounding areas."
           />
           <ul className="mt-10 flex flex-wrap items-center justify-center gap-3">
             {coreCities.map((city) => (

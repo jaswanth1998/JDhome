@@ -31,7 +31,7 @@ No test framework is configured.
 
 ### Centralized Theme (`src/config/theme.ts`)
 
-Brand, contact info, SEO metadata, services data, testimonials, and feature flags live in a single `theme` object. Components import from `@/config/theme` rather than hardcoding values. When changing business details (phone, email, hours, service area, services), update this file only. Each service has a `tier` (`"primary"` leads the site; `"addon"` is listed as an extra service), a `shortName` for nav, an `icon` (resolved by `ServiceIcon`), and an `image` key.
+Brand, contact info, SEO metadata, services data, testimonials, and feature flags live in a single `theme` object. Components import from `@/config/theme` rather than hardcoding values. Visible copy leads with the service area (`theme.contact.address.serviceArea`, "Durham Region and surrounding areas"), per the owner; Oshawa stays in SEO titles and city pages. When changing business details (phone, email, hours, service area, services), update this file only. Each service has a `tier` (`"primary"` leads the site; `"addon"` is listed as an extra service), a `shortName` for nav, an `icon` (resolved by `ServiceIcon`), and an `image` key.
 
 Photos live in `src/config/images.ts` (Unsplash CDN ids, free Unsplash License); render them with the `Photo` component, which builds a cropped responsive `srcset`. Swap in real job photos by setting `src` to a `/images/...` path.
 
@@ -40,9 +40,9 @@ Design tokens (navy + gold, from the logo) are CSS custom properties in `src/app
 ### Component Organization
 
 - `src/components/layout/` - Header, Footer, MobileCallButton (sticky call + quote bar on phones), MotionProvider
-- `src/components/sections/` - Homepage sections (Hero, TrustStrip, CoreServices, SmartSecurity, GarageProblems, Process, AddOnServices, WhoWeHelp, Testimonials, ServiceArea, FinalCTA), plus `PageHero` (navy header for every inner page) and `CameraSystemDiagram`
+- `src/components/sections/` - Home page: `Hero` (light split hero + "start your free quote" picker; below `lg` it also shows `HeroVideo`, a looping Pexels clip that only loads on small screens), TrustStrip, `ServicesShowcase` + `HowItWorks` (built from `FeatureRow`, the photo + text row also used on the /services/ hub), Testimonials, ServiceArea, FinalCTA. Also `PageHero` (navy header for every inner page), `GarageProblems` and `CameraSystemDiagram` (service pages)
 - `src/components/ui/` - Reusable primitives (Button, Photo, ServiceCard, ServiceIcon, TestimonialCard, SectionHeading, Breadcrumbs, Reveal)
-- `src/components/inquiry/` - Quote request flow: `InquiryProvider` (context + dialog, mounted in the public layout), `InquiryButton` (opens the dialog, optionally pre-selecting a service; usable from server components), `InquiryForm` (3-step form, also embedded on /contact/)
+- `src/components/inquiry/` - Quote request flow: `InquiryProvider` (context + dialog, mounted in the public layout), `InquiryButton` (opens the dialog, optionally pre-selecting a service; usable from server components), `InquiryForm` (3-step form, also embedded on /contact/), `FloatingQuoteButton` (md+ floating quote pill shown after scrolling past the hero). `InquiryButton attention="shine"|"pulse"|"both"` adds the `.cta-shine` / `.cta-pulse` effects from globals.css (auto-disabled for reduced motion)
 - `src/components/seo/` - `JsonLd` server component (structured data); `src/components/analytics/` - `GoogleTagManager` (container from `theme.analytics.gtmId`, override `NEXT_PUBLIC_GTM_ID`) and env-gated `GoogleAnalytics`
 - `src/components/admin/` - Admin-specific components (LogoutButton, invoices/)
 - Each directory has an `index.ts` barrel export
@@ -102,7 +102,7 @@ Routes: `/blog/` (index, CollectionPage), `/blog/category/[category]/`, `/blog/[
 
 ### Website Inquiries (Firebase)
 
-"Get a free quote" buttons open `InquiryForm` (service → details → contact). Schema and option lists: `src/lib/inquiries/schema.ts`. On submit, `src/lib/inquiries/submit.ts` (lazy-loaded with the Firebase SDK) adds a document to the Firestore `inquiries` collection (project `jd-home-services-prod`, database `(default)` in `northamerica-northeast2`) via `src/lib/firebase/client.ts` (config from `NEXT_PUBLIC_FIREBASE_*`). `firestore.rules` only allows `create` with the exact field set, so keep the rules, `schema.ts`, and `submit.ts` in sync and redeploy with `firebase deploy --only firestore:rules`. A honeypot field (`company`) silently drops bot submissions. Notifications for new inquiries are handled outside this repo. n8n is no longer used for inquiries (it is still used by the admin panel to email invoice/estimate PDFs). Setup notes: `docs/firebase-setup.md`.
+"Get a free quote" buttons open `InquiryForm` (service → details → contact). Schema and option lists: `src/lib/inquiries/schema.ts`. On submit, `src/lib/inquiries/submit.ts` (lazy-loaded with the Firebase SDK) adds a document to the Firestore `inquiries` collection (project `jd-home-services-prod`, database `(default)` in `northamerica-northeast2`) via `src/lib/firebase/client.ts` (config from `NEXT_PUBLIC_FIREBASE_*`). `firestore.rules` only allows `create` with the exact field set, so keep the rules, `schema.ts`, and `submit.ts` in sync and redeploy with `firebase deploy --only firestore:rules`. A honeypot field (`company`) silently drops bot submissions. Notifications for new inquiries are handled outside this repo by an n8n workflow that signs in as the Firebase Auth user in `isLeadBot()` (see `firestore.rules`), posts `status: "new"` inquiries to Telegram, and marks them `notified`. n8n is also used by the admin panel to email invoice/estimate PDFs. Setup notes: `docs/firebase-setup.md`.
 
 ### SEO & Structured Data
 

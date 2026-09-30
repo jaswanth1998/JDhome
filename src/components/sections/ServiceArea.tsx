@@ -14,8 +14,8 @@ export function ServiceArea() {
           <div>
             <SectionHeading
               eyebrow="Service area"
-              title="Based in Oshawa, working across Durham Region"
-              subtitle="Oshawa is home base, so the core Durham communities below are the quickest for us to reach. We also travel farther afield; just ask."
+              title="Serving Durham Region and surrounding areas"
+              subtitle="We work across the core Durham communities below and travel to nearby areas too. Not sure if we cover you? Just ask."
             />
             <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
               {coreCities.map((city) => (

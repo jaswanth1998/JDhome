@@ -56,7 +56,7 @@ export default function ServiceAreasPage() {
       <PageHero
         eyebrow="Service areas"
         title="Areas we serve across Durham Region and beyond"
-        subtitle="Based in Oshawa, we provide garage door repair and installation and security camera systems throughout Durham Region and nearby communities, with locksmith and 24/7 car lockout help as add-ons."
+        subtitle="We provide garage door installation and repair and security camera systems throughout Durham Region and surrounding areas, with locksmith and 24/7 car lockout help as add-ons."
         image="garageDark"
         breadcrumbs={[
           { name: "Home", href: "/" },
@@ -68,7 +68,7 @@ export default function ServiceAreasPage() {
         <div className="container">
           <SectionHeading
             eyebrow="Core communities"
-            title="Closest to our Oshawa base"
+            title="Core Durham Region communities"
             subtitle="Each of these communities has its own page with details on the services available there."
           />
           <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">

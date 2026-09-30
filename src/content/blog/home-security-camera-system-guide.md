@@ -77,7 +77,7 @@ When we install a system through our [security camera service](/services/securit
 2. Recommend camera types and a recorder sized to your needs
 3. Run and conceal PoE cabling as neatly as the building allows
 4. Mount and weatherproof cameras
-5. Set up the NVR, recording schedules, and AI detection zones
+5. Set up the recorder, recording schedules, and the areas where you want smart alerts
 6. Connect the phone app and show you how to use live view, playback, and search
 
 ## Frequently asked questions

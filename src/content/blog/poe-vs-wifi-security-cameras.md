@@ -13,7 +13,7 @@ When people start shopping for security cameras, the first big choice is between
 
 ## What is PoE?
 
-PoE stands for **Power over Ethernet**. A single network cable (Cat5e or Cat6) runs from each camera back to a PoE switch or a network video recorder (NVR) with built-in PoE ports. That one cable carries both:
+PoE stands for **Power over Ethernet**. A single network cable (the same kind used for internet, called Cat5e or Cat6) runs from each camera back to a PoE switch or a network video recorder (NVR) with built-in PoE ports. That one cable carries both:
 
 - **Power** to run the camera, its night-vision lights, and heaters on some outdoor models
 - **Data**, meaning the video stream back to the recorder

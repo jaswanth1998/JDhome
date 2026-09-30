@@ -95,7 +95,7 @@ export function Header() {
           <div className="flex items-center gap-6">
             <span className="flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5 text-gold-500" aria-hidden="true" />
-              Based in {theme.contact.address.city} · Serving Durham Region
+              Serving {theme.contact.address.serviceArea}
             </span>
             <span className="flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5 text-gold-500" aria-hidden="true" />
@@ -245,7 +245,9 @@ export function Header() {
                   <span className="block font-bold">{theme.contact.phone.display}</span>
                 </span>
               </a>
-              <InquiryButton icon={null}>Get a free quote</InquiryButton>
+              <InquiryButton icon={null} attention="shine">
+                Get a free quote
+              </InquiryButton>
             </div>
 
             {/* Mobile actions */}

@@ -27,7 +27,7 @@ Before calling anyone, take a minute to check:
 
 ## What not to do
 
-- **Don't use a coat hanger or slim jim.** Modern car doors contain wiring, airbag components, and window mechanisms that are easily damaged.
+- **Don't use a coat hanger or a slim jim (a thin metal strip).** Modern car doors contain wiring, airbag components, and window mechanisms that are easily damaged.
 - **Don't pry the door or window.** Bent frames and broken weatherstripping lead to leaks and wind noise.
 - **Don't break a window** unless there's an emergency with a person or pet inside and help hasn't arrived.
 

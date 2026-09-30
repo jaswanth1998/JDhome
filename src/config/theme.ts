@@ -68,7 +68,7 @@ const serviceCities = [
     name: "Bowmanville",
     region: "Durham Region",
     core: true,
-    blurb: "Bowmanville is the largest community in Clarington, east of Courtice along Highway 401. We serve Bowmanville from our Oshawa base for garage door repair and installation and security camera systems.",
+    blurb: "Bowmanville is the largest community in Clarington, east of Courtice along Highway 401. We serve Bowmanville from our Oshawa base for garage door installation and repair and security camera systems.",
   },
   { slug: "cobourg", name: "Cobourg", region: "Northumberland County", core: false },
   { slug: "millbrook", name: "Millbrook", region: "Peterborough County", core: false },
@@ -103,7 +103,7 @@ export const theme = {
   brand: {
     name: "JD Home Services",
     tagline: "From Install to Repair. Finished to Perfection.",
-    description: "Garage door repair and installation and smart security camera systems in Oshawa and Durham Region, with locksmith and car lockout help as add-on services.",
+    description: "Garage door and security camera installation and repair in Oshawa, Durham Region, and surrounding areas, with locksmith and car lockout help as add-on services.",
 
     logo: {
       primary: "/images/logo.png",
@@ -136,7 +136,7 @@ export const theme = {
       display: "(289) 991-3277",
       tel: "+12899913277",
     },
-    email: "Info@jdhomeservices.ca",
+    email: "info@jdhomeservices.ca",
 
     address: {
       city: "Oshawa",
@@ -195,9 +195,9 @@ export const theme = {
      SEO & META INFORMATION
      ========================================== */
   seo: {
-    defaultTitle: "Garage Door Repair & Security Cameras Oshawa | JD Home",
+    defaultTitle: "Garage Door & Camera Installation & Repair Oshawa | JD Home",
     titleTemplate: "%s | JD Home Services",
-    defaultDescription: "Garage door repair and installation plus smart security cameras in Oshawa and Durham Region. Locksmith and 24/7 car lockout too. Call (289) 991-3277.",
+    defaultDescription: "Garage door and security camera installation and repair in Oshawa, Durham Region, and surrounding areas. Local experts, free quotes: (289) 991-3277.",
     keywords: "garage door repair Oshawa, garage door installation Durham Region, garage door spring repair Oshawa, security camera installation Oshawa, CCTV installation Durham Region, PoE camera system, locksmith Oshawa, car lockout Oshawa",
     siteUrl: "https://www.jdhomeservices.ca",
     ogImage: "/og-image.png",
@@ -215,25 +215,25 @@ export const theme = {
       {
         id: "garage-door-repair-installation",
         tier: "primary",
-        name: "Garage Door Repair & Installation",
+        name: "Garage Door Installation & Repair",
         shortName: "Garage Doors",
-        shortDescription: "Repairs, spring and cable work, openers, and new door installation for safe, smooth daily operation.",
-        description: "We repair and install garage doors and related hardware for homeowners and businesses who need dependable performance and safe operation. Whether your door is stuck, off-track, noisy, damaged, or ready for replacement, we diagnose the issue clearly, explain your options, and complete the work with attention to safety, fit, and long-term reliability.",
+        shortDescription: "New garage doors and openers installed, and existing doors repaired: springs, cables, openers, and more, done right the first time.",
+        description: "We install new garage doors and openers, and we repair the ones you already have. Whether you want a brand-new door or yours is stuck, off-track, noisy, or damaged, we explain your options in plain language and do the work carefully, with safety and long-term reliability in mind.",
         icon: "Warehouse",
         image: "garageService",
         features: [
-          "Garage door repair and troubleshooting",
-          "Broken spring and cable replacement",
-          "Track, roller, and hinge adjustments",
-          "Opener installation, repair, and remote setup",
           "New garage door installation and replacement",
-          "Safety inspection and balance testing on every visit",
+          "Garage door opener installation and repair",
+          "Broken spring and cable replacement",
+          "Repairs for stuck, noisy, or off-track doors",
+          "Remote and keypad setup",
+          "Safety and balance check on every visit",
         ],
         seo: {
-          title: "Garage Door Repair & Installation Oshawa | JD Home",
+          title: "Garage Door Installation & Repair Oshawa | JD Home",
           description:
-            "Garage door repair, spring and cable replacement, opener work, and new door installation in Oshawa and Durham Region, with safety and balance checks.",
-          h1: "Garage Door Repair & Installation in Oshawa & Durham Region",
+            "New garage door and opener installation, plus spring, cable, and door repairs in Oshawa, Durham Region, and surrounding areas. Free quotes.",
+          h1: "Garage Door Installation & Repair in Durham Region & Surrounding Areas",
         },
         faqs: [
           {
@@ -266,27 +266,27 @@ export const theme = {
       {
         id: "security-camera-installation",
         tier: "primary",
-        name: "CCTV & Smart Security Cameras",
+        name: "Security Camera Installation",
         shortName: "Security Cameras",
-        shortDescription: "AI-powered camera systems for homes and businesses: PoE wiring, local recording, smart search, and live view on your phone.",
-        description: "We design and install security camera systems for homes, workplaces, and rental properties. Our installs use modern smart cameras with AI person and vehicle detection, wired with Power over Ethernet (PoE) so a single cable carries both power and video. Footage records to a network video recorder (NVR) kept at your property, and you can watch live, play back recordings, and search your footage from your phone.",
+        shortDescription: "Smart security cameras installed at your home or business, with alerts and live video on your phone.",
+        description: "We plan and install security camera systems for homes, workplaces, and rental properties, and we service the systems we put in. Our smart cameras can tell people and cars apart, so you only get alerts that matter. Each camera connects with one wired cable that carries both power and video (known as PoE), recordings are saved on a recorder at your property, and you can watch live, replay footage, and search it from your phone.",
         icon: "Cctv",
         image: "cctvInstall",
         features: [
-          "Indoor and outdoor camera installation for homes and businesses",
-          "AI person and vehicle detection to cut down on false alerts",
-          "Smart search: describe what you are looking for and find matching snapshots",
-          "Power over Ethernet (PoE) wiring: one cable for power and video",
-          "Local recording to an NVR at your property",
-          "Live view, playback, and alerts on your phone",
-          "Dome, bullet, turret, PTZ, 360° panoramic, and doorbell cameras",
-          "Camera placement planning and a full walkthrough of your system",
+          "Indoor and outdoor cameras installed for homes and businesses",
+          "Smart alerts that tell people and cars apart",
+          "Find footage fast by typing what you're looking for",
+          "Reliable wired cameras: one cable for power and video",
+          "Recordings saved at your property, not in someone else's cloud",
+          "Watch live and replay footage on your phone",
+          "Wide-view, turn-and-zoom, and doorbell cameras",
+          "Camera placement planning and a full walkthrough",
         ],
         seo: {
-          title: "Security Camera & CCTV Installation Oshawa | JD Home",
+          title: "Security Camera Installation Oshawa & Durham | JD Home",
           description:
-            "Smart CCTV installation in Oshawa and Durham Region: AI person detection, smart footage search, PoE wiring, local NVR recording, and phone access.",
-          h1: "Security Camera & CCTV Installation in Oshawa & Durham Region",
+            "Smart security camera (CCTV) installation in Oshawa and Durham Region: people and car alerts, easy footage search, wired cameras, phone access.",
+          h1: "Security Camera Installation in Durham Region & Surrounding Areas",
         },
         faqs: [
           {
@@ -321,7 +321,7 @@ export const theme = {
         tier: "addon",
         name: "Locksmith",
         shortName: "Locksmith",
-        shortDescription: "Lock changes, rekeying, repairs, and new hardware for homes, rentals, and businesses.",
+        shortDescription: "New locks installed, old locks changed or rekeyed (so old keys stop working), and repairs for homes, rentals, and businesses.",
         description: "Our locksmith service covers the everyday security work property owners rely on. We handle lock changes, rekeying, deadbolt and knob replacement, hardware upgrades, lock repairs, and security checks for homes, offices, storefronts, and rental properties throughout Durham and surrounding areas. It pairs naturally with a camera install when you are upgrading a property's security.",
         icon: "KeyRound",
         image: "locksmith",
@@ -336,8 +336,8 @@ export const theme = {
         seo: {
           title: "Locksmith in Oshawa & Durham Region | JD Home Services",
           description:
-            "Lock changes, rekeying, deadbolt installs, and lock repair for homes, rentals, and businesses in Oshawa and Durham Region. Licensed and insured.",
-          h1: "Locksmith Services in Oshawa & Durham Region",
+            "Lock changes, rekeying, deadbolt installs, and lock repair for homes, rentals, and businesses in Oshawa, Durham Region, and surrounding areas.",
+          h1: "Locksmith Services in Durham Region & Surrounding Areas",
         },
         faqs: [
           {
@@ -373,7 +373,7 @@ export const theme = {
         name: "Car Lockout",
         shortName: "Car Lockout",
         shortDescription: "Damage-free vehicle entry, any time, anywhere in Durham and surrounding regions.",
-        description: "Locked your keys in the car or dealing with a stuck vehicle lock? We provide car lockout assistance with non-destructive entry methods whenever possible. Our goal is simple: get you back into your vehicle quickly, safely, and without adding more stress to your day.",
+        description: "Locked your keys in the car or dealing with a stuck vehicle lock? We provide car lockout help with damage-free entry methods whenever possible. Our goal is simple: get you back into your vehicle quickly, safely, and without adding more stress to your day.",
         icon: "Car",
         image: "carLockout",
         badge: "24/7",
@@ -389,7 +389,7 @@ export const theme = {
           title: "24/7 Car Lockout Service Oshawa & Durham | JD Home",
           description:
             "Locked out of your car in Oshawa or Durham Region? Get 24/7 car lockout help with damage-free entry when possible. Call JD Home Services: (289) 991-3277.",
-          h1: "24/7 Car Lockout Service in Oshawa & Durham Region",
+          h1: "24/7 Car Lockout Service in Durham Region & Surrounding Areas",
         },
         faqs: [
           {
@@ -400,7 +400,7 @@ export const theme = {
           {
             question: "Will unlocking my car damage the door or lock?",
             answer:
-              "We use non-destructive entry methods whenever possible, so in most cases your door and lock are left exactly as they were. If the vehicle or the condition of the lock means damage-free entry is not realistic, we explain the situation and your options before any work begins.",
+              "We use damage-free entry methods whenever possible, so in most cases your door and lock are left exactly as they were. If the vehicle or the condition of the lock means damage-free entry is not realistic, we explain the situation and your options before any work begins.",
           },
           {
             question: "How quickly can you reach me in Oshawa or Durham Region?",
@@ -482,7 +482,7 @@ export const theme = {
       id: 3,
       quote: "Reliable and trustworthy. They fixed our garage door issue quickly and explained exactly what needed repair. Quality work at a fair price.",
       author: "Jennifer L.",
-      service: "Garage Door Repair & Installation",
+      service: "Garage Door Installation & Repair",
       rating: 5,
     },
     {

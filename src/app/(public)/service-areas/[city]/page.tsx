@@ -27,8 +27,8 @@ export async function generateMetadata({
   const phone = theme.contact.phone.display;
   const description =
     city.slug === "oshawa"
-      ? `Garage door repair and installation and smart security camera systems in Oshawa, our home base. Locksmith and 24/7 car lockout too. Call ${phone}.`
-      : `Garage door repair and installation and smart security camera systems in ${city.name}, served from Oshawa. Locksmith and lockouts too. Call ${phone}.`;
+      ? `Garage door installation and repair and smart security camera systems in Oshawa, our home base. Locksmith and 24/7 car lockout too. Call ${phone}.`
+      : `Garage door installation and repair and smart security camera systems in ${city.name}, served from Oshawa. Locksmith and lockouts too. Call ${phone}.`;
 
   return buildMetadata({
     title: `${city.name} Garage Door Repair & Security Cameras`,

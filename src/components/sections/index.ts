@@ -1,13 +1,10 @@
 export { Hero } from "./Hero";
 export { TrustStrip } from "./TrustStrip";
-export { CoreServices } from "./CoreServices";
-export { SmartSecurity } from "./SmartSecurity";
 export { GarageProblems } from "./GarageProblems";
-export { Process } from "./Process";
-export { AddOnServices } from "./AddOnServices";
-export { WhoWeHelp } from "./WhoWeHelp";
 export { Testimonials } from "./Testimonials";
 export { ServiceArea } from "./ServiceArea";
 export { FinalCTA } from "./FinalCTA";
 export { PageHero } from "./PageHero";
 export { CameraSystemDiagram } from "./CameraSystemDiagram";
+export { FeatureRow } from "./FeatureRow";
+export { ServicesShowcase, HowItWorks } from "./ServicesShowcase";

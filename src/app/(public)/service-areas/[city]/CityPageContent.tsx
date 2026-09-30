@@ -57,9 +57,9 @@ export function CityPageContent({ city }: CityPageContentProps) {
                   {isHomeBase
                     ? "Oshawa is our home base, so it is where we handle our services most often."
                     : `In ${city.name}, we provide the same services we offer at home in Oshawa.`}{" "}
-                  That starts with garage door repair and installation, including spring, cable, track, roller, and
-                  opener work backed by safety and balance checks, and smart security camera systems with AI detection,
-                  PoE wiring, local recording, and phone access for homes and businesses. We also offer residential and
+                  That means installing new garage doors and openers and repairing existing ones (springs, cables,
+                  tracks, and more, finished with a safety and balance check), and installing smart security cameras
+                  for homes and businesses, with alerts and live video on your phone. We also offer residential and
                   commercial locksmith work and 24/7 car lockout help as add-on services.
                 </p>
                 <p>

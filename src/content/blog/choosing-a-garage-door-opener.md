@@ -53,7 +53,7 @@ Mounts beside the door and turns the torsion shaft directly, with no rail across
 
 ## Features worth paying for
 
-- **DC motors** start and stop softly, run more quietly, and often support battery backup.
+- **DC motors** (a quieter, smoother type of motor) start and stop softly, run more quietly, and often support battery backup.
 - **Battery backup** lets you open the door during a power outage. Useful in winter storms.
 - **Smart Wi-Fi control** lets you open, close, and check the door from your phone and get alerts if it's left open. It pairs nicely with a [security camera system](/services/security-camera-installation/) so you can see who's at the garage.
 - **Rolling security codes** change the remote code each time, protecting against code-grabbing.
@@ -79,7 +79,7 @@ A new opener makes sense when:
 - You want quieter operation or smart control
 - Replacement parts aren't available
 
-If your opener is relatively new and the problem is a sensor, remote, or travel limit, a repair is often all you need.
+If your opener is relatively new and the problem is a sensor, a remote, or the opener's open and close settings, a repair is often all you need.
 
 ## Professional installation
 
