@@ -12,7 +12,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/privacy-policy/",
 });
 
-const LAST_UPDATED = "September 23, 2026";
+const LAST_UPDATED = "September 29, 2026";
 
 export default function PrivacyPolicyPage() {
   return (
@@ -209,7 +209,57 @@ export default function PrivacyPolicyPage() {
 
             <div className="space-y-4">
               <h2 className="text-2xl text-ink">
-                5. Data Retention
+                5. Cookies, Analytics &amp; Advertising
+              </h2>
+              <p>
+                Our website uses cookies and similar technologies from the
+                following providers:
+              </p>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>
+                  <strong>Google Tag Manager and Google Analytics</strong>{" "}
+                  (Google LLC) — to understand how visitors use our website, such
+                  as the pages viewed, how you arrived, and the type of device
+                  used.
+                </li>
+                <li>
+                  <strong>Meta Pixel</strong> (Meta Platforms, Inc.) — to measure
+                  the results of our Facebook and Instagram ads and to show our
+                  ads to people who may be interested in our services. When you
+                  visit our website, the Meta Pixel may send Meta information such
+                  as the pages you view, your device and browser, and actions you
+                  take on the site (for example, tapping to call us or submitting
+                  a quote request). Meta processes this information under its own
+                  data policy.
+                </li>
+              </ul>
+              <p>
+                You can block or delete cookies in your browser settings, manage
+                how Meta uses your information for ads in your Facebook or
+                Instagram{" "}
+                <a
+                  href="https://www.facebook.com/adpreferences"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  ad preferences
+                </a>
+                , and opt out of Google Analytics with the{" "}
+                <a
+                  href="https://tools.google.com/dlpage/gaoptout"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Google Analytics opt-out browser add-on
+                </a>
+                . Blocking these technologies will not stop you from calling us
+                or requesting a quote.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <h2 className="text-2xl text-ink">
+                6. Data Retention
               </h2>
               <p>
                 We retain your personal information only for as long as necessary
@@ -222,7 +272,7 @@ export default function PrivacyPolicyPage() {
 
             <div className="space-y-4">
               <h2 className="text-2xl text-ink">
-                6. Data Security
+                7. Data Security
               </h2>
               <p>
                 We use reasonable administrative, technical, and physical
@@ -235,7 +285,7 @@ export default function PrivacyPolicyPage() {
 
             <div className="space-y-4">
               <h2 className="text-2xl text-ink">
-                7. Your Privacy Rights
+                8. Your Privacy Rights
               </h2>
               <p>
                 Subject to applicable law, you have the right to:
@@ -263,7 +313,7 @@ export default function PrivacyPolicyPage() {
 
             <div className="space-y-4">
               <h2 className="text-2xl text-ink">
-                8. Children&rsquo;s Privacy
+                9. Children&rsquo;s Privacy
               </h2>
               <p>
                 Our services are not directed to individuals under the age of 18,
@@ -275,7 +325,7 @@ export default function PrivacyPolicyPage() {
 
             <div className="space-y-4">
               <h2 className="text-2xl text-ink">
-                9. Third-Party Links
+                10. Third-Party Links
               </h2>
               <p>
                 Our website may contain links to third-party websites or services
@@ -287,7 +337,7 @@ export default function PrivacyPolicyPage() {
 
             <div className="space-y-4">
               <h2 className="text-2xl text-ink">
-                10. Changes to This Privacy Policy
+                11. Changes to This Privacy Policy
               </h2>
               <p>
                 We may update this Privacy Policy from time to time. Any changes
@@ -299,7 +349,7 @@ export default function PrivacyPolicyPage() {
 
             <div className="space-y-4">
               <h2 className="text-2xl text-ink">
-                11. Contact Us
+                12. Contact Us
               </h2>
               <p>
                 If you have any questions about this Privacy Policy or how we

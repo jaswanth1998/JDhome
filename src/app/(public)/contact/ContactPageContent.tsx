@@ -1,7 +1,7 @@
 import { Car, Clock, Mail, MapPin, Phone } from "lucide-react";
 import { theme } from "@/config/theme";
-import { InquiryForm } from "@/components/inquiry";
 import { PageHero } from "@/components/sections";
+import { ContactInquiryForm } from "./ContactInquiryForm";
 
 const details = [
   {
@@ -47,7 +47,7 @@ export function ContactPageContent() {
           <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
             {/* Form card overlaps the hero */}
             <div className="relative z-10 -mt-8 rounded-[var(--radius-xl)] border border-line bg-white p-6 shadow-[var(--shadow-lg)] md:-mt-12 md:p-10">
-              <InquiryForm />
+              <ContactInquiryForm />
             </div>
 
             <aside className="space-y-5 lg:pt-10">

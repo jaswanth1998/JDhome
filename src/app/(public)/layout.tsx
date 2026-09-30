@@ -4,6 +4,7 @@ import {
   MobileCallButton,
   MotionProvider,
 } from "@/components/layout";
+import { MetaPixel } from "@/components/analytics";
 import { InquiryProvider } from "@/components/inquiry";
 import { JsonLd } from "@/components/seo";
 import { buildSiteGraph } from "@/lib/jsonld";
@@ -29,6 +30,7 @@ export default function PublicLayout({
         </div>
         <MobileCallButton />
         <JsonLd data={buildSiteGraph()} />
+        <MetaPixel />
       </InquiryProvider>
     </MotionProvider>
   );
