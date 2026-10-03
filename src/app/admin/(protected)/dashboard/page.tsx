@@ -63,7 +63,7 @@ export default function DashboardPage() {
           Welcome back, {profile?.username || profile?.email?.split("@")[0]}
         </h1>
         <p className="text-[var(--text-muted)] mt-1">
-          JD Home Solutions Admin Dashboard
+          JD Home Services Admin Dashboard
         </p>
       </div>
 

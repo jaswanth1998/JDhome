@@ -1,11 +1,9 @@
-"use client";
-
-import { forwardRef, ButtonHTMLAttributes, AnchorHTMLAttributes } from "react";
+import { forwardRef, type AnchorHTMLAttributes, type ButtonHTMLAttributes } from "react";
 import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
 
-type ButtonVariant = "primary" | "emergency" | "secondary" | "outline" | "ghost";
+type ButtonVariant = "gold" | "navy" | "outline" | "ghost-light";
 type ButtonSize = "sm" | "md" | "lg";
 
 interface BaseButtonProps {
@@ -29,8 +27,6 @@ type ButtonAsAnchor = BaseButtonProps &
   Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof BaseButtonProps> & {
     as: "a";
     href: string;
-    target?: string;
-    rel?: string;
   };
 
 type ButtonAsLink = BaseButtonProps & {
@@ -40,45 +36,24 @@ type ButtonAsLink = BaseButtonProps & {
 
 type ButtonProps = ButtonAsButton | ButtonAsAnchor | ButtonAsLink;
 
-const variantStyles: Record<ButtonVariant, string> = {
-  primary: `
-    bg-[var(--accent-teal)] text-white
-    hover:bg-[var(--accent-teal-hover)]
-    hover:shadow-[var(--shadow-primary-glow)]
-  `,
-  emergency: `
-    bg-[var(--accent-orange)] text-white
-    hover:bg-[var(--accent-orange-hover)]
-    hover:shadow-[var(--shadow-emergency-glow)]
-  `,
-  secondary: `
-    bg-[var(--secondary-main)] text-white
-    hover:bg-[var(--secondary-dark)]
-  `,
-  outline: `
-    bg-transparent text-[var(--primary-main)]
-    border-2 border-[var(--primary-main)]
-    hover:bg-[var(--primary-main)] hover:text-white
-  `,
-  ghost: `
-    bg-transparent text-[var(--text-primary)]
-    hover:bg-[var(--neutral-light-gray)]
-  `,
+const variantClass: Record<ButtonVariant, string> = {
+  gold: "btn-gold",
+  navy: "btn-primary",
+  outline: "btn-outline",
+  "ghost-light": "btn-ghost-light",
 };
 
-const sizeStyles: Record<ButtonSize, string> = {
-  sm: "px-4 py-2 text-sm h-9",
-  md: "px-6 py-3 text-base h-11",
-  lg: "px-8 py-4 text-lg h-[52px]",
+const sizeClass: Record<ButtonSize, string> = {
+  sm: "btn-sm",
+  md: "",
+  lg: "btn-lg",
 };
 
-export const Button = forwardRef<
-  HTMLButtonElement | HTMLAnchorElement,
-  ButtonProps
->(
+/** Button styled with the global `.btn` classes; renders a button, anchor, or Next.js Link. */
+export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
   (
     {
-      variant = "primary",
+      variant = "gold",
       size = "md",
       icon: Icon,
       iconPosition = "left",
@@ -88,80 +63,52 @@ export const Button = forwardRef<
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
-    const baseStyles = `
-      inline-flex items-center justify-center gap-2
-      font-medium rounded-lg
-      transition-all duration-150 ease-in-out
-      focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-teal)] focus-visible:ring-offset-2
-      disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none
-    `;
-
-    const combinedClassName = cn(
-      baseStyles,
-      variantStyles[variant],
-      sizeStyles[size],
-      fullWidth && "w-full",
-      className
-    );
+    const classes = cn("btn", variantClass[variant], sizeClass[size], fullWidth && "w-full", className);
 
     const content = (
       <>
-        {isLoading && (
-          <span className="spinner" aria-hidden="true" />
-        )}
-        {!isLoading && Icon && iconPosition === "left" && (
-          <Icon className="w-5 h-5" aria-hidden="true" />
-        )}
+        {isLoading && <span className="spinner" aria-hidden="true" />}
+        {!isLoading && Icon && iconPosition === "left" && <Icon className="h-[18px] w-[18px]" aria-hidden="true" />}
         <span>{children}</span>
-        {!isLoading && Icon && iconPosition === "right" && (
-          <Icon className="w-5 h-5" aria-hidden="true" />
-        )}
+        {!isLoading && Icon && iconPosition === "right" && <Icon className="h-[18px] w-[18px]" aria-hidden="true" />}
       </>
     );
 
-    // Render as Link (Next.js internal navigation)
     if (props.as === "link") {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { as, href, ...linkProps } = props;
       return (
-        <Link
-          href={href}
-          className={combinedClassName}
-          {...linkProps}
-        >
+        <Link href={href} className={classes} {...linkProps}>
           {content}
         </Link>
       );
     }
 
-    // Render as anchor (external links)
     if (props.as === "a") {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { as, ...anchorProps } = props;
       return (
-        <a
-          ref={ref as React.Ref<HTMLAnchorElement>}
-          className={combinedClassName}
-          {...anchorProps}
-        >
+        <a ref={ref as React.Ref<HTMLAnchorElement>} className={classes} {...anchorProps}>
           {content}
         </a>
       );
     }
 
-    // Render as button (default)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { as, ...buttonProps } = props as ButtonAsButton;
     return (
       <button
         ref={ref as React.Ref<HTMLButtonElement>}
-        className={combinedClassName}
+        className={classes}
         disabled={isLoading || buttonProps.disabled}
         {...buttonProps}
       >
         {content}
       </button>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";
