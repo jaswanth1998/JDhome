@@ -1,5 +1,6 @@
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { getDb } from "@/lib/firebase/client";
+import type { Attribution } from "@/lib/tracking/attribution";
 import { serviceGroup, serviceLabel, type InquiryFormValues } from "./schema";
 
 export const INQUIRIES_COLLECTION = "inquiries";
@@ -10,7 +11,11 @@ export const INQUIRIES_COLLECTION = "inquiries";
  *
  * Imported lazily from the form so the Firebase SDK only loads on submit.
  */
-export async function submitInquiry(values: InquiryFormValues, page: string): Promise<string> {
+export async function submitInquiry(
+  values: InquiryFormValues,
+  page: string,
+  attribution?: Attribution,
+): Promise<string> {
   const group = serviceGroup(values.service);
 
   // Only keep the detail fields that apply to the chosen service.
@@ -29,13 +34,15 @@ export async function submitInquiry(values: InquiryFormValues, page: string): Pr
     serviceLabel: serviceLabel(values.service),
     details,
     city: values.city,
-    timing: values.timing,
+    timing: values.timing || "Not specified",
     message: values.message?.trim() ?? "",
     name: values.name.trim(),
     phone: values.phone.trim(),
     email: values.email.trim(),
     preferredContact: values.preferredContact,
     page: page.slice(0, 200),
+    // Ad click id + UTM tags, so leads can be traced to (and imported back into) Google Ads.
+    ...(attribution ? { attribution } : {}),
     status: "new",
     createdAt: serverTimestamp(),
   });

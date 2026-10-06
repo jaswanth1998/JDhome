@@ -492,13 +492,6 @@ export const theme = {
       service: "Locksmith",
       rating: 5,
     },
-    {
-      id: 1,
-      quote: "Fast, professional service when we got locked out at 11 PM. They arrived within 30 minutes and had us back inside quickly. Highly recommend!",
-      author: "Sarah M.",
-      service: "Car Lockout",
-      rating: 5,
-    },
   ],
 
   /* ==========================================

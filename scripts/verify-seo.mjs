@@ -80,6 +80,7 @@ const EXCLUDED_DIRS = [
   /^404(\/|$)/,
   /^admin(\/|$)/,
   /^share(\/|$)/,
+  /^lp(\/|$)/, // Google Ads landing pages: noindex on purpose, kept out of the sitemap
   /^_not-found(\/|$)/,
 ];
 
@@ -281,7 +282,7 @@ async function main() {
 
     const hygiene = [];
     for (const loc of locs) {
-      if (/\/(admin|share)\//.test(loc)) hygiene.push(`sitemap lists ${loc}`);
+      if (/\/(admin|share|lp)\//.test(loc)) hygiene.push(`sitemap lists ${loc}`);
       if (!loc.startsWith(`${SITE}/`)) hygiene.push(`bad prefix: ${loc}`);
       if (!loc.endsWith("/")) hygiene.push(`no trailing slash: ${loc}`);
     }
@@ -551,7 +552,10 @@ async function main() {
     const fails = [];
     const mustNoindex = htmlFiles.filter((f) => {
       const r = path.relative(OUT, f).split(path.sep).join("/");
-      return r === "share/index.html" || (r.startsWith("admin/") && r.endsWith("/index.html"));
+      return (
+        r === "share/index.html" ||
+        ((r.startsWith("admin/") || r.startsWith("lp/")) && r.endsWith("/index.html"))
+      );
     });
     for (const file of mustNoindex) {
       const robots = metaByName(htmlText.get(file), "robots");
@@ -562,7 +566,7 @@ async function main() {
       const robots = metaByName(html, "robots");
       if (robots && /noindex/i.test(robots)) fails.push(`${p} is noindex`);
     }
-    verdict("6", "noindex on share/ and admin/**, never on public pages", fails, [], `${mustNoindex.length} private pages noindex`);
+    verdict("6", "noindex on share/, admin/** and lp/**, never on public pages", fails, [], `${mustNoindex.length} private pages noindex`);
   }
 
   // ---- 7. robots.txt

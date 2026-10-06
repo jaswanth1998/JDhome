@@ -31,10 +31,29 @@ service cloud.firestore {
         && (!('cameraFeatures' in d) || (d.cameraFeatures is list && d.cameraFeatures.size() <= 10));
     }
 
+    // Ad click id + UTM tags captured on the landing page (src/lib/tracking/attribution.ts).
+    function validAttribution(a) {
+      return a is map
+        && a.keys().hasOnly([
+             'gclid', 'gbraid', 'wbraid', 'utm_source', 'utm_medium', 'utm_campaign',
+             'utm_term', 'utm_content', 'landingPage'
+           ])
+        && (!('gclid' in a) || isShortString(a.gclid, 1, 200))
+        && (!('gbraid' in a) || isShortString(a.gbraid, 1, 200))
+        && (!('wbraid' in a) || isShortString(a.wbraid, 1, 200))
+        && (!('utm_source' in a) || isShortString(a.utm_source, 1, 200))
+        && (!('utm_medium' in a) || isShortString(a.utm_medium, 1, 200))
+        && (!('utm_campaign' in a) || isShortString(a.utm_campaign, 1, 200))
+        && (!('utm_term' in a) || isShortString(a.utm_term, 1, 200))
+        && (!('utm_content' in a) || isShortString(a.utm_content, 1, 200))
+        && (!('landingPage' in a) || isShortString(a.landingPage, 1, 200));
+    }
+
     match /inquiries/{inquiryId} {
       allow create: if request.resource.data.keys().hasOnly([
             'service', 'serviceLabel', 'details', 'city', 'timing', 'message',
-            'name', 'phone', 'email', 'preferredContact', 'page', 'status', 'createdAt'
+            'name', 'phone', 'email', 'preferredContact', 'page', 'status', 'createdAt',
+            'attribution'
           ])
         && request.resource.data.keys().hasAll([
             'service', 'serviceLabel', 'city', 'timing', 'name', 'phone',
@@ -53,6 +72,7 @@ service cloud.firestore {
         && isShortString(request.resource.data.get('email', ''), 0, 120)
         && request.resource.data.preferredContact in ['phone', 'text', 'email']
         && isShortString(request.resource.data.get('page', ''), 0, 200)
+        && validAttribution(request.resource.data.get('attribution', {}))
         && request.resource.data.status == 'new'
         && request.resource.data.createdAt == request.time;
 

@@ -27,6 +27,7 @@ import { theme } from "@/config/theme";
 import { trackMetaEvent } from "@/components/analytics";
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
+import { getAttribution, toE164 } from "@/lib/tracking/attribution";
 import {
   CAMERA_COUNTS,
   CAMERA_FEATURES,
@@ -123,6 +124,7 @@ export function InquiryForm({ defaultService, onClose, className }: InquiryFormP
 
   const goTo = (next: number) => {
     hasNavigated.current = true;
+    if (next > step) window.dataLayer?.push({ event: "inquiry_step", inquiry_step: INQUIRY_STEPS[next].id });
     setDirection(next > step ? 1 : -1);
     setStep(next);
   };
@@ -152,13 +154,25 @@ export function InquiryForm({ defaultService, onClose, className }: InquiryFormP
         throw new Error("Online requests are not set up yet.");
       }
       let timer: ReturnType<typeof setTimeout> | undefined;
-      await Promise.race([
-        submitInquiry(values, pathname ?? "/"),
-        new Promise((_, reject) => {
+      const inquiryId = await Promise.race([
+        submitInquiry(values, pathname ?? "/", getAttribution()),
+        new Promise<never>((_, reject) => {
           timer = setTimeout(() => reject(new Error("Timed out saving the inquiry")), SUBMIT_TIMEOUT_MS);
         }),
       ]).finally(() => clearTimeout(timer));
-      window.dataLayer?.push({ event: "inquiry_submitted", inquiry_service: values.service });
+      // transaction_id stops Google Ads counting the same lead twice; user_data feeds
+      // Enhanced Conversions (GTM hashes it before it is sent to Google).
+      const [firstName, ...rest] = values.name.trim().split(/\s+/);
+      window.dataLayer?.push({
+        event: "inquiry_submitted",
+        inquiry_service: values.service,
+        transaction_id: inquiryId,
+        user_data: {
+          ...(values.email ? { email: values.email.trim().toLowerCase() } : {}),
+          ...(toE164(values.phone) ? { phone_number: toE164(values.phone) } : {}),
+          address: { first_name: firstName, ...(rest.length ? { last_name: rest.join(" ") } : {}), country: "CA" },
+        },
+      });
       trackMetaEvent("Lead", { content_name: values.service });
       hasNavigated.current = true;
       setSubmit({ status: "done", name: values.name.split(" ")[0] });
@@ -368,7 +382,7 @@ export function InquiryForm({ defaultService, onClose, className }: InquiryFormP
                   ))}
                 </select>
               </Field>
-              <Field label="When do you need it?" htmlFor="inq-timing" error={errors.timing?.message}>
+              <Field label="When do you need it?" optional htmlFor="inq-timing" error={errors.timing?.message}>
                 <select
                   id="inq-timing"
                   className="input cursor-pointer"

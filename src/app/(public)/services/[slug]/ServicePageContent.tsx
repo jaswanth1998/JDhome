@@ -31,6 +31,7 @@ export function ServicePageContent({ service }: ServicePageContentProps) {
         badge={badge ? `${badge} available` : undefined}
         image={service.image}
         service={inquiryService}
+        showHours={!isLockout}
         breadcrumbs={[
           { name: "Home", href: "/" },
           { name: "Services", href: "/services/" },

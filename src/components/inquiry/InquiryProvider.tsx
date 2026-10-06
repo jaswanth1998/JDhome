@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import type { InquiryService } from "@/lib/inquiries/schema";
+import { inquiryServiceForLocation, type InquiryService } from "@/lib/inquiries/schema";
 import { InquiryForm } from "./InquiryForm";
 
 type InquiryContextValue = {
@@ -29,8 +29,11 @@ export function InquiryProvider({ children }: { children: React.ReactNode }) {
 
   const openInquiry = useCallback((service?: InquiryService) => {
     returnFocus.current = document.activeElement as HTMLElement | null;
+    // No service given (header, mobile bar, floating button): use the page's own service,
+    // so visitors from an ad don't have to pick it again.
+    const resolved = service ?? inquiryServiceForLocation(window.location.pathname, window.location.search);
     // A fresh key resets the form each time it opens.
-    setState((prev) => ({ open: true, service, key: prev.key + 1 }));
+    setState((prev) => ({ open: true, service: resolved, key: prev.key + 1 }));
   }, []);
 
   const close = useCallback(() => {

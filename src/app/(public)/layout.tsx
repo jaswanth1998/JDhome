@@ -5,7 +5,7 @@ import {
   MotionProvider,
 } from "@/components/layout";
 import { FloatingQuoteButton, InquiryProvider } from "@/components/inquiry";
-import { MetaPixel } from "@/components/analytics";
+import { AdTracking, MetaPixel } from "@/components/analytics";
 import { JsonLd } from "@/components/seo";
 import { buildSiteGraph } from "@/lib/jsonld";
 
@@ -32,6 +32,7 @@ export default function PublicLayout({
         <FloatingQuoteButton />
         <JsonLd data={buildSiteGraph()} />
         <MetaPixel />
+        <AdTracking />
       </InquiryProvider>
     </MotionProvider>
   );

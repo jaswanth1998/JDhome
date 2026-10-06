@@ -1,4 +1,4 @@
-import { Phone } from "lucide-react";
+import { Clock, Phone } from "lucide-react";
 import { theme } from "@/config/theme";
 import type { SiteImageKey } from "@/config/images";
 import { InquiryButton } from "@/components/inquiry";
@@ -17,6 +17,8 @@ interface PageHeroProps {
   service?: InquiryService;
   /** Hide the quote/call buttons (e.g. on the contact page). */
   hideActions?: boolean;
+  /** Show regular phone hours under the buttons (off for the 24/7 lockout page). */
+  showHours?: boolean;
 }
 
 /** Navy page header used by every inner page, with an optional photo on the right. */
@@ -29,6 +31,7 @@ export function PageHero({
   badge,
   service,
   hideActions = false,
+  showHours = true,
 }: PageHeroProps) {
   return (
     <section className="relative isolate overflow-hidden bg-navy-950 text-white">
@@ -63,6 +66,12 @@ export function PageHero({
                 {theme.contact.phone.display}
               </a>
             </div>
+          )}
+          {!hideActions && showHours && (
+            <p className="mt-4 flex items-center gap-2 text-sm text-white/70">
+              <Clock className="h-4 w-4" aria-hidden="true" />
+              Phones answered {theme.contact.hours.regular.display}
+            </p>
           )}
         </div>
       </div>

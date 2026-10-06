@@ -70,7 +70,7 @@ export const inquirySchema = z
     cameraCount: z.string().max(40).nullish(),
     cameraFeatures: z.union([z.array(z.string().max(60)).max(CAMERA_FEATURES.length), z.literal(false)]).nullish(),
     city: z.string().min(1, "Choose your city").max(60),
-    timing: z.string().min(1, "Choose a timeframe").max(60),
+    timing: z.string().max(60).optional(),
     message: z.string().trim().max(1500, "Please keep it under 1,500 characters").optional(),
     name: z.string().trim().min(2, "Please enter your name").max(80),
     phone: z
@@ -109,12 +109,26 @@ export function serviceGroup(value: InquiryService | undefined): InquiryServiceG
   return INQUIRY_SERVICES.find((s) => s.value === value)?.group;
 }
 
+/**
+ * The service to pre-select for a quote opened on this page: `?service=` from the URL
+ * (ads can link with it) first, then the service page or ad landing page being viewed.
+ */
+export function inquiryServiceForLocation(pathname: string, search: string): InquiryService | undefined {
+  const raw = new URLSearchParams(search).get("service") ?? undefined;
+  const fromUrl = inquiryServiceForPage(raw) ?? INQUIRY_SERVICES.find((s) => s.value === raw)?.value;
+  if (fromUrl) return fromUrl;
+  const slug = pathname.match(/^\/(?:services|lp)\/([^/]+)/)?.[1];
+  return inquiryServiceForPage(slug);
+}
+
 /** Map a site service page id to the form's service option. */
 export function inquiryServiceForPage(serviceId: string | undefined): InquiryService | undefined {
   switch (serviceId) {
     case "garage-door-repair-installation":
+    case "garage-door-repair":
       return "garage-repair";
     case "security-camera-installation":
+    case "security-cameras":
       return "security-cameras";
     case "locksmith":
       return "locksmith";
