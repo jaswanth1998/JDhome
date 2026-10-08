@@ -10,6 +10,7 @@ import { theme } from "@/config/theme";
 import { InquiryButton } from "@/components/inquiry";
 import { ServiceIcon } from "@/components/ui";
 import { cn } from "@/lib/utils";
+import { useShowLockoutLine } from "./LockoutLine";
 
 type NavItem = {
   name: string;
@@ -53,6 +54,7 @@ const navigation: NavItem[] = [
 
 export function Header() {
   const pathname = usePathname();
+  const showLockoutLine = useShowLockoutLine();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -103,10 +105,12 @@ export function Header() {
             </span>
           </div>
           <div className="flex items-center gap-6">
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="h-3.5 w-3.5 text-gold-500" aria-hidden="true" />
-              {theme.contact.hours.emergency.display}
-            </span>
+            {showLockoutLine && (
+              <span className="flex items-center gap-1.5">
+                <ShieldCheck className="h-3.5 w-3.5 text-gold-500" aria-hidden="true" />
+                {theme.contact.hours.emergency.display}
+              </span>
+            )}
             <a href={`tel:${theme.contact.phone.tel}`} className="flex items-center gap-1.5 font-semibold text-white hover:text-gold-500">
               <Phone className="h-3.5 w-3.5 text-gold-500" aria-hidden="true" />
               {theme.contact.phone.display}
@@ -361,7 +365,9 @@ export function Header() {
                   <Phone className="h-[18px] w-[18px]" aria-hidden="true" />
                   {theme.contact.phone.display}
                 </a>
-                <p className="text-center text-xs text-ink-3">{theme.contact.hours.emergency.display}</p>
+                {showLockoutLine && (
+                  <p className="text-center text-xs text-ink-3">{theme.contact.hours.emergency.display}</p>
+                )}
               </div>
             </motion.div>
           </>

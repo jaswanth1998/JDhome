@@ -56,8 +56,8 @@ export function businessNode(): JsonLdObject {
       {
         "@type": "OpeningHoursSpecification",
         dayOfWeek: [...theme.contact.hours.regular.days],
-        opens: "08:00",
-        closes: "18:00",
+        opens: theme.contact.hours.regular.opens,
+        closes: theme.contact.hours.regular.closes,
       },
     ],
     sameAs: [theme.contact.social.instagram, theme.contact.social.facebook],

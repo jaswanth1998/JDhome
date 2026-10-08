@@ -152,9 +152,11 @@ export const theme = {
 
     hours: {
       regular: {
-        display: "Mon–Fri 8AM–6PM",
-        days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        time: "8:00 AM - 6:00 PM",
+        display: "Mon–Sun 10AM–7PM",
+        days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        time: "10:00 AM - 7:00 PM",
+        opens: "10:00",
+        closes: "19:00",
       },
       emergency: {
         display: "24/7 car lockout line",
@@ -363,7 +365,7 @@ export const theme = {
           {
             question: "How do I get a quote for locksmith work?",
             answer:
-              "Call us at (289) 991-3277 or send a request through our contact page with a short description of the job, such as how many doors are involved and whether you need rekeying, repair, or new hardware. We will talk through the options and give you clear recommendations before any work begins. Our regular hours are Monday to Friday, 8 AM to 6 PM.",
+              "Call us at (289) 991-3277 or send a request through our contact page with a short description of the job, such as how many doors are involved and whether you need rekeying, repair, or new hardware. We will talk through the options and give you clear recommendations before any work begins. Our regular hours are every day, 10 AM to 7 PM.",
           },
         ],
       },

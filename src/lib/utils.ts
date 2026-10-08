@@ -56,15 +56,10 @@ export function scrollToElement(elementId: string, offset = 100): void {
  */
 export function isBusinessHours(): boolean {
   const now = new Date();
-  const day = now.getDay();
   const hour = now.getHours();
 
-  // Monday = 1, Friday = 5
-  if (day >= 1 && day <= 5) {
-    // 8 AM to 6 PM
-    return hour >= 8 && hour < 18;
-  }
-  return false;
+  // Every day, 10 AM to 7 PM
+  return hour >= 10 && hour < 19;
 }
 
 /**

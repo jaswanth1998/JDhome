@@ -4,6 +4,7 @@ import { Clock, Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
 import { theme } from "@/config/theme";
 import { coreCities } from "@/lib/seo";
 import { getPost } from "@/lib/blog";
+import { LockoutLine } from "./LockoutLine";
 
 const companyLinks = [
   { name: "About Us", href: "/about/" },
@@ -151,8 +152,10 @@ export function Footer() {
                 <Clock className="mt-0.5 h-[18px] w-[18px] text-gold-500" aria-hidden="true" />
                 <span>
                   {theme.contact.hours.regular.display}
-                  <br />
-                  <span className="text-gold-500">{theme.contact.hours.emergency.display}</span>
+                  <LockoutLine>
+                    <br />
+                    <span className="text-gold-500">{theme.contact.hours.emergency.display}</span>
+                  </LockoutLine>
                 </span>
               </li>
             </ul>
