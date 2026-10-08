@@ -1,5 +1,7 @@
 import type { Metadata, MetadataRoute } from "next";
 import { theme, type ServiceCity } from "@/config/theme";
+import { GARAGE_SUB_SERVICES, type GarageSubService } from "@/content/garageServices";
+import { getPost } from "@/lib/blog";
 
 /**
  * Date the static (non-guide) pages were last meaningfully changed. Bump it when
@@ -7,6 +9,9 @@ import { theme, type ServiceCity } from "@/config/theme";
  * build time on every deploy.
  */
 export const SITE_CONTENT_UPDATED = "2026-09-28";
+
+/** Date of the October 2026 service, sub-service and city page rewrite. */
+const SEO_REWRITE_UPDATED = "2026-10-07";
 
 /** Canonical site origin, without a trailing slash. */
 export const SITE_URL = theme.seo.siteUrl;
@@ -114,6 +119,8 @@ export type SiteRoute = {
   path: string;
   changeFrequency: NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
   priority: number;
+  /** ISO date the page's main content last changed; defaults to SITE_CONTENT_UPDATED. */
+  updated?: string;
 };
 
 export type ServiceCategory = (typeof theme.services.categories)[number];
@@ -125,21 +132,31 @@ export const coreCities: readonly ServiceCity[] = theme.serviceCities.filter(
 
 /** Every indexable public route, in sitemap order. */
 export const SITE_ROUTES: readonly SiteRoute[] = [
-  { path: "/", changeFrequency: "weekly", priority: 1.0 },
-  { path: "/services/", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/", changeFrequency: "weekly", priority: 1.0, updated: SEO_REWRITE_UPDATED },
+  { path: "/services/", changeFrequency: "monthly", priority: 0.9, updated: SEO_REWRITE_UPDATED },
   ...theme.services.categories.map(
     (service): SiteRoute => ({
       path: `/services/${service.id}/`,
       changeFrequency: "monthly",
       priority: 0.9,
+      updated: SEO_REWRITE_UPDATED,
     })
   ),
-  { path: "/service-areas/", changeFrequency: "monthly", priority: 0.7 },
+  ...GARAGE_SUB_SERVICES.map(
+    (sub): SiteRoute => ({
+      path: `/services/${sub.slug}/`,
+      changeFrequency: "monthly",
+      priority: 0.8,
+      updated: SEO_REWRITE_UPDATED,
+    })
+  ),
+  { path: "/service-areas/", changeFrequency: "monthly", priority: 0.7, updated: SEO_REWRITE_UPDATED },
   ...coreCities.map(
     (city): SiteRoute => ({
       path: `/service-areas/${city.slug}/`,
       changeFrequency: "monthly",
       priority: 0.7,
+      updated: SEO_REWRITE_UPDATED,
     })
   ),
   { path: "/about/", changeFrequency: "yearly", priority: 0.6 },
@@ -153,4 +170,42 @@ export function getService(slug: string): ServiceCategory | undefined {
 
 export function getCity(slug: string): ServiceCity | undefined {
   return theme.serviceCities.find((city) => city.slug === slug);
+}
+
+/** Garage door sub-service page (/services/{slug}/) from src/content/garageServices.ts. */
+export function getSubService(slug: string): GarageSubService | undefined {
+  return GARAGE_SUB_SERVICES.find((sub) => sub.slug === slug);
+}
+
+/**
+ * Fail the static build when copy links to a page that does not exist, or
+ * writes an internal href without the trailing slash `trailingSlash: true` needs.
+ */
+export function assertInternalHref(href: string): void {
+  if (!href.startsWith("/") || !href.endsWith("/")) {
+    throw new Error(`Internal link "${href}" must start and end with "/"`);
+  }
+  const blog = href.match(/^\/blog\/([^/]+)\/$/);
+  if (blog && !getPost(blog[1])) throw new Error(`Link to missing guide "${href}"`);
+  const service = href.match(/^\/services\/([^/]+)\/$/);
+  if (service && !getService(service[1]) && !getSubService(service[1])) {
+    throw new Error(`Link to missing service page "${href}"`);
+  }
+  const city = href.match(/^\/service-areas\/([^/]+)\/$/);
+  if (city && !getCity(city[1])?.core) throw new Error(`Link to missing city page "${href}"`);
+}
+
+/**
+ * Structural copy of theme.ts's ServiceSection, kept local so this helper
+ * compiles whether or not a given service defines `sections`.
+ */
+type ServiceSection = {
+  heading: string;
+  paragraphs: readonly string[];
+  bullets?: readonly string[];
+};
+
+/** Long-form H2 sections for a service page (empty when the service has none). */
+export function getServiceSections(service: ServiceCategory): readonly ServiceSection[] {
+  return (service as unknown as { sections?: readonly ServiceSection[] }).sections ?? [];
 }

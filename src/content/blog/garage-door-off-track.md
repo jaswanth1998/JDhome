@@ -30,7 +30,7 @@ Even a gentle nudge from a bumper while the door is moving can push rollers out 
 
 ### A broken or slack cable
 
-The lift cables raise both sides of the door evenly. If one breaks or slips off its drum, one side drops and the door twists out of the track. A [broken spring](/blog/broken-garage-door-spring/) often causes cables to lose tension too.
+The lift cables raise both sides of the door evenly. If one breaks or slips off its drum, one side drops and the door twists out of the track. A [broken spring](/blog/broken-garage-door-spring/) often causes cables to lose tension too. Our [broken cable repair](/services/garage-door-spring-repair/) service replaces the cable and checks the drums and springs it works with.
 
 ### Bent or misaligned tracks
 

@@ -81,7 +81,7 @@ If the door doesn't reverse, **stop using the automatic opener** until it's fixe
 - Wiring is damaged or sensors are broken
 - The door is heavy, noisy, or uneven (a sign the problem isn't only the sensors)
 
-Our [garage door repair service](/services/garage-door-repair-installation/) includes sensor replacement, rewiring, opener force adjustment, and a full safety test. If the door still won't close after these checks, our [troubleshooting guide](/blog/garage-door-wont-open/) covers other causes.
+Our [opener and safety sensor repair](/services/garage-door-opener-installation/) service includes sensor replacement, rewiring, opener force adjustment, and a full safety test. When the door itself is heavy or uneven, our [garage door repair service](/services/garage-door-repair-installation/) covers the springs, cables, and rollers as well. If the door still won't close after these checks, our [troubleshooting guide](/blog/garage-door-wont-open/) covers other causes.
 
 ## Frequently asked questions
 

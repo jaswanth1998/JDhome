@@ -79,6 +79,7 @@ export default function RootLayout({
   return (
     <html lang="en-CA" className={`${inter.variable} ${manrope.variable}`}>
       <body className="antialiased">
+        <link rel="preconnect" href="https://images.unsplash.com" />
         <GoogleTagManagerNoScript />
         {children}
         <GoogleTagManager />

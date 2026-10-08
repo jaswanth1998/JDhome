@@ -77,7 +77,7 @@ A new door is a good time to review the opener. Our [opener guide](/blog/choosin
 
 ## What to expect from installation
 
-A professional installation from our [garage door installation service](/services/garage-door-repair-installation/) typically includes:
+A professional installation from our [garage door installation service](/services/garage-door-installation/) typically includes:
 
 1. Measuring the opening, headroom, and side room
 2. Removing and disposing of the old door
@@ -87,7 +87,7 @@ A professional installation from our [garage door installation service](/service
 6. Testing safety sensors and the auto-reverse
 7. Walking you through the new door and remotes
 
-Not sure whether you need a new door at all? Read [repair or replace your garage door](/blog/repair-or-replace-garage-door/) first.
+Not sure whether you need a new door at all? Read [repair or replace your garage door](/blog/repair-or-replace-garage-door/) first. If the door you have only needs a fix, our [garage door repair service](/services/garage-door-repair-installation/) handles springs, cables, rollers, and openers.
 
 ## Frequently asked questions
 

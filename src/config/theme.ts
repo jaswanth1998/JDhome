@@ -23,6 +23,12 @@ export type ServiceFaq = { question: string; answer: string };
 /** Primary services lead the site; add-ons are listed as extra services. */
 export type ServiceTier = "primary" | "addon";
 
+/**
+ * An H2 section of plain-text service-page copy, rendered after the overview on
+ * /services/[slug]/. Links are added by the page component, never written here.
+ */
+export type ServiceSection = { heading: string; paragraphs: readonly string[]; bullets?: readonly string[] };
+
 /* ==========================================
    SERVICE CITIES
    Core cities get dedicated service-area pages; the rest are listed only.
@@ -33,7 +39,7 @@ const serviceCities = [
     name: "Oshawa",
     region: "Durham Region",
     core: true,
-    blurb: "Oshawa is our home base, so it is the area we can usually reach most quickly for garage door repairs, security camera installs, and add-on locksmith work.",
+    blurb: "Oshawa is our home base for garage door repairs, security camera installs, and add-on locksmith work.",
   },
   {
     slug: "whitby",
@@ -93,6 +99,8 @@ type ServiceDefinition = {
   badge?: string;
   features: readonly string[];
   seo: { title: string; description: string; h1: string };
+  /** Long-form H2 sections shown below the overview (read via getServiceSections in src/lib/seo.ts). */
+  sections?: readonly ServiceSection[];
   faqs: readonly ServiceFaq[];
 };
 
@@ -197,10 +205,10 @@ export const theme = {
      SEO & META INFORMATION
      ========================================== */
   seo: {
-    defaultTitle: "Garage Door & Camera Installation & Repair Oshawa | JD Home",
+    defaultTitle: "Garage Door Company in Oshawa & Durham | JD Home Services",
     titleTemplate: "%s | JD Home Services",
-    defaultDescription: "Garage door and security camera installation and repair in Oshawa, Durham Region, and surrounding areas. Local experts, free quotes: (289) 991-3277.",
-    keywords: "garage door repair Oshawa, garage door installation Durham Region, garage door spring repair Oshawa, security camera installation Oshawa, CCTV installation Durham Region, PoE camera system, locksmith Oshawa, car lockout Oshawa",
+    defaultDescription: "Oshawa-based garage door installation and repair, plus security camera systems for homes and businesses. Open 7 days, free quotes: (289) 991-3277.",
+    keywords: "garage door company Oshawa, garage door contractor Oshawa, garage door repair Oshawa, garage door installation Oshawa, garage door opener installation Oshawa, garage door spring repair Oshawa, garage door repair Durham Region, security camera installation Oshawa, locksmith Oshawa, lock rekeying Durham Region, car lockout Oshawa",
     siteUrl: "https://www.jdhomeservices.ca",
     ogImage: "/og-image.png",
     // No X/Twitter account exists for JD Home Services. Left empty on purpose —
@@ -217,10 +225,10 @@ export const theme = {
       {
         id: "garage-door-repair-installation",
         tier: "primary",
-        name: "Garage Door Installation & Repair",
+        name: "Garage Door Repair",
         shortName: "Garage Doors",
-        shortDescription: "New garage doors and openers installed, and existing doors repaired: springs, cables, openers, and more, done right the first time.",
-        description: "We install new garage doors and openers, and we repair the ones you already have. Whether you want a brand-new door or yours is stuck, off-track, noisy, or damaged, we explain your options in plain language and do the work carefully, with safety and long-term reliability in mind.",
+        shortDescription: "Garage door repairs in Oshawa and across Durham Region: springs, cables, openers, off-track and noisy doors, plus new doors and openers when you need them.",
+        description: "We repair garage doors across Oshawa and Durham Region, from broken springs and cables to openers, off-track and noisy doors, and we install new doors and openers when a repair no longer makes sense. We explain your options in plain language and do the work carefully, with safety and long-term reliability in mind.",
         icon: "Warehouse",
         image: "garageService",
         features: [
@@ -232,11 +240,70 @@ export const theme = {
           "Safety and balance check on every visit",
         ],
         seo: {
-          title: "Garage Door Installation & Repair Oshawa | JD Home",
+          title: "Garage Door Repair Oshawa | Springs, Openers | JD Home",
           description:
-            "New garage door and opener installation, plus spring, cable, and door repairs in Oshawa, Durham Region, and surrounding areas. Free quotes.",
-          h1: "Garage Door Installation & Repair in Durham Region & Surrounding Areas",
+            "Broken spring, snapped cable or a door off its track? Oshawa-based garage door repair and installation across Durham. Free quotes: (289) 991-3277.",
+          h1: "Garage Door Repair in Oshawa & Durham Region",
         },
+        sections: [
+          {
+            heading: "Garage door repair in Oshawa: what we fix",
+            paragraphs: [
+              "We are based in Oshawa, and most of the garage door calls we take start the same way: a door that was fine yesterday is heavy, crooked, loud or simply refuses to move today. We look at the whole door rather than only the part that gave out, because one worn component usually puts extra strain on everything connected to it.",
+              "These are the problems we repair most often, from the springs overhead to the opener on the ceiling:",
+            ],
+            bullets: [
+              "Springs: a snapped spring is the usual reason a door suddenly feels far too heavy to lift or stops a few inches off the floor. Our garage door spring and cable repair service replaces it with a correctly matched part and rebalances the door.",
+              "Cables: frayed, slack or broken lift cables leave one side of the door lower than the other. We replace the cable and check the drums it winds around so the door lifts evenly again.",
+              "Rollers and hinges: worn rollers cause grinding, shaking and jerky travel. Swapping them out is often the simplest way to make a rough door run smoothly again.",
+              "Off-track doors: a bump from a vehicle or a failed cable can pull rollers out of the track. We set the door back in place, straighten or replace bent track, and find out why it came off in the first place.",
+              "Noisy doors: squealing, banging and rattling almost always point to a specific worn part. We track down the cause instead of just spraying lubricant and hoping.",
+              "Damaged panels: a dented or cracked section can sometimes be replaced on its own, as long as a matching section is still available for your door.",
+              "Openers: dead remotes, keypads that stop responding, blinking safety sensors and motors that hum without moving are all handled by our garage door opener installation and repair service.",
+            ],
+          },
+          {
+            heading: "Is it safe to use the door? What to do before we arrive",
+            paragraphs: [
+              "If the door looks crooked, made a loud bang, or suddenly feels much heavier than usual, leave it where it is. Running the opener against a broken spring or a slack cable can bend the track, strain the motor and turn one repair into several.",
+              "Springs, cables and the bottom brackets hold a great deal of tension, so please do not try to loosen, adjust or remove them yourself. If the door is stuck open, unplug the opener and keep children, pets and vehicles away from the opening until it has been looked at.",
+              "When you call, tell us what you see and hear: a gap in a spring, a cable hanging loose, a door sitting at an angle, or an opener that clicks without lifting. That helps us understand the problem before the visit, and we will confirm a realistic arrival window during the call.",
+            ],
+          },
+          {
+            heading: "What a repair visit looks like",
+            paragraphs: [
+              "Every repair follows the same straightforward order, so you always know what is happening and why:",
+            ],
+            bullets: [
+              "Diagnose: we inspect the springs, cables, rollers, tracks, panels and opener, not only the part you called about.",
+              "Explain: we tell you what we found in plain language, and whether repairing or replacing makes more sense for your door.",
+              "Quote: you get a free, no-obligation quote before any work begins, with no pressure to go ahead.",
+              "Fix: we carry out the work you approved, with safety and long-term reliability in mind.",
+              "Check: every visit ends with a safety and balance check, including the auto-reverse and the safety sensors.",
+              "Walk-through: we test everything and walk you through it before we leave, so you know how the door should feel and sound from now on.",
+            ],
+          },
+          {
+            heading: "Repair or replace?",
+            paragraphs: [
+              "Most problems with springs, cables, rollers and openers can be fixed, and on a door that is otherwise in good shape, a repair is usually the sensible choice. You get honest advice on repair versus replacement, and we will not talk you into a new door you do not need.",
+              "Replacement starts to make sense when several panels are badly dented or rusted through, when the same parts keep failing, or when you want better insulation and a fresh look for the front of the house. Our guide on whether to repair or replace a garage door walks through the warning signs in more detail if you would like to read up before we visit.",
+            ],
+          },
+          {
+            heading: "New doors and openers",
+            paragraphs: [
+              "When a new door really is the better option, we take care of that too. Our new garage door installation service covers removal of the old door, installation, balancing, opener setup, and a full safety test. If the door itself is sound and only the opener is failing, a replacement opener can usually be fitted to the existing door once we have confirmed the springs and balance are right. Either way, the quote comes first and the walk-through comes last.",
+            ],
+          },
+          {
+            heading: "Who we work with",
+            paragraphs: [
+              "Most of our garage door work is for homeowners in Oshawa and the rest of Durham Region, from single doors on older houses to double doors on newer builds. Landlords and property managers call us to keep the doors at rental homes working between tenants, often alongside rekeying and cameras covering entrances and parking. For retail and small business clients, we also look after doors at small commercial properties such as storefronts and stock rooms.",
+            ],
+          },
+        ],
         faqs: [
           {
             question: "Do you repair garage doors, or only install new ones?",
@@ -263,6 +330,16 @@ export const theme = {
             answer:
               "Yes. We repair and install garage doors from our Oshawa base across Durham Region, including Whitby, Ajax, Pickering, Courtice, and Bowmanville, and we also travel to nearby communities such as Port Perry, Uxbridge, Cobourg, Peterborough, and Lindsay. Call us with your location and we will confirm availability.",
           },
+          {
+            question: "Do you replace broken garage door springs?",
+            answer:
+              "Yes, it is one of the repairs we do most. We replace the broken spring with one matched to your door, check the cables and drums while we are there, and finish with a balance test and safety check. If your door uses a pair of springs, we will tell you whether replacing both together makes sense so the door stays balanced.",
+          },
+          {
+            question: "How much does garage door repair cost?",
+            answer:
+              "Every job is different, so we don't publish set prices. The cost depends on what has failed (a spring, a cable, rollers or the opener), the size and weight of the door, and whether parts should be replaced in pairs. We inspect the door, explain what we found, and give you a free, no-obligation quote before any work begins.",
+          },
         ],
       },
       {
@@ -288,8 +365,24 @@ export const theme = {
           title: "Security Camera Installation Oshawa & Durham | JD Home",
           description:
             "Smart security camera (CCTV) installation in Oshawa and Durham Region: people and car alerts, easy footage search, wired cameras, phone access.",
-          h1: "Security Camera Installation in Durham Region & Surrounding Areas",
+          h1: "Security Camera Installation in Oshawa & Durham Region",
         },
+        sections: [
+          {
+            heading: "Wired camera systems for Oshawa and Durham Region properties",
+            paragraphs: [
+              "From our base in Oshawa, we install wired security camera systems for houses, rental properties and businesses across Durham Region. Each camera runs on a single PoE cable that carries both power and video, recordings are kept on a network video recorder (NVR) at the property, and the phone app lets you watch live, replay clips and receive alerts wherever you are.",
+              "Smart detection separates people and vehicles from shadows, rain and passing animals, so your phone only buzzes for the events you care about. On systems that support it, smart search lets you type a short description and jump straight to the matching footage instead of scrolling through a whole afternoon of video.",
+            ],
+          },
+          {
+            heading: "Planning coverage before anything is mounted",
+            paragraphs: [
+              "Every install starts with a walk around the property to agree where each camera should go: front and side entrances, the driveway, the backyard, parking areas or a stock room. Getting the angles right does more for your coverage than simply adding more cameras. At rentals, we aim cameras at shared entrances and parking without pointing them into a neighbour's yard.",
+              "On installation day we route the cabling as neatly as the building allows, set up the recorder and the app on your phone, and test every camera from your phone before we pack up. We finish with a full walkthrough so you know how to find a clip when you need one.",
+            ],
+          },
+        ],
         faqs: [
           {
             question: "What does AI person detection actually do?",
@@ -336,17 +429,68 @@ export const theme = {
           "Clear recommendations and professional workmanship",
         ],
         seo: {
-          title: "Locksmith in Oshawa & Durham Region | JD Home Services",
+          title: "Locksmith Oshawa | Lock Changes & Rekeying | JD Home",
           description:
-            "Lock changes, rekeying, deadbolt installs, and lock repair for homes, rentals, and businesses in Oshawa, Durham Region, and surrounding areas.",
-          h1: "Locksmith Services in Durham Region & Surrounding Areas",
+            "Lock changes, rekeying after a move or tenant turnover, deadbolt installs and lock repair in Oshawa and Durham. Open 7 days. Free quotes: (289) 991-3277.",
+          h1: "Locksmith Services in Oshawa & Durham Region",
         },
-        faqs: [
+        sections: [
           {
-            question: "Do you handle both residential and commercial locksmith work?",
-            answer:
-              "Yes. Our locksmith service covers homes, offices, storefronts, and rental properties throughout Durham Region and surrounding areas. Typical jobs include lock changes, lock repair and alignment, rekeying, and installing new deadbolts, knobs, levers, and entry hardware.",
+            heading: "Lock changes and rekeying in Oshawa",
+            paragraphs: [
+              "From our base in Oshawa, we change and rekey locks for houses, rental units, offices and storefronts. Most of these calls come from people who have just moved in, landlords getting a unit ready between tenants, and owners who have simply lost track of how many keys are out there.",
+              "Rekeying changes the pins inside the lock so the old keys stop working, while the existing hardware stays on the door. A lock change swaps the hardware itself, which is the better route when a lock is worn, damaged, or not the style or strength you want. We do both, and we will tell you plainly which one suits your doors.",
+            ],
           },
+          {
+            heading: "Rekey or replace: which do you need?",
+            paragraphs: [
+              "If your locks turn smoothly and you are happy with how they look, rekeying is usually all you need. If a lock sticks, the bolt does not line up with the frame, or you want sturdier hardware, replacing it is the better choice. Our guide, Rekey or Replace Your Locks? What to Do After Moving In, explains the difference in more detail.",
+            ],
+          },
+          {
+            heading: "Deadbolts, knobs, levers and entry hardware",
+            paragraphs: [
+              "We install new deadbolts, door knobs, levers and handle sets, and we replace tired entry hardware on front, side and back doors. A good install is about more than the lock itself: we make sure the bolt fully extends, the strike plate lines up with the frame, and the door latches without being pushed or lifted.",
+              "Doors shift as houses settle and seasons change, which is a common reason locks start to stick or stop latching. Lock repair and alignment can often fix that without replacing anything, and we will say so when it is the better option.",
+            ],
+            bullets: [
+              "Deadbolt installation and replacement",
+              "Door knob, lever and handle set installation",
+              "Strike plate and latch alignment",
+              "Repairs for sticking, stiff or worn locks",
+            ],
+          },
+          {
+            heading: "For landlords and property managers",
+            paragraphs: [
+              "Tenant turnover is the most common reason landlords call us. Rekeying between tenants means the previous occupant's keys no longer open the unit, without replacing the hardware every time a lease ends. Booking it for the days after a move-out inspection means the incoming tenant starts with keys that nobody else holds.",
+              "Because we also install security cameras and look after garage doors, we can cover entrances and parking areas with cameras and keep the garage door at a rental home working, all from one local team. That means fewer contractors to coordinate and one number to call for the property.",
+            ],
+          },
+          {
+            heading: "For storefronts and offices",
+            paragraphs: [
+              "Businesses call us for lock changes after a staff member leaves, rekeying when keys have gone missing, and sturdier entry hardware on front doors, back doors and stock rooms. Let us know your opening hours when you call and we will plan the visit around them where we can. When a key has left with a former employee, rekeying the affected locks is usually less disruptive than replacing them.",
+              "Many shops and offices pair a lock review with a security camera installation that covers the entrance, the counter and the stock room, so the doors that matter are both secured and recorded.",
+            ],
+          },
+          {
+            heading: "What our locksmith service covers",
+            paragraphs: [
+              "Our locksmith work is planned lock work during our regular hours, every day from 10 AM to 7 PM: lock changes, rekeying, deadbolt, knob and lever installs, lock repair and alignment, and security upgrades after a move-in or tenant turnover.",
+              "If you are locked out of a vehicle, call our 24/7 car lockout line instead. For anything not listed here, call and ask, and we will tell you honestly whether it is something we handle.",
+              "To get a quote, tell us how many doors are involved, whether you are after rekeying, new hardware or a repair, and roughly when you would like the work done. You get a free, no-obligation quote before any work begins, and we finish by testing every lock and key with you.",
+            ],
+          },
+          {
+            heading: "Locksmith work across Durham Region",
+            paragraphs: [
+              "We travel from Oshawa for lock changes and rekeying throughout Durham Region. In Whitby and Brooklin, we change locks for new homeowners and between tenants at rental units. In Ajax, we install deadbolts and replace worn entry hardware on houses and rentals. In Pickering, we handle lock changes for homes, offices and storefronts. In Courtice, part of the Municipality of Clarington, we make sure the old keys stop working for people who have just bought a home. In Bowmanville, also in Clarington, we repair and realign locks that no longer latch properly and install new deadbolts.",
+            ],
+          },
+        ],
+        faqs: [
           {
             question: "Should I rekey or replace my locks after moving in or changing tenants?",
             answer:
@@ -366,6 +510,16 @@ export const theme = {
             question: "How do I get a quote for locksmith work?",
             answer:
               "Call us at (289) 991-3277 or send a request through our contact page with a short description of the job, such as how many doors are involved and whether you need rekeying, repair, or new hardware. We will talk through the options and give you clear recommendations before any work begins. Our regular hours are every day, 10 AM to 7 PM.",
+          },
+          {
+            question: "Can you rekey all my locks to one key?",
+            answer:
+              "Often, yes, depending on the key type. When the locks on your doors take the same kind of key, we can usually rekey them so a single key opens the front, back and side doors. Locks that take different key types may not be compatible, so we check your hardware first and explain the options, including replacing a lock where that is the simpler fix.",
+          },
+          {
+            question: "Do you handle lock changes for businesses?",
+            answer:
+              "Yes. We change and rekey locks for offices, storefronts and other workplaces, including back doors and stock rooms. It is a common request after a staff change or when keys go missing. Tell us how many doors are involved and when you are open, and we will give you a free, no-obligation quote and plan the work around your business where we can.",
           },
         ],
       },
@@ -391,8 +545,24 @@ export const theme = {
           title: "24/7 Car Lockout Service Oshawa & Durham | JD Home",
           description:
             "Locked out of your car in Oshawa or Durham Region? Get 24/7 car lockout help with damage-free entry when possible. Call JD Home Services: (289) 991-3277.",
-          h1: "24/7 Car Lockout Service in Durham Region & Surrounding Areas",
+          h1: "24/7 Car Lockout Service in Oshawa & Durham Region",
         },
+        sections: [
+          {
+            heading: "Car lockout help in Oshawa and across Durham Region",
+            paragraphs: [
+              "Our car lockout line is answered 24/7, including evenings, weekends and holidays. Whether the keys are sitting on the seat in a parking lot in Oshawa or the lock has jammed in your own driveway in Whitby, Ajax, Pickering, Courtice or Bowmanville, call (289) 991-3277 at any hour and we will help you get back into the vehicle.",
+              "We use damage-free entry methods whenever possible and explain what we plan to do before we start, so there are no surprises. Lockout service covers most cars, SUVs, vans and light trucks, and it is the one part of our work that runs outside our regular 10 AM to 7 PM hours.",
+            ],
+          },
+          {
+            heading: "What to expect when you call about a car lockout",
+            paragraphs: [
+              "Tell us where you are, what you are driving, and whether the keys are locked inside or the lock itself has stopped working. We confirm the details, give you a realistic arrival estimate based on your location, the time of day and traffic, and keep you posted by phone while you wait.",
+              "Once the door is open, we check that the door and lock work normally before we leave. If the lock turns out to be damaged, we explain what we found and your options rather than guessing. Keep your phone switched on and nearby so we can reach you if we need directions to the vehicle.",
+            ],
+          },
+        ],
         faqs: [
           {
             question: "Are you available 24/7 for car lockouts?",
@@ -422,6 +592,39 @@ export const theme = {
         ],
       },
     ] as const satisfies readonly ServiceDefinition[],
+
+    /**
+     * Garage door hub + the three garage sub-service pages, for the header dropdown,
+     * footer, and home page. Slugs are fixed by src/content/garageServices.ts; the
+     * names double as link text, so keep them in step with the anchor map there
+     * (any label containing "installation" must never point at the hub).
+     */
+    garageLinks: [
+      {
+        name: "All garage door repairs",
+        href: "/services/garage-door-repair-installation/",
+        icon: "Warehouse",
+        description: "Springs, cables, rollers, openers, and off-track or noisy doors.",
+      },
+      {
+        name: "New garage door installation",
+        href: "/services/garage-door-installation/",
+        icon: "DoorOpen",
+        description: "Old or damaged doors replaced, balanced, and safety-tested.",
+      },
+      {
+        name: "Garage door opener installation & repair",
+        href: "/services/garage-door-opener-installation/",
+        icon: "Cog",
+        description: "Openers, remotes, keypads, and safety sensors.",
+      },
+      {
+        name: "Garage door spring & cable repair",
+        href: "/services/garage-door-spring-repair/",
+        icon: "Zap",
+        description: "Broken springs and cables replaced and the door rebalanced.",
+      },
+    ],
   },
 
   /* ==========================================
@@ -484,7 +687,7 @@ export const theme = {
       id: 3,
       quote: "Reliable and trustworthy. They fixed our garage door issue quickly and explained exactly what needed repair. Quality work at a fair price.",
       author: "Jennifer L.",
-      service: "Garage Door Installation & Repair",
+      service: "Garage Door Repair",
       rating: 5,
     },
     {

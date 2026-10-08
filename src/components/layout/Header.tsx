@@ -1,56 +1,85 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FocusEvent, type KeyboardEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, Clock, MapPin, Menu, Phone, ShieldCheck, X } from "lucide-react";
 import { theme } from "@/config/theme";
+import { HUB_SLUG } from "@/content/garageServices";
 import { InquiryButton } from "@/components/inquiry";
 import { ServiceIcon } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { useShowLockoutLine } from "./LockoutLine";
 
+type NavChild = { name: string; href: string; description: string; icon: string };
+
+type NavDropdown = {
+  /** id of the always-rendered sub-list, referenced by the toggle's aria-controls. */
+  id: string;
+  /** Accessible name for a chevron-only toggle (used when the parent label is itself a link). */
+  toggleLabel?: string;
+  children: readonly NavChild[];
+};
+
 type NavItem = {
   name: string;
   href: string;
-  children?: { name: string; href: string; description: string; icon: string }[];
+  /** When true the parent label is a real link and a separate chevron button toggles the sub-list. */
+  linked?: boolean;
+  dropdown?: NavDropdown;
 };
 
+const garageLinks = theme.services.garageLinks;
 const primaryServices = theme.services.categories.filter((s) => s.tier === "primary");
 const addonServices = theme.services.categories.filter((s) => s.tier === "addon");
 
 const navigation: NavItem[] = [
-  ...primaryServices.map((s) => ({ name: s.shortName, href: `/services/${s.id}/` })),
+  ...primaryServices.map((s): NavItem =>
+    s.id === HUB_SLUG
+      ? {
+          name: s.shortName,
+          href: `/services/${s.id}/`,
+          linked: true,
+          dropdown: { id: "nav-sub-garage", toggleLabel: "Show garage door services", children: garageLinks },
+        }
+      : { name: s.shortName, href: `/services/${s.id}/` },
+  ),
   {
     name: "More",
     href: "/services/",
-    children: [
-      ...addonServices.map((s) => ({
-        name: s.name,
-        href: `/services/${s.id}/`,
-        description: s.shortDescription,
-        icon: s.icon,
-      })),
-      {
-        name: "All services",
-        href: "/services/",
-        description: "Everything we do, in one place.",
-        icon: "Wrench",
-      },
-      {
-        name: "About us",
-        href: "/about/",
-        description: "Who we are and how we work.",
-        icon: "Info",
-      },
-    ],
+    dropdown: {
+      id: "nav-sub-more",
+      children: [
+        ...addonServices.map((s) => ({
+          name: s.name,
+          href: `/services/${s.id}/`,
+          description: s.shortDescription,
+          icon: s.icon,
+        })),
+        {
+          name: "All services",
+          href: "/services/",
+          description: "Everything we do, in one place.",
+          icon: "Wrench",
+        },
+        {
+          name: "About us",
+          href: "/about/",
+          description: "Who we are and how we work.",
+          icon: "Info",
+        },
+      ],
+    },
   },
   { name: "Service Areas", href: "/service-areas/" },
   { name: "Guides", href: "/blog/" },
   { name: "Contact", href: "/contact/" },
 ];
+
+/** Strip trailing slashes so paths compare the same whether or not the router reports one. */
+const normalizePath = (path: string) => path.replace(/\/+$/, "") || "/";
 
 export function Header() {
   const pathname = usePathname();
@@ -81,12 +110,42 @@ export function Header() {
     };
   }, [isMobileMenuOpen]);
 
+  // Close an open dropdown when a pointer (mouse, touch or pen) goes down outside every dropdown <li>.
+  useEffect(() => {
+    if (!openDropdown) return;
+    const onDown = (e: PointerEvent) => {
+      if (!(e.target as Element).closest("[data-nav-dropdown]")) setOpenDropdown(null);
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [openDropdown]);
+
   // Compare without trailing slashes so it works whether or not the router reports one
   const isActive = (href: string) => {
-    const current = pathname.replace(/\/+$/, "") || "/";
-    const target = href.replace(/\/+$/, "") || "/";
+    const current = normalizePath(pathname);
+    const target = normalizePath(href);
     if (target === "/") return current === "/";
     return current === target || current.startsWith(`${target}/`);
+  };
+  /** Exact page match, for dropdown entries such as "/services/" that prefix other pages. */
+  const isCurrent = (href: string) => normalizePath(pathname) === normalizePath(href);
+  /** A nav item is highlighted when its own page or any page in its dropdown is open. */
+  const isSectionActive = (item: NavItem) =>
+    (item.linked && isActive(item.href)) || (item.dropdown?.children.some((c) => isCurrent(c.href)) ?? false);
+
+  const closeDropdown = (id: string) => setOpenDropdown((current) => (current === id ? null : current));
+
+  // Close when focus leaves the whole <li> (toggle, parent link and sub-list).
+  const handleDropdownBlur = (id: string) => (event: FocusEvent<HTMLLIElement>) => {
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) closeDropdown(id);
+  };
+
+  // Escape closes the open sub-list and returns focus to its toggle.
+  const handleDropdownKeyDown = (id: string) => (event: KeyboardEvent<HTMLLIElement>) => {
+    if (event.key !== "Escape" || openDropdown !== id) return;
+    event.stopPropagation();
+    setOpenDropdown(null);
+    event.currentTarget.querySelector<HTMLButtonElement>(`button[aria-controls="${id}"]`)?.focus();
   };
 
   return (
@@ -152,85 +211,124 @@ export function Header() {
               </span>
             </Link>
 
-            {/* Desktop navigation */}
+            {/* Desktop navigation. Sub-lists stay in the DOM (crawlable links) and are shown with visibility + a CSS transition. */}
             <ul className="hidden items-center xl:flex xl:gap-1 min-[1440px]:gap-2">
-              {navigation.map((item) => (
-                <li
-                  key={item.name}
-                  className="relative"
-                  onMouseEnter={() => item.children && setOpenDropdown(item.name)}
-                  onMouseLeave={() => item.children && setOpenDropdown(null)}
-                >
-                  {item.children ? (
-                    <button
-                      type="button"
-                      aria-expanded={openDropdown === item.name}
-                      onClick={() => setOpenDropdown(openDropdown === item.name ? null : item.name)}
-                      className={cn(
-                        "flex items-center gap-1 whitespace-nowrap rounded-lg px-2.5 py-2 text-[0.9375rem] xl:px-3 font-medium transition-colors",
-                        item.children.some((c) => isActive(c.href))
-                          ? "text-navy-800"
-                          : "text-ink-2 hover:text-navy-800",
-                      )}
-                    >
-                      {item.name}
-                      <ChevronDown
-                        className={cn("h-4 w-4 transition-transform", openDropdown === item.name && "rotate-180")}
-                        aria-hidden="true"
-                      />
-                    </button>
-                  ) : (
-                    <Link
-                      href={item.href}
-                      aria-current={isActive(item.href) ? "page" : undefined}
-                      className={cn(
-                        "relative block whitespace-nowrap rounded-lg px-2.5 py-2 text-[0.9375rem] xl:px-3 font-medium transition-colors",
-                        isActive(item.href) ? "text-navy-800" : "text-ink-2 hover:text-navy-800",
-                      )}
-                    >
-                      {item.name}
-                      {isActive(item.href) && (
-                        <span className="absolute inset-x-3 -bottom-[1px] h-0.5 rounded-full bg-gold-500" />
-                      )}
-                    </Link>
-                  )}
+              {navigation.map((item) => {
+                const dropdown = item.dropdown;
+                const sectionActive = dropdown ? isSectionActive(item) : isActive(item.href);
+                const isOpen = dropdown ? openDropdown === dropdown.id : false;
+                const toggle = dropdown
+                  ? () => setOpenDropdown(isOpen ? null : dropdown.id)
+                  : undefined;
 
-                  {item.children && (
-                    <AnimatePresence>
-                      {openDropdown === item.name && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 6 }}
-                          transition={{ duration: 0.15 }}
-                          className="absolute left-1/2 top-full w-80 -translate-x-1/2 pt-2"
+                return (
+                  <li
+                    key={item.name}
+                    className="relative"
+                    data-nav-dropdown={dropdown ? "" : undefined}
+                    onMouseEnter={dropdown ? () => setOpenDropdown(dropdown.id) : undefined}
+                    onMouseLeave={dropdown ? () => closeDropdown(dropdown.id) : undefined}
+                    onBlur={dropdown ? handleDropdownBlur(dropdown.id) : undefined}
+                    onKeyDown={dropdown ? handleDropdownKeyDown(dropdown.id) : undefined}
+                  >
+                    {dropdown && !item.linked ? (
+                      <button
+                        type="button"
+                        aria-expanded={isOpen}
+                        aria-controls={dropdown.id}
+                        onClick={toggle}
+                        className={cn(
+                          "flex items-center gap-1 whitespace-nowrap rounded-lg px-2.5 py-2 text-[0.9375rem] xl:px-3 font-medium transition-colors",
+                          sectionActive ? "text-navy-800" : "text-ink-2 hover:text-navy-800",
+                        )}
+                      >
+                        {item.name}
+                        <ChevronDown
+                          className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")}
+                          aria-hidden="true"
+                        />
+                      </button>
+                    ) : (
+                      <div className="flex items-center">
+                        <Link
+                          href={item.href}
+                          aria-current={isCurrent(item.href) ? "page" : undefined}
+                          className={cn(
+                            "relative block whitespace-nowrap rounded-lg py-2 pl-2.5 text-[0.9375rem] xl:pl-3 font-medium transition-colors",
+                            dropdown ? "pr-1" : "pr-2.5 xl:pr-3",
+                            sectionActive ? "text-navy-800" : "text-ink-2 hover:text-navy-800",
+                          )}
                         >
-                          <ul className="overflow-hidden rounded-[var(--radius-lg)] border border-line bg-white p-2 shadow-[var(--shadow-lg)]">
-                            {item.children.map((child) => (
-                              <li key={child.href + child.name}>
-                                <Link
-                                  href={child.href}
-                                  className="flex gap-3 rounded-lg p-3 transition-colors hover:bg-paper-cool"
-                                >
-                                  <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-paper-cool text-navy-700">
-                                    <ServiceIcon name={child.icon} className="h-[18px] w-[18px]" />
+                          {item.name}
+                          {sectionActive && (
+                            <span
+                              className={cn(
+                                "absolute -bottom-[1px] h-0.5 rounded-full bg-gold-500",
+                                dropdown ? "left-3 right-1" : "inset-x-3",
+                              )}
+                            />
+                          )}
+                        </Link>
+                        {dropdown && (
+                          <button
+                            type="button"
+                            aria-expanded={isOpen}
+                            aria-controls={dropdown.id}
+                            aria-label={dropdown.toggleLabel}
+                            onClick={toggle}
+                            className={cn(
+                              "rounded-md p-1 transition-colors",
+                              sectionActive ? "text-navy-800" : "text-ink-2 hover:text-navy-800",
+                            )}
+                          >
+                            <ChevronDown
+                              className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")}
+                              aria-hidden="true"
+                            />
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {dropdown && (
+                      <div
+                        className={cn(
+                          "absolute left-1/2 top-full w-80 -translate-x-1/2 pt-2 transition-[opacity,translate,visibility] duration-150",
+                          isOpen ? "visible translate-y-0 opacity-100" : "invisible translate-y-1.5 opacity-0",
+                        )}
+                      >
+                        <ul
+                          id={dropdown.id}
+                          className="overflow-hidden rounded-[var(--radius-lg)] border border-line bg-white p-2 shadow-[var(--shadow-lg)]"
+                        >
+                          {dropdown.children.map((child) => (
+                            <li key={child.href + child.name}>
+                              <Link
+                                href={child.href}
+                                aria-current={isCurrent(child.href) ? "page" : undefined}
+                                className={cn(
+                                  "flex gap-3 rounded-lg p-3 transition-colors hover:bg-paper-cool",
+                                  isCurrent(child.href) && "bg-paper-cool",
+                                )}
+                              >
+                                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-paper-cool text-navy-700">
+                                  <ServiceIcon name={child.icon} className="h-[18px] w-[18px]" />
+                                </span>
+                                <span>
+                                  <span className="block text-sm font-semibold text-ink">{child.name}</span>
+                                  <span className="block text-xs leading-relaxed text-ink-3">
+                                    {child.description}
                                   </span>
-                                  <span>
-                                    <span className="block text-sm font-semibold text-ink">{child.name}</span>
-                                    <span className="block text-xs leading-relaxed text-ink-3">
-                                      {child.description}
-                                    </span>
-                                  </span>
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  )}
-                </li>
-              ))}
+                                </span>
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
 
             {/* Desktop actions */}
@@ -319,22 +417,44 @@ export function Header() {
                   Services
                 </p>
                 {theme.services.categories.map((s) => (
-                  <Link
-                    key={s.id}
-                    href={`/services/${s.id}/`}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium",
-                      isActive(`/services/${s.id}/`) ? "bg-paper-cool text-navy-800" : "text-ink hover:bg-paper-cool",
+                  <div key={s.id}>
+                    <Link
+                      href={`/services/${s.id}/`}
+                      aria-current={isCurrent(`/services/${s.id}/`) ? "page" : undefined}
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium",
+                        isActive(`/services/${s.id}/`) ? "bg-paper-cool text-navy-800" : "text-ink hover:bg-paper-cool",
+                      )}
+                    >
+                      <ServiceIcon name={s.icon} className="h-5 w-5 text-navy-700" />
+                      {s.name}
+                      {s.tier === "addon" && (
+                        <span className="ml-auto text-[0.6875rem] font-semibold uppercase tracking-wider text-ink-3">
+                          Add-on
+                        </span>
+                      )}
+                    </Link>
+                    {s.id === HUB_SLUG && (
+                      <ul className="mb-1 ml-[1.375rem] border-l border-line pl-4">
+                        {garageLinks.slice(1).map((link) => (
+                          <li key={link.href}>
+                            <Link
+                              href={link.href}
+                              aria-current={isCurrent(link.href) ? "page" : undefined}
+                              className={cn(
+                                "block rounded-lg px-3 py-2 text-[0.9375rem]",
+                                isCurrent(link.href)
+                                  ? "bg-paper-cool font-medium text-navy-800"
+                                  : "text-ink-2 hover:bg-paper-cool",
+                              )}
+                            >
+                              {link.name}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
                     )}
-                  >
-                    <ServiceIcon name={s.icon} className="h-5 w-5 text-navy-700" />
-                    {s.name}
-                    {s.tier === "addon" && (
-                      <span className="ml-auto text-[0.6875rem] font-semibold uppercase tracking-wider text-ink-3">
-                        Add-on
-                      </span>
-                    )}
-                  </Link>
+                  </div>
                 ))}
                 <div className="my-3 border-t border-line" />
                 {[

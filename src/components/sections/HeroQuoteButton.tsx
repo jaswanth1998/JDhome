@@ -39,7 +39,7 @@ export function HeroQuoteButton() {
             className="pointer-events-none absolute bottom-full left-4 mb-3 whitespace-nowrap rounded-full bg-navy-900 px-3.5 py-1.5 text-sm font-medium text-white shadow-[var(--shadow-lg)]"
             role="status"
           >
-            <span aria-hidden="true">👋 </span>Free quote in about a minute
+            <span aria-hidden="true">👋 </span>Free quote, no obligation
             <span
               className="absolute -bottom-1.5 left-6 h-3 w-3 rotate-45 rounded-[2px] bg-navy-900"
               aria-hidden="true"

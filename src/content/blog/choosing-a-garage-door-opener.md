@@ -83,7 +83,7 @@ If your opener is relatively new and the problem is a sensor, a remote, or the o
 
 ## Professional installation
 
-Our [garage door service](/services/garage-door-repair-installation/) includes opener installation and repair, remote and keypad setup, travel and force adjustment, and safety testing. We also check the door's springs and balance first, so the new opener isn't working harder than it should.
+Our [garage door opener installation and repair](/services/garage-door-opener-installation/) service includes remote and keypad setup, travel and force adjustment, and safety testing. We also check the door's springs and balance first, so the new opener isn't working harder than it should. If the springs, cables, or rollers need work, our [garage door repair service](/services/garage-door-repair-installation/) takes care of those too.
 
 ## Frequently asked questions
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Phone } from "lucide-react";
 import { theme } from "@/config/theme";
+import { HUB_SLUG } from "@/content/garageServices";
 import { InquiryButton } from "@/components/inquiry";
 import { SectionHeading } from "@/components/ui";
 import { inquiryServiceForPage } from "@/lib/inquiries/schema";
@@ -11,10 +12,38 @@ type ServiceCategory = (typeof theme.services.categories)[number];
 const primaryServices = theme.services.categories.filter((s) => s.tier === "primary");
 const addonServices = theme.services.categories.filter((s) => s.tier === "addon");
 
-const learnMoreClass =
+const detailLinkClass =
   "inline-flex items-center gap-1.5 px-2 py-2 text-sm font-semibold text-navy-700 hover:text-navy-900";
 
+/** Descriptive link text per service page (the garage row links its hub and sub-pages below instead). */
+const detailLinkText: Record<string, string> = {
+  "security-camera-installation": "More about security camera installation",
+  locksmith: "More about lock changes and rekeying",
+  "car-lockout": "More about 24/7 car lockout",
+};
+
+/** Compact row linking the garage hub and its three sub-service pages. */
+function GarageServiceLinks() {
+  const [hub, ...subPages] = theme.services.garageLinks;
+  return (
+    <ul className="mt-1 flex basis-full flex-wrap gap-2" aria-label="Garage door services">
+      {[...subPages, hub].map((link) => (
+        <li key={link.href}>
+          <Link
+            href={link.href}
+            className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-1.5 text-sm font-medium text-navy-700 transition-colors hover:border-navy-600 hover:text-navy-900"
+          >
+            {link.name}
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function ServiceActions({ service }: { service: ServiceCategory }) {
+  const linkText = detailLinkText[service.id];
   return (
     <>
       {service.id === "car-lockout" ? (
@@ -27,10 +56,14 @@ function ServiceActions({ service }: { service: ServiceCategory }) {
           Get a quote
         </InquiryButton>
       )}
-      <Link href={`/services/${service.id}/`} className={learnMoreClass}>
-        Learn more
-        <ArrowRight className="h-4 w-4" aria-hidden="true" />
-      </Link>
+      {service.id === HUB_SLUG ? (
+        <GarageServiceLinks />
+      ) : (
+        <Link href={`/services/${service.id}/`} className={detailLinkClass}>
+          {linkText ?? service.name}
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        </Link>
+      )}
     </>
   );
 }

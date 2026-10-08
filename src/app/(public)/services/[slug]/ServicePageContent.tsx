@@ -1,13 +1,89 @@
 import Link from "next/link";
 import { Check, ChevronDown, MapPin, Phone } from "lucide-react";
 import { theme, type ServiceFaq } from "@/config/theme";
-import { coreCities, type ServiceCategory } from "@/lib/seo";
+import { GARAGE_SUB_SERVICES, HUB_FEATURE_LINKS, HUB_SLUG } from "@/content/garageServices";
+import { assertInternalHref, coreCities, getService, getServiceSections, type ServiceCategory } from "@/lib/seo";
 import { inquiryServiceForPage } from "@/lib/inquiries/schema";
 import { InquiryButton } from "@/components/inquiry";
-import { SectionHeading, ServiceCard } from "@/components/ui";
+import { SectionHeading } from "@/components/ui";
+import { ServiceLinkCard } from "@/components/ui/ServiceLinkCard";
 import { CameraSystemDiagram, FinalCTA, GarageProblems, PageHero } from "@/components/sections";
 import { GuidesStrip } from "@/components/blog";
-import { getPostsForService } from "@/lib/blog";
+import { getAllPosts, getPostsForService } from "@/lib/blog";
+
+type LinkRule = { href: string; phrases: readonly string[] };
+
+/**
+ * Phrases in theme.ts section copy that become in-body links (first match per
+ * page only, never to the page itself). Order matters: earlier rules win when
+ * two phrases start at the same place. Anchor discipline (contract C6): link
+ * text containing "installation" never points at the garage hub.
+ */
+function sectionLinkRules(): LinkRule[] {
+  return [
+    {
+      href: "/services/garage-door-spring-repair/",
+      phrases: ["garage door spring and cable repair", "spring and cable repair"],
+    },
+    {
+      href: "/services/garage-door-opener-installation/",
+      phrases: ["garage door opener installation and repair", "opener installation and repair"],
+    },
+    { href: "/services/garage-door-installation/", phrases: ["new garage door installation"] },
+    { href: "/services/security-camera-installation/", phrases: ["security camera installation"] },
+    { href: "/services/locksmith/", phrases: ["lock changes and rekeying"] },
+    { href: "/services/car-lockout/", phrases: ["24/7 car lockout"] },
+    { href: "/blog/repair-or-replace-garage-door/", phrases: ["whether to repair or replace a garage door"] },
+    ...getAllPosts().map((post) => ({ href: `/blog/${post.slug}/`, phrases: [post.title] })),
+  ];
+}
+
+const isWordChar = (ch: string | undefined) => !!ch && /[A-Za-z0-9]/.test(ch);
+
+/** Find a whole-phrase, case-insensitive match of `phrase` in `text`. */
+function findPhrase(text: string, phrase: string): number {
+  const haystack = text.toLowerCase();
+  const needle = phrase.toLowerCase();
+  let from = 0;
+  while (from <= haystack.length) {
+    const at = haystack.indexOf(needle, from);
+    if (at === -1) return -1;
+    if (!isWordChar(text[at - 1]) && !isWordChar(text[at + needle.length])) return at;
+    from = at + 1;
+  }
+  return -1;
+}
+
+const inBodyLinkClass = "font-semibold text-navy-700 underline decoration-gold-500/60 underline-offset-2 hover:text-navy-900";
+
+/** Link the first unused phrase occurrences in a plain-text paragraph; `used` is shared across the page. */
+function linkify(text: string, rules: readonly LinkRule[], used: Set<string>): React.ReactNode[] {
+  const out: React.ReactNode[] = [];
+  let rest = text;
+  for (;;) {
+    let best: { at: number; length: number; href: string } | null = null;
+    for (const rule of rules) {
+      if (used.has(rule.href)) continue;
+      for (const phrase of rule.phrases) {
+        const at = findPhrase(rest, phrase);
+        if (at !== -1 && (!best || at < best.at)) best = { at, length: phrase.length, href: rule.href };
+        if (at !== -1) break;
+      }
+    }
+    if (!best) break;
+    assertInternalHref(best.href);
+    used.add(best.href);
+    if (best.at > 0) out.push(rest.slice(0, best.at));
+    out.push(
+      <Link key={best.href} href={best.href} className={inBodyLinkClass}>
+        {rest.slice(best.at, best.at + best.length)}
+      </Link>
+    );
+    rest = rest.slice(best.at + best.length);
+  }
+  if (rest) out.push(rest);
+  return out;
+}
 
 interface ServicePageContentProps {
   service: ServiceCategory;
@@ -21,6 +97,26 @@ export function ServicePageContent({ service }: ServicePageContentProps) {
   const inquiryService = inquiryServiceForPage(service.id);
   const relatedServices = theme.services.categories.filter((other) => other.id !== service.id);
   const isLockout = service.id === "car-lockout";
+  const isGarageHub = service.id === HUB_SLUG;
+  const pagePath = `/services/${service.id}/`;
+  const sections = getServiceSections(service);
+  const linkRules = sectionLinkRules().filter((rule) => rule.href !== pagePath);
+  const usedLinks = new Set<string>();
+
+  // Contract C6: the hub's theme name is its link text everywhere (nav, footer,
+  // breadcrumbs, related cards), so it must never contain "installation".
+  const hubName = getService(HUB_SLUG)?.name;
+  if (!hubName || /installation/i.test(hubName)) {
+    throw new Error(`Garage hub "${HUB_SLUG}" must exist and its name must not contain "installation" (contract C6)`);
+  }
+
+  if (isGarageHub) {
+    for (const feature of Object.keys(HUB_FEATURE_LINKS)) {
+      if (!features.includes(feature)) {
+        throw new Error(`Hub feature "${feature}" (HUB_FEATURE_LINKS) is missing from theme.ts; keep the strings identical`);
+      }
+    }
+  }
 
   return (
     <>
@@ -64,14 +160,23 @@ export function ServicePageContent({ service }: ServicePageContentProps) {
             <div className="rounded-[var(--radius-xl)] border border-line bg-paper-warm p-7 md:p-8">
               <h2 className="text-xl text-ink">What&apos;s included</h2>
               <ul className="mt-5 space-y-3.5">
-                {features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-3 text-ink-2">
-                    <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-navy-800">
-                      <Check className="h-3 w-3 text-gold-500" aria-hidden="true" />
-                    </span>
-                    {feature}
-                  </li>
-                ))}
+                {features.map((feature) => {
+                  const featureHref = isGarageHub ? HUB_FEATURE_LINKS[feature] : undefined;
+                  return (
+                    <li key={feature} className="flex items-start gap-3 text-ink-2">
+                      <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-navy-800">
+                        <Check className="h-3 w-3 text-gold-500" aria-hidden="true" />
+                      </span>
+                      {featureHref ? (
+                        <Link href={featureHref} className={inBodyLinkClass}>
+                          {feature}
+                        </Link>
+                      ) : (
+                        feature
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
               <InquiryButton service={inquiryService} variant="navy" fullWidth className="mt-7">
                 Request a quote
@@ -81,8 +186,65 @@ export function ServicePageContent({ service }: ServicePageContentProps) {
         </div>
       </section>
 
+      {/* Long-form sections from theme.ts */}
+      {sections.length > 0 && (
+        <section className="section bg-paper-warm">
+          <div className="container">
+            <div className="mx-auto max-w-3xl space-y-14">
+              {sections.map((section) => (
+                <article key={section.heading}>
+                  <h2 className="text-balance text-3xl text-ink">{section.heading}</h2>
+                  <div className="mt-5 space-y-4 text-lg leading-relaxed text-ink-2">
+                    {section.paragraphs.map((paragraph) => (
+                      <p key={paragraph}>{linkify(paragraph, linkRules, usedLinks)}</p>
+                    ))}
+                  </div>
+                  {section.bullets && section.bullets.length > 0 && (
+                    <ul className="mt-6 space-y-3.5">
+                      {section.bullets.map((bullet) => (
+                        <li key={bullet} className="flex items-start gap-3 text-ink-2">
+                          <span className="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-navy-800">
+                            <Check className="h-3 w-3 text-gold-500" aria-hidden="true" />
+                          </span>
+                          <span className="leading-relaxed">{linkify(bullet, linkRules, usedLinks)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Garage hub: the three sub-service pages */}
+      {isGarageHub && (
+        <section className="section bg-paper-cool">
+          <div className="container">
+            <SectionHeading
+              eyebrow="Specialist services"
+              title="Garage door services"
+              subtitle="New doors, openers, and springs and cables each have their own page with the details and answers that matter for that job."
+            />
+            <div className="mt-10 grid gap-6 md:grid-cols-3">
+              {GARAGE_SUB_SERVICES.map((sub) => (
+                <ServiceLinkCard
+                  key={sub.slug}
+                  href={`/services/${sub.slug}/`}
+                  label={sub.cardLabel}
+                  blurb={sub.cardBlurb}
+                  icon={sub.icon}
+                  image={sub.image}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {service.id === "security-camera-installation" && <CameraSystemDiagram />}
-      {service.id === "garage-door-repair-installation" && <GarageProblems />}
+      {isGarageHub && <GarageProblems />}
 
       {/* FAQ */}
       <section className="section bg-paper-cool">
@@ -161,11 +323,11 @@ export function ServicePageContent({ service }: ServicePageContentProps) {
           <SectionHeading eyebrow="More from JD Home Services" title="Related services" />
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {relatedServices.map((related) => (
-              <ServiceCard
+              <ServiceLinkCard
                 key={related.id}
-                id={related.id}
-                name={related.name}
-                shortDescription={related.shortDescription}
+                href={`/services/${related.id}/`}
+                label={related.name}
+                blurb={related.shortDescription}
                 icon={related.icon}
                 image={related.image}
                 badge={"badge" in related ? related.badge : undefined}

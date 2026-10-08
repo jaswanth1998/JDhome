@@ -19,7 +19,7 @@ It sounds obvious, but a garage door left open, even for an hour while you're in
 
 - Close the door as soon as you've driven in or out
 - Don't leave it open while you're away from the front of the house
-- Use a **smart opener** that alerts your phone when the door is left open and lets you close it remotely. See [choosing a garage door opener](/blog/choosing-a-garage-door-opener/).
+- Use a **smart opener** that alerts your phone when the door is left open and lets you close it remotely. See [choosing a garage door opener](/blog/choosing-a-garage-door-opener/), or ask us about [opener installation and repair](/services/garage-door-opener-installation/).
 
 ## 2. Protect the opener remote
 
@@ -62,6 +62,8 @@ A garage door that doesn't close fully, reverses unexpectedly, or has to be forc
 - Sensor problems: see [garage door safety sensors](/blog/garage-door-safety-sensors/)
 - A heavy or unbalanced door: see [broken garage door springs](/blog/broken-garage-door-spring/)
 - Worn weatherstripping that leaves gaps at the bottom
+
+Our [garage door repair service](/services/garage-door-repair-installation/) can sort out any of these.
 
 [[cta]]
 

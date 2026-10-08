@@ -5,17 +5,20 @@ import { theme, type ServiceCity } from "@/config/theme";
 import { JsonLd } from "@/components/seo";
 import { breadcrumbNode, withGraph } from "@/lib/jsonld";
 import { buildMetadata, coreCities } from "@/lib/seo";
-import { SectionHeading, ServiceCard } from "@/components/ui";
+import { SectionHeading } from "@/components/ui";
+import { AreaServiceCard } from "./AreaServiceCard";
 import { FinalCTA, PageHero } from "@/components/sections";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Areas We Serve | Oshawa & Durham Region | JD Home Services",
+  title: "Garage Door Repair Durham Region | Areas We Serve | JD Home",
   description:
-    "Garage door repair, security cameras, locksmith, and car lockout service for Oshawa, Whitby, Ajax, Pickering, Courtice, Bowmanville, and nearby areas.",
+    "Garage door repair, new doors and security cameras across Durham Region: Oshawa, Whitby, Ajax, Pickering, Clarington, Port Perry, Uxbridge and beyond.",
   path: "/service-areas/",
 });
 
 const allCities: readonly ServiceCity[] = theme.serviceCities;
+
+const inlineLink = "font-semibold text-navy-700 underline underline-offset-2 hover:text-navy-900";
 
 /** Non-core cities grouped by region, Durham Region first, otherwise in theme order. */
 function groupOtherCitiesByRegion() {
@@ -55,7 +58,7 @@ export default function ServiceAreasPage() {
 
       <PageHero
         eyebrow="Service areas"
-        title="Areas we serve across Durham Region and beyond"
+        title="Garage Door Repair & Installation Across Durham Region"
         subtitle="We provide garage door installation and repair and security camera systems throughout Durham Region and surrounding areas, with locksmith and 24/7 car lockout help as add-ons."
         image="garageDark"
         breadcrumbs={[
@@ -93,6 +96,45 @@ export default function ServiceAreasPage() {
         </div>
       </section>
 
+      <section className="section bg-paper-warm">
+        <div className="container">
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+            <div>
+              <SectionHeading eyebrow="East of Oshawa" title="Clarington: Courtice and Bowmanville" />
+              <p className="mt-6 text-lg leading-relaxed text-ink-2">
+                Courtice and Bowmanville both belong to the Municipality of Clarington, just east of our Oshawa base.{" "}
+                <Link href="/service-areas/courtice/" className={inlineLink}>
+                  Courtice
+                </Link>{" "}
+                starts where Oshawa ends, and{" "}
+                <Link href="/service-areas/bowmanville/" className={inlineLink}>
+                  Bowmanville
+                </Link>{" "}
+                lies a little farther east along Highway 401; each has its own page with local details. We also travel to
+                Newcastle and the smaller Clarington communities for garage door repairs, new doors and camera systems.
+              </p>
+            </div>
+            <div>
+              <SectionHeading eyebrow="North Durham" title="Port Perry, Uxbridge and north Durham" />
+              <div className="mt-6 space-y-5 text-lg leading-relaxed text-ink-2">
+                <p id="port-perry" className="scroll-mt-28">
+                  <strong className="text-ink">Port Perry</strong> sits on the shore of Lake Scugog in the Township of
+                  Scugog, straight up Simcoe Street from Oshawa. We come up for spring and opener repairs, replacement
+                  doors on lakeside and country homes, and camera systems that watch a driveway or a detached garage set
+                  back from the road.
+                </p>
+                <p id="uxbridge" className="scroll-mt-28">
+                  <strong className="text-ink">Uxbridge</strong>, in the north-west corner of Durham Region, pairs an
+                  older downtown with rural lots and long lanes. Garage door repairs and new installs are booked there
+                  like anywhere else, and on larger properties it usually makes sense to place cameras at the lane
+                  entrance, the outbuildings and the garage itself. Share your address when you call so we can plan the trip.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="section bg-paper-cool">
         <div className="container">
           <SectionHeading
@@ -123,7 +165,7 @@ export default function ServiceAreasPage() {
           <SectionHeading eyebrow="Services" title="What we do in every area" />
           <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {theme.services.categories.map((service) => (
-              <ServiceCard
+              <AreaServiceCard
                 key={service.id}
                 id={service.id}
                 name={service.name}
