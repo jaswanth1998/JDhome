@@ -15,7 +15,14 @@ import {
   Check,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { InvoiceStatusBadge } from "@/components/admin/invoices";
+import {
+  InvoiceStatusBadge,
+  UploadedPdfViewer,
+} from "@/components/admin/invoices";
+import {
+  downloadUploadedInvoice,
+  removeUploadedInvoiceFile,
+} from "@/lib/pdf/uploadedInvoice";
 import {
   sendDocument,
   downloadDocumentPdf,
@@ -31,6 +38,9 @@ type InvoiceDetail = {
   notes: string | null;
   client_signature: string | null;
   public_token: string;
+  /** Set when the invoice was issued elsewhere and uploaded as a PDF */
+  pdf_url: string | null;
+  sent_from_company: string | null;
   subtotal: number;
   hst_rate: number;
   hst_amount: number;
@@ -87,7 +97,7 @@ export default function InvoiceDetailContent() {
       .select(
         `
         id, invoice_number, invoice_date, payment_method, notes, client_signature,
-        public_token,
+        public_token, pdf_url, sent_from_company,
         subtotal, hst_rate, hst_amount, total, status,
         sent_at, paid_at, created_at,
         client:clients(name, email, phone, address),
@@ -157,6 +167,14 @@ export default function InvoiceDetailContent() {
     if (!invoice) return;
     setActionLoading("download");
     try {
+      if (invoice.pdf_url) {
+        await downloadUploadedInvoice(
+          supabase,
+          invoice.pdf_url,
+          invoice.invoice_number
+        );
+        return;
+      }
       // Render the PDF in the browser and save it locally
       await downloadDocumentPdf(
         toInvoiceDocument(invoice, invoice.client, invoice.invoice_items)
@@ -194,6 +212,7 @@ export default function InvoiceDetailContent() {
       .from("invoices")
       .delete()
       .eq("id", invoice.id);
+    if (invoice.pdf_url) await removeUploadedInvoiceFile(supabase, invoice.pdf_url);
     router.push("/admin/invoices");
   }
 
@@ -205,6 +224,10 @@ export default function InvoiceDetailContent() {
     );
   }
 
+
+  // Uploaded invoices have no line items and were sent outside the app, so
+  // editing, emailing and the public share link do not apply to them.
+  const isUploaded = !!invoice.pdf_url;
 
   return (
     <div>
@@ -223,10 +246,20 @@ export default function InvoiceDetailContent() {
                 {invoice.invoice_number}
               </h1>
               <InvoiceStatusBadge status={invoice.status} />
+              {isUploaded && (
+                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--neutral-light-gray)] text-[var(--text-muted)]">
+                  Uploaded PDF
+                </span>
+              )}
             </div>
             <p className="text-xs sm:text-sm text-[var(--text-muted)] truncate">
               {invoice.client.name} &middot; {invoice.client.email}
             </p>
+            {invoice.sent_from_company && (
+              <p className="text-xs sm:text-sm text-[var(--text-muted)] truncate">
+                Sent from {invoice.sent_from_company}
+              </p>
+            )}
           </div>
         </div>
 
@@ -234,15 +267,17 @@ export default function InvoiceDetailContent() {
         <div className="flex gap-2 flex-wrap">
           {/* Available for every status — a paid invoice may still need a
               correction (wrong address, typo in a line item). */}
-          <button
-            onClick={() => router.push(`/admin/invoices/edit?id=${invoice.id}`)}
-            className="btn btn-sm bg-white text-[var(--text-primary)] hover:bg-[var(--neutral-light-gray)] border border-[var(--border-light)]"
-          >
-            <Pencil className="w-4 h-4" />
-            Edit
-          </button>
+          {!isUploaded && (
+            <button
+              onClick={() => router.push(`/admin/invoices/edit?id=${invoice.id}`)}
+              className="btn btn-sm bg-white text-[var(--text-primary)] hover:bg-[var(--neutral-light-gray)] border border-[var(--border-light)]"
+            >
+              <Pencil className="w-4 h-4" />
+              Edit
+            </button>
+          )}
 
-          {invoice.status === "draft" && (
+          {!isUploaded && invoice.status === "draft" && (
             <button
               onClick={handleSend}
               disabled={actionLoading === "send"}
@@ -253,7 +288,8 @@ export default function InvoiceDetailContent() {
             </button>
           )}
 
-          {(invoice.status === "sent" || invoice.status === "overdue") && (
+          {!isUploaded &&
+            (invoice.status === "sent" || invoice.status === "overdue") && (
             <button
               onClick={handleSend}
               disabled={actionLoading === "resend"}
@@ -275,6 +311,7 @@ export default function InvoiceDetailContent() {
             </button>
           )}
 
+          {!isUploaded && (
           <button
             onClick={handleCopyShareLink}
             className="btn btn-sm bg-white text-[var(--text-primary)] hover:bg-[var(--neutral-light-gray)] border border-[var(--border-light)]"
@@ -287,6 +324,7 @@ export default function InvoiceDetailContent() {
             )}
             {copied ? "Copied!" : "Copy link"}
           </button>
+          )}
 
           <button
             onClick={handleDownload}
@@ -311,13 +349,17 @@ export default function InvoiceDetailContent() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Invoice Preview — the actual PDF the client receives */}
         <div className="lg:col-span-2">
-          <DocumentPdfViewer
-            data={toInvoiceDocument(
-              invoice,
-              invoice.client,
-              invoice.invoice_items
-            )}
-          />
+          {invoice.pdf_url ? (
+            <UploadedPdfViewer path={invoice.pdf_url} />
+          ) : (
+            <DocumentPdfViewer
+              data={toInvoiceDocument(
+                invoice,
+                invoice.client,
+                invoice.invoice_items
+              )}
+            />
+          )}
         </div>
 
         {/* Timeline / Info */}

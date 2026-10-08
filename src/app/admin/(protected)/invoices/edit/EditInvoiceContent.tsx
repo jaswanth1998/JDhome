@@ -74,7 +74,7 @@ export default function EditInvoiceContent() {
       .select(
         `
         id, invoice_number, invoice_date, payment_method, notes, client_signature,
-        subtotal, hst_rate, hst_amount, total, status, client_id,
+        subtotal, hst_rate, hst_amount, total, status, client_id, pdf_url,
         client:clients(name, email, phone, address),
         invoice_items(description, quantity, rate, amount, sort_order)
       `
@@ -84,6 +84,12 @@ export default function EditInvoiceContent() {
 
     if (error || !data) {
       router.push("/admin/invoices");
+      return;
+    }
+
+    // Uploaded invoices have no line items — saving this form would zero their totals
+    if ((data as { pdf_url?: string | null }).pdf_url) {
+      router.push(`/admin/invoices/view?id=${id}`);
       return;
     }
 

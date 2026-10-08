@@ -8,6 +8,7 @@ import {
   FileText,
   FileCheck,
   Package,
+  Users,
   Settings,
   Loader2,
 } from "lucide-react";
@@ -18,6 +19,7 @@ const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/invoices", label: "Invoices", icon: FileText },
   { href: "/admin/estimates", label: "Estimates", icon: FileCheck },
+  { href: "/admin/clients", label: "Clients", icon: Users },
   { href: "/admin/service-items", label: "Service Items", icon: Package },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];

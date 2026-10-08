@@ -12,10 +12,18 @@ import {
   Download,
   Trash2,
   Loader2,
+  FileUp,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { InvoiceStatusBadge } from "@/components/admin/invoices";
+import {
+  InvoiceStatusBadge,
+  MonthlySummary,
+} from "@/components/admin/invoices";
 import { downloadDocumentPdf, toInvoiceDocument } from "@/lib/pdf";
+import {
+  downloadUploadedInvoice,
+  removeUploadedInvoiceFile,
+} from "@/lib/pdf/uploadedInvoice";
 
 type Invoice = {
   id: string;
@@ -24,6 +32,9 @@ type Invoice = {
   total: number;
   status: string;
   public_token: string;
+  /** Set when the invoice was issued elsewhere and uploaded as a PDF */
+  pdf_url: string | null;
+  sent_from_company: string | null;
   client: { name: string } | null;
 };
 
@@ -79,6 +90,8 @@ export default function InvoiceListContent() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<(typeof STATUS_TABS)[number]>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [companyFilter, setCompanyFilter] = useState("all");
+  const [view, setView] = useState<"list" | "monthly">("list");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [rowBusy, setRowBusy] = useState<{
     id: string;
@@ -91,7 +104,7 @@ export default function InvoiceListContent() {
       .schema("jdhome")
       .from("invoices")
       .select(
-        "id, invoice_number, invoice_date, total, status, public_token, client:clients(name)"
+        "id, invoice_number, invoice_date, total, status, public_token, pdf_url, sent_from_company, client:clients(name)"
       )
       .order("created_at", { ascending: false });
 
@@ -123,6 +136,16 @@ export default function InvoiceListContent() {
   async function handleDownload(id: string) {
     setRowBusy({ id, action: "download" });
     try {
+      const uploaded = invoices.find((inv) => inv.id === id);
+      if (uploaded?.pdf_url) {
+        await downloadUploadedInvoice(
+          supabase,
+          uploaded.pdf_url,
+          uploaded.invoice_number
+        );
+        return;
+      }
+
       // The list only holds a summary — pull the full record the PDF needs
       const { data, error } = await supabase
         .schema("jdhome")
@@ -168,6 +191,8 @@ export default function InvoiceListContent() {
         .delete()
         .eq("id", id);
       if (error) throw new Error("Failed to delete invoice");
+      const pdfPath = invoices.find((inv) => inv.id === id)?.pdf_url;
+      if (pdfPath) await removeUploadedInvoiceFile(supabase, pdfPath);
       await fetchInvoices();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to delete invoice");
@@ -176,13 +201,27 @@ export default function InvoiceListContent() {
     }
   }
 
+  const companies = [
+    ...new Set(
+      invoices.flatMap((inv) =>
+        inv.sent_from_company ? [inv.sent_from_company] : []
+      )
+    ),
+  ].sort();
+  const byCompany =
+    companyFilter === "all"
+      ? invoices
+      : invoices.filter((inv) => inv.sent_from_company === companyFilter);
   const filtered = searchQuery
-    ? invoices.filter(
+    ? byCompany.filter(
         (inv) =>
           inv.invoice_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          inv.client?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+          inv.client?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          inv.sent_from_company
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase())
       )
-    : invoices;
+    : byCompany;
 
   return (
     <div>
@@ -196,15 +235,51 @@ export default function InvoiceListContent() {
             Create, send, and track invoices
           </p>
         </div>
-        <button
-          onClick={() => router.push("/admin/invoices/new")}
-          className="btn btn-primary btn-sm"
-        >
-          <Plus className="w-4 h-4" />
-          New Invoice
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => router.push("/admin/invoices/upload")}
+            className="btn btn-outline btn-sm"
+            title="Keep a copy of an invoice you already sent"
+          >
+            <FileUp className="w-4 h-4" />
+            <span className="hidden sm:inline">Upload existing</span>
+          </button>
+          <button
+            onClick={() => router.push("/admin/invoices/new")}
+            className="btn btn-primary btn-sm"
+          >
+            <Plus className="w-4 h-4" />
+            New Invoice
+          </button>
+        </div>
       </div>
 
+      {/* View switch */}
+      <div className="flex gap-4 border-b border-[var(--border-light)] mb-4">
+        {(
+          [
+            ["list", "Invoices"],
+            ["monthly", "Monthly summary"],
+          ] as const
+        ).map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setView(key)}
+            className={`pb-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              view === key
+                ? "border-[var(--accent-teal)] text-[var(--text-primary)]"
+                : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {view === "monthly" ? (
+        <MonthlySummary />
+      ) : (
+        <>
       {/* Tabs + Search */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
         <div className="flex gap-1 bg-[var(--neutral-light-gray)] rounded-lg p-1 overflow-x-auto">
@@ -232,6 +307,21 @@ export default function InvoiceListContent() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+        {companies.length > 0 && (
+          <select
+            className="input !h-9 text-sm sm:!w-auto"
+            value={companyFilter}
+            onChange={(e) => setCompanyFilter(e.target.value)}
+            title="Filter by the company the invoice was sent from"
+          >
+            <option value="all">All companies</option>
+            {companies.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       {/* Table */}
@@ -243,7 +333,7 @@ export default function InvoiceListContent() {
         <div className="text-center py-16 bg-white rounded-lg border border-[var(--border-light)]">
           <FileText className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-3 opacity-40" />
           <p className="text-[var(--text-muted)] mb-4">
-            {invoices.length === 0
+            {invoices.length === 0 && activeTab === "all"
               ? "No invoices yet"
               : "No invoices match your search"}
           </p>
@@ -271,6 +361,9 @@ export default function InvoiceListContent() {
                     Client
                   </th>
                   <th className="text-left px-4 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
+                    Sent From
+                  </th>
+                  <th className="text-left px-4 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
                     Date
                   </th>
                   <th className="text-right px-4 py-3 font-semibold text-[var(--text-muted)] text-xs uppercase tracking-wider">
@@ -293,9 +386,17 @@ export default function InvoiceListContent() {
                   >
                     <td className="px-4 py-3 font-medium text-[var(--text-primary)]">
                       {inv.invoice_number}
+                      {inv.pdf_url && (
+                        <span className="ml-2 text-[10px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
+                          Uploaded
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-[var(--text-secondary)]">
                       {inv.client?.name ?? "—"}
+                    </td>
+                    <td className="px-4 py-3 text-[var(--text-secondary)]">
+                      {inv.sent_from_company ?? "—"}
                     </td>
                     <td className="px-4 py-3 text-[var(--text-secondary)]">
                       {formatDate(inv.invoice_date)}
@@ -308,6 +409,7 @@ export default function InvoiceListContent() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
+                        {!inv.pdf_url && (
                         <button
                           title="Edit"
                           onClick={(e) => {
@@ -319,6 +421,8 @@ export default function InvoiceListContent() {
                         >
                           <Pencil className="w-4 h-4" />
                         </button>
+                        )}
+                        {!inv.pdf_url && (
                         <button
                           title="Copy client link"
                           onClick={(e) => {
@@ -333,6 +437,7 @@ export default function InvoiceListContent() {
                             <Link2 className="w-4 h-4" />
                           )}
                         </button>
+                        )}
                         <button
                           title="Download PDF"
                           onClick={(e) => {
@@ -384,12 +489,23 @@ export default function InvoiceListContent() {
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-sm font-medium text-[var(--text-primary)]">
                     {inv.invoice_number}
+                    {inv.pdf_url && (
+                      <span className="ml-2 text-[10px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
+                        Uploaded
+                      </span>
+                    )}
                   </span>
                   <InvoiceStatusBadge status={inv.status} />
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-[var(--text-secondary)]">
                     {inv.client?.name ?? "—"}
+                    {inv.sent_from_company && (
+                      <span className="text-xs text-[var(--text-muted)]">
+                        {" · "}
+                        {inv.sent_from_company}
+                      </span>
+                    )}
                   </span>
                   <span className="text-sm font-medium text-[var(--text-primary)]">
                     {formatCurrency(inv.total)}
@@ -400,6 +516,7 @@ export default function InvoiceListContent() {
                     {formatDate(inv.invoice_date)}
                   </p>
                   <div className="flex items-center justify-end gap-1">
+                    {!inv.pdf_url && (
                     <button
                       title="Edit"
                       onClick={(e) => {
@@ -411,6 +528,8 @@ export default function InvoiceListContent() {
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
+                    )}
+                    {!inv.pdf_url && (
                     <button
                       title="Copy client link"
                       onClick={(e) => {
@@ -425,6 +544,7 @@ export default function InvoiceListContent() {
                         <Link2 className="w-4 h-4" />
                       )}
                     </button>
+                    )}
                     <button
                       title="Download PDF"
                       onClick={(e) => {
@@ -461,6 +581,8 @@ export default function InvoiceListContent() {
               </div>
             ))}
           </div>
+        </>
+      )}
         </>
       )}
     </div>
