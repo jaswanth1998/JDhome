@@ -22,6 +22,9 @@ import path from "node:path";
 const ROOT = process.cwd();
 const OUT = path.join(ROOT, "out");
 const SITE = "https://www.jdhomeservices.ca";
+/** Site name Google should show in results (WebSite.name, og:site_name) and its accepted short form (WebSite.alternateName). */
+const SITE_NAME = "JD Home Services";
+const SITE_SHORT_NAME = "JD Home";
 
 const SERVICE_PATHS = [
   "/services/locksmith/",
@@ -509,7 +512,8 @@ async function main() {
     const siteFails = [];
     const locksmithFails = [];
     const websiteFails = [];
-    for (const [p] of pageEntries) {
+    const siteNameFails = [];
+    for (const [p, { html }] of pageEntries) {
       const nodes = nodesOf(p);
       const types = new Set(nodes.flatMap(typeList));
       if (!types.has("Locksmith")) siteFails.push(`${p} lacks Locksmith`);
@@ -539,10 +543,22 @@ async function main() {
       if (site && !String(site.publisher?.["@id"] ?? "").endsWith("/#business")) {
         websiteFails.push(`${p}: WebSite.publisher.@id=${site.publisher?.["@id"]}`);
       }
+      // Google's site-name signals must agree: WebSite.name (highest priority), its url = home page,
+      // the "| JD Home" title suffix declared as alternateName, and og:site_name carrying the same name.
+      if (site) {
+        const alt = Array.isArray(site.alternateName) ? site.alternateName : [site.alternateName].filter(Boolean);
+        if (site.name !== SITE_NAME) siteNameFails.push(`${p}: WebSite.name=${JSON.stringify(site.name)}`);
+        if (site.url !== `${SITE}/`) siteNameFails.push(`${p}: WebSite.url=${site.url}`);
+        if (!alt.includes(SITE_SHORT_NAME)) siteNameFails.push(`${p}: WebSite.alternateName lacks "${SITE_SHORT_NAME}"`);
+        if (biz && biz.name !== SITE_NAME) siteNameFails.push(`${p}: business name=${JSON.stringify(biz.name)}`);
+      }
+      const ogSiteName = metaByProperty(html, "og:site_name");
+      if (ogSiteName !== SITE_NAME) siteNameFails.push(`${p}: og:site_name=${JSON.stringify(ogSiteName)}`);
     }
     verdict("3b", "Every public page has Locksmith + WebSite", siteFails, [], `${pageEntries.length} pages`);
     verdict("3c", "Locksmith node (id, address, geo, hours, areaServed, sameAs, image/logo)", locksmithFails, [], "identical valid node on every page");
     verdict("3d", "WebSite.publisher -> /#business", websiteFails, [], `${pageEntries.length} pages`);
+    verdict("3l", `Site name: WebSite.name = og:site_name = "${SITE_NAME}", url = home, alternateName has "${SITE_SHORT_NAME}"`, siteNameFails, [], `${pageEntries.length} pages`);
 
     const serviceFails = [];
     for (const p of SERVICE_PATHS) {

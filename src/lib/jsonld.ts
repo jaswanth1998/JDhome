@@ -34,6 +34,7 @@ export function businessNode(): JsonLdObject {
     "@type": ["HomeAndConstructionBusiness", "Locksmith"],
     "@id": BUSINESS_ID,
     name: theme.brand.name,
+    alternateName: theme.brand.shortName,
     description: `${theme.brand.description} Car lockout help is available 24/7.`,
     url: `${SITE_URL}/`,
     telephone: theme.contact.phone.tel,
@@ -94,6 +95,10 @@ export function websiteNode(): JsonLdObject {
     "@id": WEBSITE_ID,
     url: `${SITE_URL}/`,
     name: theme.brand.name,
+    // Google's site-name feature reads WebSite.name first and falls back to the domain when
+    // other signals disagree; inner-page titles end in "| JD Home", so list it as an accepted
+    // alternate (in order of preference) instead of leaving the two names in conflict.
+    alternateName: [theme.brand.shortName],
     description: theme.seo.defaultDescription,
     inLanguage: "en-CA",
     publisher: { "@id": BUSINESS_ID },

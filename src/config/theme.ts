@@ -110,6 +110,8 @@ export const theme = {
      ========================================== */
   brand: {
     name: "JD Home Services",
+    /** Short form used in page-title suffixes; declared as a WebSite alternateName so Google treats it as the same site name. */
+    shortName: "JD Home",
     tagline: "From Install to Repair. Finished to Perfection.",
     description: "Garage door and security camera installation and repair in Oshawa, Durham Region, and surrounding areas, with locksmith and car lockout help as add-on services.",
 
