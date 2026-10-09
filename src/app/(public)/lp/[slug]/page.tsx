@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Check, ChevronDown, Clock, MapPin, Phone } from "lucide-react";
+import { Check, ChevronDown, MapPin, Phone } from "lucide-react";
 import { theme, type ServiceCity, type ServiceFaq } from "@/config/theme";
 import { InquiryForm } from "@/components/inquiry";
 import { FinalCTA, Testimonials } from "@/components/sections";
@@ -65,10 +65,6 @@ export default async function LandingPage({ params }: LandingPageProps) {
               <Phone className="h-[18px] w-[18px]" aria-hidden="true" />
               Call {theme.contact.phone.display}
             </a>
-            <p className="mt-3 flex items-center gap-2 text-sm text-white/70">
-              <Clock className="h-4 w-4" aria-hidden="true" />
-              Phones answered {theme.contact.hours.regular.display}. Send the form any time.
-            </p>
           </div>
 
           <div
