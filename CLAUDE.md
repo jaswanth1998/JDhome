@@ -13,6 +13,7 @@ JD Home Services (www.jdhomeservices.ca) - a business website + admin panel for 
 - `npm run start` - Serve the static `out/` build via `npx serve out`
 - `npm run lint` - Run ESLint (flat config, `eslint.config.mjs`)
 - `npm run verify:seo` - Verify SEO output in `out/` (titles, canonicals, JSON-LD, sitemap, robots); run after `npm run build`
+- `npm run indexnow` - Submit every sitemap URL to IndexNow (Bing/Copilot); the deploy workflow runs it after each Pages deploy. Key file: `public/<key>.txt`
 
 No test framework is configured.
 
@@ -40,7 +41,7 @@ Design tokens (navy + gold, from the logo) are CSS custom properties in `src/app
 ### Component Organization
 
 - `src/components/layout/` - Header, Footer, MobileCallButton (sticky call + quote bar on phones), MotionProvider
-- `src/components/sections/` - Home page: `Hero` (light split hero + "start your free quote" picker; below `lg` it also shows `HeroVideo`, a looping Pexels clip that only loads on small screens), TrustStrip, `ServicesShowcase` + `HowItWorks` (built from `FeatureRow`, the photo + text row also used on the /services/ hub), Testimonials, ServiceArea, FinalCTA. Also `PageHero` (navy header for every inner page), `GarageProblems` and `CameraSystemDiagram` (service pages)
+- `src/components/sections/` - Home page: `Hero` (light split hero + "start your free quote" picker; below `lg` it also shows `HeroVideo`, a looping Pexels clip that only loads on small screens), TrustStrip, `ServicesShowcase` + `HowItWorks` (built from `FeatureRow`, the photo + text row also used on the /services/ hub), `Testimonials` (real Google reviews from `theme.testimonials`, quoted word for word, never reworded; `serviceIds` filters them per page; the rating line reads `theme.contact.googleReviews`; also on service, sub-service, city and ad landing pages), ServiceArea, FinalCTA. Also `PageHero` (navy header for every inner page), `GarageProblems` and `CameraSystemDiagram` (service pages)
 - `src/components/ui/` - Reusable primitives (Button, Photo, ServiceCard, ServiceIcon, TestimonialCard, SectionHeading, Breadcrumbs, Reveal)
 - `src/components/inquiry/` - Quote request flow: `InquiryProvider` (context + dialog, mounted in the public layout), `InquiryButton` (opens the dialog, optionally pre-selecting a service; usable from server components), `InquiryForm` (3-step form, also embedded on /contact/), `FloatingQuoteButton` (md+ floating quote pill shown after scrolling past the hero). `InquiryButton attention="shine"|"pulse"|"both"` adds the `.cta-shine` / `.cta-pulse` effects from globals.css (auto-disabled for reduced motion)
 - `src/components/seo/` - `JsonLd` server component (structured data); `src/components/analytics/` - `GoogleTagManager` (container from `theme.analytics.gtmId`, override `NEXT_PUBLIC_GTM_ID`) and env-gated `GoogleAnalytics`
@@ -55,6 +56,7 @@ The app uses Next.js route groups to separate marketing and admin layouts:
 src/app/
   layout.tsx                      # Root: html/body/fonts/globals + GoogleTagManager/GoogleAnalytics (no Header/Footer)
   sitemap.ts, robots.ts           # sitemap.xml / robots.txt (force-static)
+  llms.txt/route.ts               # /llms.txt: markdown business summary for AI assistants, built from theme + guides (force-static)
   og-image.png/route.tsx          # Pre-rendered 1200x630 OG image (force-static)
   og/blog/[image]/route.tsx       # Per-guide 1200x630 share images (/og/blog/<slug>.png)
   (public)/                       # Marketing site

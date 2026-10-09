@@ -7,7 +7,7 @@ import { HUB_SLUG } from "@/content/garageServices";
 import { InquiryButton } from "@/components/inquiry";
 import { SectionHeading } from "@/components/ui";
 import { AreaServiceCard } from "../AreaServiceCard";
-import { FinalCTA, PageHero } from "@/components/sections";
+import { FinalCTA, PageHero, Testimonials } from "@/components/sections";
 import { GuidesStrip } from "@/components/blog";
 import { getPost } from "@/lib/blog";
 
@@ -322,6 +322,8 @@ export function CityPageContent({ city, copy }: CityPageContentProps) {
           </ul>
         </div>
       </section>
+
+      <Testimonials tone="cool" />
 
       <GuidesStrip posts={guides} title={`Guides for ${city.name} homeowners`} className="section bg-paper-warm" />
 

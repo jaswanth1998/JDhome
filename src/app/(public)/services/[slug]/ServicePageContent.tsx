@@ -7,7 +7,7 @@ import { inquiryServiceForPage } from "@/lib/inquiries/schema";
 import { InquiryButton } from "@/components/inquiry";
 import { SectionHeading } from "@/components/ui";
 import { ServiceLinkCard } from "@/components/ui/ServiceLinkCard";
-import { CameraSystemDiagram, FinalCTA, GarageProblems, PageHero } from "@/components/sections";
+import { CameraSystemDiagram, FinalCTA, GarageProblems, PageHero, Testimonials } from "@/components/sections";
 import { GuidesStrip } from "@/components/blog";
 import { getAllPosts, getPostsForService } from "@/lib/blog";
 
@@ -316,6 +316,8 @@ export function ServicePageContent({ service }: ServicePageContentProps) {
           </ul>
         </div>
       </section>
+
+      <Testimonials serviceIds={[service.id]} tone="cool" />
 
       {/* Related */}
       <section className="section bg-paper-warm">

@@ -60,7 +60,8 @@ export function businessNode(): JsonLdObject {
         closes: theme.contact.hours.regular.closes,
       },
     ],
-    sameAs: [theme.contact.social.instagram, theme.contact.social.facebook],
+    hasMap: theme.contact.googleReviews.url,
+    sameAs: [theme.contact.googleReviews.url, theme.contact.social.instagram, theme.contact.social.facebook],
     knowsAbout: [
       "Garage door repair",
       "Garage door installation",

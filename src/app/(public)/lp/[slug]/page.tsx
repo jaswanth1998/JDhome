@@ -108,7 +108,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
         </div>
       </section>
 
-      <Testimonials />
+      <Testimonials serviceIds={[page.serviceId]} />
 
       {/* FAQs */}
       <section className="section bg-paper-warm">

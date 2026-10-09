@@ -10,7 +10,7 @@ import { SectionHeading } from "@/components/ui";
 import type { BreadcrumbItem } from "@/components/ui/Breadcrumbs";
 import { RichText } from "@/components/ui/RichText";
 import { ServiceLinkCard } from "@/components/ui/ServiceLinkCard";
-import { FinalCTA, PageHero } from "@/components/sections";
+import { FinalCTA, PageHero, Testimonials } from "@/components/sections";
 import { GuidesStrip } from "@/components/blog";
 
 /* ------------------------------------------------------------------
@@ -221,6 +221,8 @@ export function SubServicePageContent({ sub, breadcrumbs }: SubServicePageConten
           </ul>
         </div>
       </section>
+
+      <Testimonials serviceIds={[HUB_SLUG]} tone="cool" />
 
       {/* Other garage door services */}
       <section className="section bg-paper-warm">

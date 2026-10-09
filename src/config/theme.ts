@@ -178,6 +178,14 @@ export const theme = {
       facebook: "https://www.facebook.com/jd.homeservices/",
     },
 
+    // Google Business Profile. The count is a snapshot: update it (and asOf) as reviews come in.
+    googleReviews: {
+      rating: 5.0,
+      count: 24,
+      asOf: "2026-10-08",
+      url: "https://www.google.com/maps?cid=2609295801497916011",
+    },
+
     responseTime: {
       regular: "Call during business hours and we will confirm a realistic arrival window",
       emergency: "Our car lockout line is answered 24/7",
@@ -682,19 +690,55 @@ export const theme = {
   /* ==========================================
      TESTIMONIALS
      ========================================== */
+  // Real Google reviews, quoted word for word (trimmed only at the ends). serviceIds drive which
+  // pages show them; a review with none is general and shows wherever the full list does.
   testimonials: [
     {
-      id: 3,
-      quote: "Reliable and trustworthy. They fixed our garage door issue quickly and explained exactly what needed repair. Quality work at a fair price.",
-      author: "Jennifer L.",
-      service: "Garage Door Repair",
+      id: 1,
+      quote: "I called to inquire about getting my garage door springs replaced and Jay arrived an hour later and had them replaced an hour after that. 2 hours from call to finished product. Pretty amazing!",
+      author: "Dave K.",
+      service: "Garage door spring repair",
+      serviceIds: ["garage-door-repair-installation"],
       rating: 5,
     },
     {
       id: 2,
-      quote: "We needed our locks changed after moving in. The work was clean, the advice was honest, and everything feels much more secure now.",
-      author: "David K.",
+      quote: "Great work by Jay on our two garage doors. He installed new weather stripping, seals at base of doors and replaced some worn rollers. Also adjusted spring. Very knowledgeable and great customer service.",
+      author: "Kirk L.",
+      service: "Garage door repair",
+      serviceIds: ["garage-door-repair-installation"],
+      rating: 5,
+    },
+    {
+      id: 3,
+      quote: "Jay did a wonderful job in my home. I would hire him again for my locks. I would also consider hiring him for my garage door. He was very friendly and helpful!",
+      author: "Laurie",
       service: "Locksmith",
+      serviceIds: ["locksmith"],
+      rating: 5,
+    },
+    {
+      id: 4,
+      quote: "I have used them for my broken garage. His Quality of work is really good. Explains well before doing anything.",
+      author: "Prince M.",
+      service: "Garage door repair",
+      serviceIds: ["garage-door-repair-installation"],
+      rating: 5,
+    },
+    {
+      id: 5,
+      quote: "Great fast & efficient service. Fair pricing. Good workmanship",
+      author: "Val S.",
+      service: "Home service",
+      serviceIds: [],
+      rating: 5,
+    },
+    {
+      id: 6,
+      quote: "Excellent service and very professional workmanship!",
+      author: "Sai Teja P.",
+      service: "Locks and garage door",
+      serviceIds: ["locksmith", "garage-door-repair-installation"],
       rating: 5,
     },
   ],
