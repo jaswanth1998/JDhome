@@ -64,7 +64,7 @@ This is where DIY stops. Signs include:
 - Cables hanging loose or off their drums
 - The door lifting a few inches and stopping, or feeling extremely heavy
 
-Unplug the opener, leave the door where it is, and call a technician. Our article on [broken garage door springs](/blog/broken-garage-door-spring/) explains why.
+Unplug the opener, leave the door where it is, and call a technician. Our article on [broken garage door springs](/blog/broken-garage-door-spring/) explains why, and our [spring and cable repair](/services/garage-door-spring-repair/) service replaces the broken part and rebalances the door.
 
 ## 9. The door is off track or the opener has failed
 

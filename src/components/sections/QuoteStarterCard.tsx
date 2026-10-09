@@ -115,7 +115,7 @@ export function QuoteStarterCard({ className }: { className?: string }) {
         })}
       </div>
 
-      <p className="mt-4 text-center text-xs text-ink-3">No obligation · About 1 minute</p>
+      <p className="mt-4 text-center text-xs text-ink-3">No obligation · Quick to fill in</p>
     </div>
   );
 }

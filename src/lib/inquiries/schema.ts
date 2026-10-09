@@ -126,7 +126,11 @@ export function inquiryServiceForPage(serviceId: string | undefined): InquirySer
   switch (serviceId) {
     case "garage-door-repair-installation":
     case "garage-door-repair":
+    case "garage-door-opener-installation":
+    case "garage-door-spring-repair":
       return "garage-repair";
+    case "garage-door-installation":
+      return "garage-install";
     case "security-camera-installation":
     case "security-cameras":
       return "security-cameras";

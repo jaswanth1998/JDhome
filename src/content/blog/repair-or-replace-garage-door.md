@@ -56,11 +56,11 @@ Our goal is a straightforward recommendation. If a repair will do the job, we'll
 
 Every job is different, so we don't publish one-size-fits-all prices. As a rule of thumb, repairs to hardware (springs, cables, rollers, openers) cost far less than a new door, and they're usually the right call on a door that's otherwise in good shape. Replacement becomes more cost-effective when you'd otherwise be repairing several major problems at once, or paying repeatedly for the same failures.
 
-We give you a clear quote before any work begins, whether it's a repair or a new door.
+We give you a clear quote before any work begins, whether it's a repair or a new door. Our [garage door repair service](/services/garage-door-repair-installation/) covers springs, cables, rollers, openers, and off-track doors across Oshawa and Durham Region.
 
 ## If you do replace, choose well
 
-A new door should last many years, so it's worth choosing carefully. Consider insulation, material, windows, colour, and the opener that will drive it. Our guide to [choosing a new garage door](/blog/choosing-a-new-garage-door/) covers the options, and our [installation service](/services/garage-door-repair-installation/) includes removal of the old door, installation, balancing, opener setup, and a full safety test.
+A new door should last many years, so it's worth choosing carefully. Consider insulation, material, windows, colour, and the opener that will drive it. Our guide to [choosing a new garage door](/blog/choosing-a-new-garage-door/) covers the options, and our [installation service](/services/garage-door-installation/) includes removal of the old door, installation, balancing, opener setup, and a full safety test.
 
 ## Frequently asked questions
 

@@ -1,29 +1,27 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { SiteImageKey } from "@/config/images";
-import { cn } from "@/lib/utils";
-import { Photo } from "./Photo";
-import { ServiceIcon } from "./ServiceIcon";
+import { Photo, ServiceIcon } from "@/components/ui";
 
-interface ServiceCardProps {
+interface AreaServiceCardProps {
   id: string;
   name: string;
   shortDescription: string;
   icon: string;
   image: SiteImageKey;
   badge?: string;
-  className?: string;
 }
 
-/** Photo card linking to a service page. */
-export function ServiceCard({ id, name, shortDescription, icon, image, badge, className }: ServiceCardProps) {
+/**
+ * Photo card linking to a service page from the service-area hub and city pages.
+ * Same look and "View service" label as the shared ServiceCard; kept local so the
+ * service-area pages do not depend on the ui barrel.
+ */
+export function AreaServiceCard({ id, name, shortDescription, icon, image, badge }: AreaServiceCardProps) {
   return (
     <Link
       href={`/services/${id}/`}
-      className={cn(
-        "group flex h-full flex-col overflow-hidden rounded-[var(--radius-xl)] border border-line bg-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]",
-        className,
-      )}
+      className="group flex h-full flex-col overflow-hidden rounded-[var(--radius-xl)] border border-line bg-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]"
     >
       <div className="relative">
         <Photo
@@ -54,5 +52,3 @@ export function ServiceCard({ id, name, shortDescription, icon, image, badge, cl
     </Link>
   );
 }
-
-export default ServiceCard;

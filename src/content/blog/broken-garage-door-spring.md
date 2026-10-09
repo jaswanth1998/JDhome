@@ -70,7 +70,7 @@ A proper spring repair is more than swapping one coil for another. When we repla
 - **Balancing the door** so it stays put when lifted halfway by hand.
 - **Testing the opener and safety sensors** so the whole system works together.
 
-That last step matters. A spring replacement is the perfect moment to catch worn rollers, a frayed cable, or an opener that's been struggling for months. Our [garage door repair service](/services/garage-door-repair-installation/) always ends with a full safety inspection and balance test.
+That last step matters. A spring replacement is the perfect moment to catch worn rollers, a frayed cable, or an opener that's been struggling for months. Our [garage door spring repair](/services/garage-door-spring-repair/) service always ends with a full safety inspection and balance test, and anything else we spot, from rollers to the opener, is covered by our [garage door repair service](/services/garage-door-repair-installation/).
 
 ## Can you make springs last longer?
 

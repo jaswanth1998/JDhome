@@ -71,7 +71,7 @@ Call a technician if:
 - Cables look frayed or loose
 - Noise continues after lubrication and tightening
 
-On a service visit we can replace rollers and hinges, rebalance the door, adjust the opener, and check springs and cables. Our [garage door repair service](/services/garage-door-repair-installation/) always includes a safety and balance check.
+On a service visit we can replace rollers and hinges, rebalance the door, [adjust the opener](/services/garage-door-opener-installation/), and check springs and cables. Our [garage door repair service](/services/garage-door-repair-installation/) always includes a safety and balance check.
 
 ## Frequently asked questions
 

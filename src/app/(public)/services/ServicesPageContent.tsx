@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { theme } from "@/config/theme";
+import { GARAGE_SUB_SERVICES, HUB_SLUG } from "@/content/garageServices";
 import { InquiryButton } from "@/components/inquiry";
 import { FeatureRow, FinalCTA, PageHero } from "@/components/sections";
 import { SectionHeading } from "@/components/ui";
@@ -34,9 +35,32 @@ function ServiceRow({ service, reverse }: { service: ServiceCategory; reverse: b
             Details &amp; FAQs
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
+          {service.id === HUB_SLUG && <GarageSubServiceLinks />}
         </>
       }
     />
+  );
+}
+
+/** Compact row linking the garage door sub-service pages (contract C6 labels). */
+function GarageSubServiceLinks() {
+  return (
+    <div className="w-full pt-2">
+      <p className="text-sm font-semibold text-ink">Garage door services</p>
+      <ul className="mt-3 flex flex-wrap gap-2">
+        {GARAGE_SUB_SERVICES.map((sub) => (
+          <li key={sub.slug}>
+            <Link
+              href={`/services/${sub.slug}/`}
+              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-1.5 text-sm font-medium text-ink transition-colors hover:border-navy-600 hover:text-navy-800"
+            >
+              {sub.cardLabel}
+              <ArrowRight className="h-3.5 w-3.5 text-gold-600" aria-hidden="true" />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

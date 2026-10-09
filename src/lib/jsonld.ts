@@ -1,4 +1,5 @@
 import { theme, type ServiceFaq } from "@/config/theme";
+import { GARAGE_SUB_SERVICES, HUB_SLUG, type GarageSubService } from "@/content/garageServices";
 import { SITE_URL, absoluteUrl, type ServiceCategory } from "@/lib/seo";
 
 type JsonLdObject = Record<string, unknown>;
@@ -39,7 +40,6 @@ export function businessNode(): JsonLdObject {
     email: theme.contact.email,
     image: absoluteUrl(theme.seo.ogImage),
     logo: absoluteUrl(theme.brand.logo.primary),
-    priceRange: "$$",
     address: {
       "@type": "PostalAddress",
       addressLocality: theme.contact.address.city,
@@ -61,6 +61,15 @@ export function businessNode(): JsonLdObject {
       },
     ],
     sameAs: [theme.contact.social.instagram, theme.contact.social.facebook],
+    knowsAbout: [
+      "Garage door repair",
+      "Garage door installation",
+      "Garage door opener installation and repair",
+      "Garage door spring replacement",
+      "Security camera installation",
+      "Lock rekeying",
+      "Car lockout service",
+    ],
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: "Garage Door, Security Camera, and Locksmith Services",
@@ -108,6 +117,20 @@ export function serviceNode(service: ServiceCategory): JsonLdObject {
     areaServed: areaServedNodes(),
   };
 
+  if (service.id === HUB_SLUG) {
+    node.hasOfferCatalog = {
+      "@type": "OfferCatalog",
+      name: "Garage door services",
+      itemListElement: GARAGE_SUB_SERVICES.map((sub) => {
+        const subUrl = serviceUrl(sub.slug);
+        return {
+          "@type": "Offer",
+          itemOffered: { "@type": "Service", "@id": `${subUrl}#service`, name: sub.name, url: subUrl },
+        };
+      }),
+    };
+  }
+
   if (service.id === "car-lockout") {
     node.hoursAvailable = [
       {
@@ -120,6 +143,22 @@ export function serviceNode(service: ServiceCategory): JsonLdObject {
   }
 
   return node;
+}
+
+/** Service node for a garage door sub-service page, tied to the hub's Service node. */
+export function subServiceNode(sub: GarageSubService): JsonLdObject {
+  const url = serviceUrl(sub.slug);
+  return {
+    "@type": "Service",
+    "@id": `${url}#service`,
+    name: sub.name,
+    serviceType: sub.name,
+    description: sub.seo.description,
+    url,
+    provider: { "@id": BUSINESS_ID },
+    areaServed: areaServedNodes(),
+    isRelatedTo: { "@id": `${serviceUrl(HUB_SLUG)}#service` },
+  };
 }
 
 export function faqPageNode(faqs: readonly ServiceFaq[]): JsonLdObject {

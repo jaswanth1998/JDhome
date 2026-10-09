@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Clock, Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
 import { theme } from "@/config/theme";
+import { HUB_SLUG } from "@/content/garageServices";
 import { coreCities } from "@/lib/seo";
 import { getPost } from "@/lib/blog";
 import { LockoutLine } from "./LockoutLine";
@@ -22,6 +23,9 @@ const popularGuideSlugs = [
 ];
 
 const linkClass = "text-white/65 transition-colors hover:text-gold-500";
+
+/** The three garage sub-service pages, listed under the hub link. */
+const garageSubPages = theme.services.garageLinks.slice(1);
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -78,6 +82,17 @@ export function Footer() {
                   <Link href={`/services/${s.id}/`} className={linkClass}>
                     {s.name}
                   </Link>
+                  {s.id === HUB_SLUG && (
+                    <ul className="mt-2.5 space-y-2 border-l border-white/15 pl-3 text-sm">
+                      {garageSubPages.map((link) => (
+                        <li key={link.href}>
+                          <Link href={link.href} className={linkClass}>
+                            {link.name}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </li>
               ))}
             </ul>

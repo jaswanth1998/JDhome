@@ -81,7 +81,7 @@ Wired PoE cameras with a local recorder, AI person detection, and phone alerts g
 
 ## One call for doors, locks, and cameras
 
-We handle the physical security pieces in one place: [garage door repair and installation](/services/garage-door-repair-installation/), [security camera installation](/services/security-camera-installation/), and [locksmith work](/services/locksmith/) for homes across Oshawa and Durham Region.
+We handle the physical security pieces in one place: [garage door repair](/services/garage-door-repair-installation/), [security camera installation](/services/security-camera-installation/), and [locksmith work](/services/locksmith/) for homes across Oshawa and Durham Region.
 
 ## Frequently asked questions
 

@@ -7,7 +7,7 @@ import { QuoteStarterCard } from "./QuoteStarterCard";
 
 const assurances = [
   { icon: CheckCircle2, text: "Free, no-obligation quotes" },
-  { icon: ShieldCheck, text: "100% satisfaction guaranteed" },
+  { icon: ShieldCheck, text: "Satisfaction guaranteed" },
   { icon: Clock, text: "24/7 car lockout line" },
 ];
 
@@ -40,10 +40,10 @@ export function Hero() {
             Serving {theme.contact.address.serviceArea}
           </p>
           {/* Smaller on narrow phones so the quote button stays on the first screen */}
-          <h1 className="text-balance text-[2.125rem] leading-[1.06] text-ink min-[380px]:text-[2.5rem] md:text-[3.25rem]">
+          <h1 className="text-balance text-[2.125rem] leading-[1.06] text-ink min-[380px]:text-[2.25rem] md:text-[3.25rem]">
             Garage doors &amp; security cameras.{" "}
             <span className="text-navy-600">
-              Durham&apos;s installation and repair{" "}
+              Oshawa &amp; Durham&apos;s installation and repair{" "}
               <span className="relative whitespace-nowrap">
                 experts
                 <span
@@ -56,7 +56,7 @@ export function Hero() {
           </h1>
           <p className="mt-5 text-pretty text-base leading-relaxed text-ink-2 min-[380px]:mt-6 min-[380px]:text-lg">
             Local specialists who get the job done quickly and done right, from
-            brand-new installs to repairs. Free quote up front and 100%
+            brand-new installs to repairs. Free quote up front and
             satisfaction guaranteed.
           </p>
 
@@ -72,7 +72,7 @@ export function Hero() {
             </a>
           </div>
           <p className="mt-3 text-sm text-ink-3">
-            Takes about a minute. We reply during business hours.
+            Quick to fill in. We reply during business hours.
           </p>
 
           <ul className="mt-8 flex flex-col gap-3 border-t border-line pt-6 text-sm text-ink-2 sm:flex-row sm:flex-wrap sm:gap-x-7">

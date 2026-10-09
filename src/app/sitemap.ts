@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { siteImages, type SiteImageKey } from "@/config/images";
 import { theme } from "@/config/theme";
+import { GARAGE_SUB_SERVICES } from "@/content/garageServices";
 import { BLOG_CATEGORIES, getAllPosts } from "@/lib/blog";
 import { SITE_CONTENT_UPDATED, SITE_ROUTES, absoluteUrl } from "@/lib/seo";
 
@@ -11,6 +12,7 @@ const staticPageImages: Record<string, SiteImageKey> = {
   "/service-areas/": "garageDark",
   "/about/": "modernHome",
   ...Object.fromEntries(theme.services.categories.map((s) => [`/services/${s.id}/`, s.image])),
+  ...Object.fromEntries(GARAGE_SUB_SERVICES.map((s) => [`/services/${s.slug}/`, s.image])),
   ...Object.fromEntries(
     theme.serviceCities.filter((c) => c.core).map((c) => [`/service-areas/${c.slug}/`, "garageHome"])
   ),
@@ -42,7 +44,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       const image = staticPageImages[route.path];
       return {
         url: absoluteUrl(route.path),
-        lastModified: toDate(SITE_CONTENT_UPDATED),
+        lastModified: toDate(route.updated ?? SITE_CONTENT_UPDATED),
         changeFrequency: route.changeFrequency,
         priority: route.priority,
         ...(image ? { images: [photo(image)] } : {}),

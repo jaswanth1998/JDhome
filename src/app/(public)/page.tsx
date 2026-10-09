@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { theme } from "@/config/theme";
 import { buildMetadata } from "@/lib/seo";
 import { GuidesStrip } from "@/components/blog";
 import { getPost } from "@/lib/blog";
@@ -13,9 +14,8 @@ import {
 } from "@/components/sections";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Garage Door & Camera Installation & Repair Oshawa | JD Home",
-  description:
-    "Garage door and security camera installation and repair in Oshawa, Durham Region, and surrounding areas. Local experts, free quotes: (289) 991-3277.",
+  title: theme.seo.defaultTitle,
+  description: theme.seo.defaultDescription,
   path: "/",
 });
 
