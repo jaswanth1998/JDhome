@@ -9,13 +9,26 @@ import {
   Clock,
   Send,
   Loader2,
+  Pencil,
+  Download,
+  Link2,
+  Check,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import {
-  InvoicePreview,
   InvoiceStatusBadge,
+  UploadedPdfViewer,
 } from "@/components/admin/invoices";
-import type { InvoicePreviewData } from "@/components/admin/invoices/InvoicePreview";
+import {
+  downloadUploadedInvoice,
+  removeUploadedInvoiceFile,
+} from "@/lib/pdf/uploadedInvoice";
+import {
+  sendDocument,
+  downloadDocumentPdf,
+  toInvoiceDocument,
+  DocumentPdfViewer,
+} from "@/lib/pdf";
 
 type InvoiceDetail = {
   id: string;
@@ -23,6 +36,11 @@ type InvoiceDetail = {
   invoice_date: string;
   payment_method: string;
   notes: string | null;
+  client_signature: string | null;
+  public_token: string;
+  /** Set when the invoice was issued elsewhere and uploaded as a PDF */
+  pdf_url: string | null;
+  sent_from_company: string | null;
   subtotal: number;
   hst_rate: number;
   hst_amount: number;
@@ -66,6 +84,7 @@ export default function InvoiceDetailContent() {
   const [invoice, setInvoice] = useState<InvoiceDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const fetchInvoice = useCallback(async () => {
     if (!id) {
@@ -77,7 +96,8 @@ export default function InvoiceDetailContent() {
       .from("invoices")
       .select(
         `
-        id, invoice_number, invoice_date, payment_method, notes,
+        id, invoice_number, invoice_date, payment_method, notes, client_signature,
+        public_token, pdf_url, sent_from_company,
         subtotal, hst_rate, hst_amount, total, status,
         sent_at, paid_at, created_at,
         client:clients(name, email, phone, address),
@@ -117,48 +137,50 @@ export default function InvoiceDetailContent() {
         if (updateError) throw new Error("Failed to update invoice status");
       }
 
-      // Call webhook to send invoice email
-      const webhookRes = await fetch(
-        "https://myn8n.plaper.org/webhook/a92a21d9-2c77-456a-b657-61694a39e1a0",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            client: {
-              name: invoice.client.name,
-              email: invoice.client.email,
-              phone: invoice.client.phone,
-              address: invoice.client.address,
-            },
-            invoice: {
-              invoice_number: invoice.invoice_number,
-              invoice_date: invoice.invoice_date,
-              payment_method: invoice.payment_method,
-              notes: invoice.notes,
-              subtotal: invoice.subtotal,
-              hst_rate: invoice.hst_rate,
-              hst_amount: invoice.hst_amount,
-              total: invoice.total,
-              status: "sent",
-            },
-            invoice_items: invoice.invoice_items.map((item) => ({
-              description: item.description,
-              quantity: item.quantity,
-              rate: item.rate,
-              amount: item.amount,
-              sort_order: item.sort_order,
-            })),
-          }),
-        }
+      // Render the PDF in the browser, then hand it to n8n to email
+      await sendDocument(
+        toInvoiceDocument(invoice, invoice.client, invoice.invoice_items)
       );
-
-      if (!webhookRes.ok) {
-        throw new Error("Failed to send invoice via webhook");
-      }
 
       await fetchInvoice();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to send invoice");
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function handleCopyShareLink() {
+    if (!invoice) return;
+    const url = `${window.location.origin}/share/?token=${invoice.public_token}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard needs a secure context; show the link so it can be copied.
+      prompt("Copy this link:", url);
+    }
+  }
+
+  async function handleDownload() {
+    if (!invoice) return;
+    setActionLoading("download");
+    try {
+      if (invoice.pdf_url) {
+        await downloadUploadedInvoice(
+          supabase,
+          invoice.pdf_url,
+          invoice.invoice_number
+        );
+        return;
+      }
+      // Render the PDF in the browser and save it locally
+      await downloadDocumentPdf(
+        toInvoiceDocument(invoice, invoice.client, invoice.invoice_items)
+      );
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to download invoice");
     } finally {
       setActionLoading(null);
     }
@@ -190,6 +212,7 @@ export default function InvoiceDetailContent() {
       .from("invoices")
       .delete()
       .eq("id", invoice.id);
+    if (invoice.pdf_url) await removeUploadedInvoiceFile(supabase, invoice.pdf_url);
     router.push("/admin/invoices");
   }
 
@@ -201,23 +224,10 @@ export default function InvoiceDetailContent() {
     );
   }
 
-  const previewData: InvoicePreviewData = {
-    invoiceNumber: invoice.invoice_number,
-    clientName: invoice.client.name,
-    clientAddress: invoice.client.address ?? "",
-    invoiceDate: invoice.invoice_date,
-    paymentMethod: invoice.payment_method,
-    items: invoice.invoice_items.map((i) => ({
-      description: i.description,
-      quantity: i.quantity,
-      rate: i.rate,
-      amount: i.amount,
-    })),
-    notes: invoice.notes ?? "",
-    subtotal: invoice.subtotal,
-    hstAmount: invoice.hst_amount,
-    total: invoice.total,
-  };
+
+  // Uploaded invoices have no line items and were sent outside the app, so
+  // editing, emailing and the public share link do not apply to them.
+  const isUploaded = !!invoice.pdf_url;
 
   return (
     <div>
@@ -236,16 +246,38 @@ export default function InvoiceDetailContent() {
                 {invoice.invoice_number}
               </h1>
               <InvoiceStatusBadge status={invoice.status} />
+              {isUploaded && (
+                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--neutral-light-gray)] text-[var(--text-muted)]">
+                  Uploaded PDF
+                </span>
+              )}
             </div>
             <p className="text-xs sm:text-sm text-[var(--text-muted)] truncate">
               {invoice.client.name} &middot; {invoice.client.email}
             </p>
+            {invoice.sent_from_company && (
+              <p className="text-xs sm:text-sm text-[var(--text-muted)] truncate">
+                Sent from {invoice.sent_from_company}
+              </p>
+            )}
           </div>
         </div>
 
         {/* Actions */}
         <div className="flex gap-2 flex-wrap">
-          {invoice.status === "draft" && (
+          {/* Available for every status — a paid invoice may still need a
+              correction (wrong address, typo in a line item). */}
+          {!isUploaded && (
+            <button
+              onClick={() => router.push(`/admin/invoices/edit?id=${invoice.id}`)}
+              className="btn btn-sm bg-white text-[var(--text-primary)] hover:bg-[var(--neutral-light-gray)] border border-[var(--border-light)]"
+            >
+              <Pencil className="w-4 h-4" />
+              Edit
+            </button>
+          )}
+
+          {!isUploaded && invoice.status === "draft" && (
             <button
               onClick={handleSend}
               disabled={actionLoading === "send"}
@@ -256,7 +288,8 @@ export default function InvoiceDetailContent() {
             </button>
           )}
 
-          {(invoice.status === "sent" || invoice.status === "overdue") && (
+          {!isUploaded &&
+            (invoice.status === "sent" || invoice.status === "overdue") && (
             <button
               onClick={handleSend}
               disabled={actionLoading === "resend"}
@@ -278,6 +311,30 @@ export default function InvoiceDetailContent() {
             </button>
           )}
 
+          {!isUploaded && (
+          <button
+            onClick={handleCopyShareLink}
+            className="btn btn-sm bg-white text-[var(--text-primary)] hover:bg-[var(--neutral-light-gray)] border border-[var(--border-light)]"
+            title="Public link the client can open without logging in"
+          >
+            {copied ? (
+              <Check className="w-4 h-4 text-green-600" />
+            ) : (
+              <Link2 className="w-4 h-4" />
+            )}
+            {copied ? "Copied!" : "Copy link"}
+          </button>
+          )}
+
+          <button
+            onClick={handleDownload}
+            disabled={actionLoading === "download"}
+            className="btn btn-sm bg-white text-[var(--text-primary)] hover:bg-[var(--neutral-light-gray)] border border-[var(--border-light)]"
+          >
+            <Download className="w-4 h-4" />
+            {actionLoading === "download" ? "Preparing..." : "Download PDF"}
+          </button>
+
           <button
             onClick={handleDelete}
             disabled={actionLoading === "delete"}
@@ -290,9 +347,19 @@ export default function InvoiceDetailContent() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Invoice Preview */}
+        {/* Invoice Preview — the actual PDF the client receives */}
         <div className="lg:col-span-2">
-          <InvoicePreview data={previewData} />
+          {invoice.pdf_url ? (
+            <UploadedPdfViewer path={invoice.pdf_url} />
+          ) : (
+            <DocumentPdfViewer
+              data={toInvoiceDocument(
+                invoice,
+                invoice.client,
+                invoice.invoice_items
+              )}
+            />
+          )}
         </div>
 
         {/* Timeline / Info */}

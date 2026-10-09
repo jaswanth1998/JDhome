@@ -3,13 +3,25 @@
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, FileText, Loader2 } from "lucide-react";
+import {
+  LayoutDashboard,
+  FileText,
+  FileCheck,
+  Package,
+  Users,
+  Settings,
+  Loader2,
+} from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { LogoutButton } from "@/components/admin/LogoutButton";
 
 const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/invoices", label: "Invoices", icon: FileText },
+  { href: "/admin/estimates", label: "Estimates", icon: FileCheck },
+  { href: "/admin/clients", label: "Clients", icon: Users },
+  { href: "/admin/service-items", label: "Service Items", icon: Package },
+  { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 export default function ProtectedAdminLayout({
@@ -72,7 +84,7 @@ export default function ProtectedAdminLayout({
                   href={item.href}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     isActive
-                      ? "bg-[var(--accent-teal)] bg-opacity-10 text-[var(--accent-teal)]"
+                      ? "bg-[var(--accent-teal)]/10 text-[var(--accent-teal)]"
                       : "text-[var(--text-secondary)] hover:bg-[var(--neutral-light-gray)] hover:text-[var(--text-primary)]"
                   }`}
                 >

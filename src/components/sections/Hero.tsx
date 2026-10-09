@@ -1,120 +1,102 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { Phone, FileText, ShieldCheck, Clock, Award } from "lucide-react";
+import { CheckCircle2, Clock, MapPin, Phone, ShieldCheck } from "lucide-react";
 import { theme } from "@/config/theme";
-import { Button } from "@/components/ui";
+import { Photo } from "@/components/ui";
+import { HeroQuoteButton } from "./HeroQuoteButton";
+import { HeroVideo } from "./HeroVideo";
+import { QuoteStarterCard } from "./QuoteStarterCard";
 
-const trustBadges = [
-  { icon: ShieldCheck, text: "Licensed & Insured" },
-  { icon: Clock, text: "Fast Response Time" },
-  { icon: Award, text: "100% Satisfaction Guaranteed" },
+const assurances = [
+  { icon: CheckCircle2, text: "Free, no-obligation quotes" },
+  { icon: ShieldCheck, text: "Satisfaction guaranteed" },
+  { icon: Clock, text: "24/7 car lockout line" },
 ];
 
+/**
+ * Light, two-column home hero: benefit-led headline + one clear action on the left,
+ * a photo with a "start your quote" card on the right so visitors can begin in one tap.
+ */
 export function Hero() {
   return (
-    <section className="relative min-h-[90vh] flex items-center bg-gradient-primary overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        />
-      </div>
+    <section className="relative overflow-hidden bg-[linear-gradient(180deg,var(--paper-warm)_0%,var(--paper)_100%)]">
+      {/* Soft gold glow behind the photo */}
+      <div
+        className="pointer-events-none absolute -right-40 top-10 h-[520px] w-[520px] rounded-full bg-gold-500/15 blur-3xl"
+        aria-hidden="true"
+      />
 
-      {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary-main)] via-[var(--primary-dark)] to-[var(--primary-main)] opacity-95" />
+      <div className="container relative grid items-center gap-12 py-8 sm:py-12 md:py-16 lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:py-20">
+        {/* Copy */}
+        <div className="max-w-xl">
+          {/* Phones and tablets: video banner with the service-area label on it */}
+          <HeroVideo className="mb-6 lg:hidden">
+            <p className="inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-[11px] font-medium min-[380px]:text-xs text-ink-2 shadow-[var(--shadow-sm)] backdrop-blur">
+              <MapPin className="h-3.5 w-3.5 shrink-0 text-gold-600" aria-hidden="true" />
+              Serving {theme.contact.address.serviceArea}
+            </p>
+          </HeroVideo>
+          {/* Desktop label (unchanged) */}
+          <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white px-3.5 py-1.5 text-[13px] font-medium text-ink-2 shadow-[var(--shadow-sm)] max-lg:hidden sm:text-sm">
+            <MapPin className="h-4 w-4 shrink-0 text-gold-600" aria-hidden="true" />
+            Serving {theme.contact.address.serviceArea}
+          </p>
+          {/* Smaller on narrow phones so the quote button stays on the first screen */}
+          <h1 className="text-balance text-[2.125rem] leading-[1.06] text-ink min-[380px]:text-[2.25rem] md:text-[3.25rem]">
+            Garage doors &amp; security cameras.{" "}
+            <span className="text-navy-600">
+              Oshawa &amp; Durham&apos;s installation and repair{" "}
+              <span className="relative whitespace-nowrap">
+                experts
+                <span
+                  className="absolute -bottom-1 left-0 h-[6px] w-full rounded-full bg-gold-500/70"
+                  aria-hidden="true"
+                />
+              </span>
+              .
+            </span>
+          </h1>
+          <p className="mt-5 text-pretty text-base leading-relaxed text-ink-2 min-[380px]:mt-6 min-[380px]:text-lg">
+            Local specialists who get the job done quickly and done right, from
+            brand-new installs to repairs. Free quote up front and
+            satisfaction guaranteed.
+          </p>
 
-      <div className="container relative z-10">
-        <div className="max-w-4xl mx-auto text-center text-white">
-          {/* Main Heading */}
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-balance"
-              style={{ color: "white" }}
-          >
-            Oshawa&apos;s Trusted Locksmith &{" "}
-            <span className="text-[var(--accent-teal)]">Smart Home Security</span>{" "}
-            Experts
-          </motion.h1>
-
-          {/* Subheadline */}
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-xl md:text-2xl text-white/80 mb-10"
-          >
-            {theme.brand.tagline}
-          </motion.p>
-
-          {/* CTA Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12"
-          >
-            <Button
-              as="a"
+          {/* Extra top margin leaves room for the button's speech bubble */}
+          <div className="mt-14 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <HeroQuoteButton />
+            <a
               href={`tel:${theme.contact.phone.tel}`}
-              variant="emergency"
-              icon={Phone}
-              size="lg"
-              className="min-w-[240px]"
+              className="btn btn-outline btn-lg"
             >
-              Call Now: {theme.contact.phone.display}
-            </Button>
+              <Phone className="h-[18px] w-[18px]" aria-hidden="true" />
+              {theme.contact.phone.display}
+            </a>
+          </div>
+          <p className="mt-3 text-sm text-ink-3">
+            Quick to fill in. We reply during business hours.
+          </p>
 
-            <Button
-              as="link"
-              href="/contact"
-              variant="primary"
-              icon={FileText}
-              size="lg"
-              className="min-w-[240px]"
-            >
-              Get a Free Quote
-            </Button>
-          </motion.div>
-
-          {/* Trust Badges */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex flex-wrap items-center justify-center gap-6 md:gap-10"
-          >
-            {trustBadges.map((badge, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-2 text-sm text-white/90"
-              >
-                <badge.icon className="w-5 h-5 text-[var(--accent-teal)]" />
-                <span>{badge.text}</span>
-              </div>
+          <ul className="mt-8 flex flex-col gap-3 border-t border-line pt-6 text-sm text-ink-2 sm:flex-row sm:flex-wrap sm:gap-x-7">
+            {assurances.map(({ icon: Icon, text }) => (
+              <li key={text} className="flex items-center gap-2">
+                <Icon className="h-4 w-4 text-gold-600" aria-hidden="true" />
+                {text}
+              </li>
             ))}
-          </motion.div>
+          </ul>
         </div>
-      </div>
 
-      {/* Bottom Wave */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <svg
-          className="w-full h-16 md:h-24"
-          viewBox="0 0 1440 100"
-          fill="none"
-          preserveAspectRatio="none"
-        >
-          <path
-            d="M0 50L48 45.7C96 41.3 192 32.7 288 30.2C384 27.7 480 31.3 576 39.2C672 47 768 59 864 59C960 59 1056 47 1152 41.3C1248 35.7 1344 36.3 1392 36.7L1440 37V100H1392C1344 100 1248 100 1152 100C1056 100 960 100 864 100C768 100 672 100 576 100C480 100 384 100 288 100C192 100 96 100 48 100H0V50Z"
-            fill="white"
+        {/* Photo + quote starter */}
+        <div className="relative lg:pb-10">
+          <Photo
+            image="heroGarage"
+            priority
+            aspect={5 / 4}
+            sizes="(min-width: 1024px) 560px, 100vw"
+            className="aspect-[5/4] shadow-[var(--shadow-xl)] max-lg:hidden"
+            imgClassName="object-[70%_50%]"
           />
-        </svg>
+          <QuoteStarterCard className="lg:absolute lg:-bottom-2 lg:-left-10 lg:w-[380px]" />
+        </div>
       </div>
     </section>
   );

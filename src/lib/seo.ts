@@ -1,0 +1,211 @@
+import type { Metadata, MetadataRoute } from "next";
+import { theme, type ServiceCity } from "@/config/theme";
+import { GARAGE_SUB_SERVICES, type GarageSubService } from "@/content/garageServices";
+import { getPost } from "@/lib/blog";
+
+/**
+ * Date the static (non-guide) pages were last meaningfully changed. Bump it when
+ * page content changes so sitemap <lastmod> stays honest instead of using the
+ * build time on every deploy.
+ */
+export const SITE_CONTENT_UPDATED = "2026-09-28";
+
+/** Date of the October 2026 service, sub-service and city page rewrite. */
+const SEO_REWRITE_UPDATED = "2026-10-07";
+
+/** Canonical site origin, without a trailing slash. */
+export const SITE_URL = theme.seo.siteUrl;
+
+/**
+ * Turn a site path into an absolute URL.
+ *
+ * Page paths get a trailing slash to match `trailingSlash: true` in
+ * next.config.ts ("/about" and "/about/" both become ".../about/"). A path whose
+ * last segment has a file extension (e.g. "/og-image.png") gets no slash.
+ */
+export function absoluteUrl(path: string): string {
+  const trimmed = path.replace(/^\/+/, "").replace(/\/+$/, "");
+  if (trimmed === "") return `${SITE_URL}/`;
+  const lastSegment = trimmed.slice(trimmed.lastIndexOf("/") + 1);
+  const isFile = /\.[A-Za-z0-9]+$/.test(lastSegment);
+  return `${SITE_URL}/${trimmed}${isFile ? "" : "/"}`;
+}
+
+export type BuildMetadataInput = {
+  title: string;
+  description: string;
+  /** Site-relative path, e.g. "/services/" */
+  path: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  noIndex?: boolean;
+  /** Site-relative path of a PNG share image (defaults to the site-wide OG image). */
+  ogImage?: string;
+  keywords?: readonly string[];
+  /** Article pages get og:type=article plus published/modified times. */
+  article?: { publishedTime: string; modifiedTime: string; section: string; tags?: readonly string[] };
+  /** Extra <link rel="alternate"> entries, e.g. the RSS feed. */
+  alternateTypes?: Record<string, { url: string; title: string }[]>;
+};
+
+/**
+ * Build the full per-page Metadata object.
+ *
+ * `title.absolute` bypasses the root title template so the brand is never
+ * doubled. `openGraph` is spelled out in full because a page-level openGraph
+ * replaces the entire inherited block (images included).
+ */
+export function buildMetadata({
+  title,
+  description,
+  path,
+  ogTitle,
+  ogDescription,
+  noIndex,
+  ogImage,
+  keywords,
+  article,
+  alternateTypes,
+}: BuildMetadataInput): Metadata {
+  const url = absoluteUrl(path);
+  const image = absoluteUrl(ogImage ?? theme.seo.ogImage);
+  const socialTitle = ogTitle ?? title;
+  const socialDescription = ogDescription ?? description;
+
+  return {
+    title: { absolute: title },
+    description,
+    ...(keywords?.length ? { keywords: [...keywords] } : {}),
+    alternates: { canonical: url, ...(alternateTypes ? { types: alternateTypes } : {}) },
+    openGraph: {
+      ...(article
+        ? {
+            type: "article" as const,
+            publishedTime: article.publishedTime,
+            modifiedTime: article.modifiedTime,
+            section: article.section,
+            tags: article.tags ? [...article.tags] : undefined,
+            authors: [theme.brand.name],
+          }
+        : { type: "website" as const }),
+      locale: "en_CA",
+      siteName: theme.brand.name,
+      url,
+      title: socialTitle,
+      description: socialDescription,
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: socialTitle,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      site: theme.seo.twitterHandle || undefined,
+      creator: theme.seo.twitterHandle || undefined,
+      title: socialTitle,
+      description: socialDescription,
+      images: [image],
+    },
+    ...(noIndex ? { robots: { index: false, follow: false } } : {}),
+  };
+}
+
+export type SiteRoute = {
+  /** Site-relative path with a trailing slash. */
+  path: string;
+  changeFrequency: NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
+  priority: number;
+  /** ISO date the page's main content last changed; defaults to SITE_CONTENT_UPDATED. */
+  updated?: string;
+};
+
+export type ServiceCategory = (typeof theme.services.categories)[number];
+
+/** Cities that get a dedicated /service-areas/{slug}/ page. */
+export const coreCities: readonly ServiceCity[] = theme.serviceCities.filter(
+  (city) => city.core
+);
+
+/** Every indexable public route, in sitemap order. */
+export const SITE_ROUTES: readonly SiteRoute[] = [
+  { path: "/", changeFrequency: "weekly", priority: 1.0, updated: SEO_REWRITE_UPDATED },
+  { path: "/services/", changeFrequency: "monthly", priority: 0.9, updated: SEO_REWRITE_UPDATED },
+  ...theme.services.categories.map(
+    (service): SiteRoute => ({
+      path: `/services/${service.id}/`,
+      changeFrequency: "monthly",
+      priority: 0.9,
+      updated: SEO_REWRITE_UPDATED,
+    })
+  ),
+  ...GARAGE_SUB_SERVICES.map(
+    (sub): SiteRoute => ({
+      path: `/services/${sub.slug}/`,
+      changeFrequency: "monthly",
+      priority: 0.8,
+      updated: SEO_REWRITE_UPDATED,
+    })
+  ),
+  { path: "/service-areas/", changeFrequency: "monthly", priority: 0.7, updated: SEO_REWRITE_UPDATED },
+  ...coreCities.map(
+    (city): SiteRoute => ({
+      path: `/service-areas/${city.slug}/`,
+      changeFrequency: "monthly",
+      priority: 0.7,
+      updated: SEO_REWRITE_UPDATED,
+    })
+  ),
+  { path: "/about/", changeFrequency: "yearly", priority: 0.6 },
+  { path: "/contact/", changeFrequency: "yearly", priority: 0.8 },
+  { path: "/privacy-policy/", changeFrequency: "yearly", priority: 0.2 },
+];
+
+export function getService(slug: string): ServiceCategory | undefined {
+  return theme.services.categories.find((service) => service.id === slug);
+}
+
+export function getCity(slug: string): ServiceCity | undefined {
+  return theme.serviceCities.find((city) => city.slug === slug);
+}
+
+/** Garage door sub-service page (/services/{slug}/) from src/content/garageServices.ts. */
+export function getSubService(slug: string): GarageSubService | undefined {
+  return GARAGE_SUB_SERVICES.find((sub) => sub.slug === slug);
+}
+
+/**
+ * Fail the static build when copy links to a page that does not exist, or
+ * writes an internal href without the trailing slash `trailingSlash: true` needs.
+ */
+export function assertInternalHref(href: string): void {
+  if (!href.startsWith("/") || !href.endsWith("/")) {
+    throw new Error(`Internal link "${href}" must start and end with "/"`);
+  }
+  const blog = href.match(/^\/blog\/([^/]+)\/$/);
+  if (blog && !getPost(blog[1])) throw new Error(`Link to missing guide "${href}"`);
+  const service = href.match(/^\/services\/([^/]+)\/$/);
+  if (service && !getService(service[1]) && !getSubService(service[1])) {
+    throw new Error(`Link to missing service page "${href}"`);
+  }
+  const city = href.match(/^\/service-areas\/([^/]+)\/$/);
+  if (city && !getCity(city[1])?.core) throw new Error(`Link to missing city page "${href}"`);
+}
+
+/**
+ * Structural copy of theme.ts's ServiceSection, kept local so this helper
+ * compiles whether or not a given service defines `sections`.
+ */
+type ServiceSection = {
+  heading: string;
+  paragraphs: readonly string[];
+  bullets?: readonly string[];
+};
+
+/** Long-form H2 sections for a service page (empty when the service has none). */
+export function getServiceSections(service: ServiceCategory): readonly ServiceSection[] {
+  return (service as unknown as { sections?: readonly ServiceSection[] }).sections ?? [];
+}

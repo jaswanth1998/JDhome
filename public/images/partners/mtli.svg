@@ -1,0 +1,8 @@
+<svg width="320" height="120" viewBox="0 0 320 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="120" rx="24" fill="#1B3A5F"/>
+  <rect x="18" y="18" width="284" height="84" rx="18" fill="#24496F"/>
+  <circle cx="60" cy="60" r="26" fill="#06B6D4"/>
+  <path d="M49 72V48H55.2L60 58.2L64.8 48H71V72H65.8V56.8L61 66.4H58.8L54 56.8V72H49Z" fill="white"/>
+  <text x="95" y="57" fill="white" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="800" letter-spacing="2">MTLI</text>
+  <text x="95" y="78" fill="#C7D7E7" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" letter-spacing="1.4">COMMERCIAL SUPPORT</text>
+</svg>

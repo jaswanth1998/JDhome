@@ -1,208 +1,106 @@
-"use client";
-
-import { motion } from "framer-motion";
-import * as Icons from "lucide-react";
-import { Check, Phone, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { theme } from "@/config/theme";
-import { Button } from "@/components/ui";
-import { FinalCTA } from "@/components/sections";
+import { GARAGE_SUB_SERVICES, HUB_SLUG } from "@/content/garageServices";
+import { InquiryButton } from "@/components/inquiry";
+import { FeatureRow, FinalCTA, PageHero } from "@/components/sections";
+import { SectionHeading } from "@/components/ui";
+import { inquiryServiceForPage } from "@/lib/inquiries/schema";
 
-// Type for service with optional badge
 type ServiceCategory = (typeof theme.services.categories)[number];
-type ServiceWithBadge = ServiceCategory & { badge?: string };
+
+const primaryServices = theme.services.categories.filter((s) => s.tier === "primary");
+const addonServices = theme.services.categories.filter((s) => s.tier === "addon");
+
+function ServiceRow({ service, reverse }: { service: ServiceCategory; reverse: boolean }) {
+  return (
+    <FeatureRow
+      id={service.id}
+      image={service.image}
+      icon={service.icon}
+      badge={"badge" in service ? service.badge : undefined}
+      title={service.name}
+      description={service.description}
+      points={service.features}
+      reverse={reverse}
+      actions={
+        <>
+          <InquiryButton service={inquiryServiceForPage(service.id)} variant="navy">
+            Get a quote
+          </InquiryButton>
+          <Link
+            href={`/services/${service.id}/`}
+            className="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-semibold text-navy-700 hover:text-navy-900"
+          >
+            Details &amp; FAQs
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+          {service.id === HUB_SLUG && <GarageSubServiceLinks />}
+        </>
+      }
+    />
+  );
+}
+
+/** Compact row linking the garage door sub-service pages (contract C6 labels). */
+function GarageSubServiceLinks() {
+  return (
+    <div className="w-full pt-2">
+      <p className="text-sm font-semibold text-ink">Garage door services</p>
+      <ul className="mt-3 flex flex-wrap gap-2">
+        {GARAGE_SUB_SERVICES.map((sub) => (
+          <li key={sub.slug}>
+            <Link
+              href={`/services/${sub.slug}/`}
+              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-1.5 text-sm font-medium text-ink transition-colors hover:border-navy-600 hover:text-navy-800"
+            >
+              {sub.cardLabel}
+              <ArrowRight className="h-3.5 w-3.5 text-gold-600" aria-hidden="true" />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export function ServicesPageContent() {
   return (
     <>
-      {/* Hero Section */}
-      <section className="section bg-gradient-primary text-white">
+      <PageHero
+        eyebrow="Our services"
+        title="Garage doors and security cameras, plus the extras"
+        subtitle="Two core specialties from one local team serving Durham Region and surrounding areas: garage door installation and repair, and smart security camera installation. Locksmith work and 24/7 car lockout help are available as add-ons."
+        breadcrumbs={[
+          { name: "Home", href: "/" },
+          { name: "Services", href: "/services/" },
+        ]}
+        image="garageService"
+      />
+
+      <section className="section bg-white">
+        <div className="container space-y-20 md:space-y-28">
+          {primaryServices.map((service, i) => (
+            <ServiceRow key={service.id} service={service} reverse={i % 2 === 1} />
+          ))}
+        </div>
+      </section>
+
+      <section className="section bg-paper-warm">
         <div className="container">
-          <div className="max-w-3xl mx-auto text-center">
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-4xl md:text-5xl font-bold mb-6"
-            >
-              Professional Locksmith Services
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-lg md:text-xl text-white/80 mb-8"
-            >
-              From emergency lockouts to smart home security systems, we provide
-              comprehensive locksmith services throughout Oshawa and Durham Region.
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <Button
-                as="a"
-                href={`tel:${theme.contact.phone.tel}`}
-                variant="emergency"
-                icon={Phone}
-                size="lg"
-              >
-                Call Now: {theme.contact.phone.display}
-              </Button>
-            </motion.div>
+          <SectionHeading
+            eyebrow="Add-on services"
+            title="Locks and lockouts, handled too"
+            subtitle="Handy when you're already upgrading a property's security, or when you need help getting back into your car."
+          />
+          <div className="mt-14 space-y-20 md:space-y-28">
+            {addonServices.map((service, i) => (
+              <ServiceRow key={service.id} service={service} reverse={i % 2 === 0} />
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Services Detail Sections */}
-      {(theme.services.categories as unknown as ServiceWithBadge[]).map((service, index) => {
-        const IconComponent = Icons[service.icon as keyof typeof Icons] as Icons.LucideIcon;
-        const isEven = index % 2 === 0;
-
-        return (
-          <section
-            key={service.id}
-            id={service.id}
-            className={`section ${isEven ? "bg-white" : "bg-[var(--bg-secondary)]"}`}
-          >
-            <div className="container">
-              <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-                {/* Content Side */}
-                <motion.div
-                  initial={{ opacity: 0, x: isEven ? -30 : 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.6 }}
-                  className={isEven ? "order-1" : "order-1 lg:order-2"}
-                >
-                  {/* Badge for emergency service */}
-                  {service.badge && (
-                    <span className="inline-block px-4 py-1 rounded-full bg-[var(--accent-orange)] text-white text-sm font-medium mb-4">
-                      {service.badge}
-                    </span>
-                  )}
-
-                  <h2 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-4">
-                    {service.name}
-                  </h2>
-
-                  <p className="text-[var(--text-secondary)] mb-8 leading-relaxed text-lg">
-                    {service.description}
-                  </p>
-
-                  {/* Features List */}
-                  <div className="mb-8">
-                    <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
-                      What&apos;s Included:
-                    </h3>
-                    <ul className="space-y-3">
-                      {service.features.map((feature, i) => (
-                        <li key={i} className="flex items-start gap-3">
-                          <div
-                            className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                            style={{ backgroundColor: `${service.color}20` }}
-                          >
-                            <Check
-                              className="w-4 h-4"
-                              style={{ color: service.color }}
-                            />
-                          </div>
-                          <span className="text-[var(--text-secondary)]">
-                            {feature}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Brands (for smart locks and high-security) */}
-                  {service.id === "smart-locks" && (
-                    <div className="mb-8">
-                      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-3">
-                        Popular Smart Lock Brands We Install:
-                      </h3>
-                      <p className="text-[var(--text-secondary)]">
-                        {theme.services.smartLockBrands.join(" • ")}
-                      </p>
-                    </div>
-                  )}
-
-                  {service.id === "high-security" && (
-                    <div className="mb-8">
-                      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-3">
-                        Top High-Security Brands:
-                      </h3>
-                      <p className="text-[var(--text-secondary)]">
-                        {theme.services.highSecurityBrands.join(" • ")}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* CTA */}
-                  <div className="flex flex-wrap gap-4">
-                    {service.id === "emergency" ? (
-                      <Button
-                        as="a"
-                        href={`tel:${theme.contact.phone.tel}`}
-                        variant="emergency"
-                        icon={Phone}
-                        size="lg"
-                      >
-                        Call Now: {theme.contact.phone.display}
-                      </Button>
-                    ) : (
-                      <Button
-                        as="link"
-                        href="/contact"
-                        variant="primary"
-                        icon={ArrowRight}
-                        iconPosition="right"
-                        size="lg"
-                      >
-                        Request This Service
-                      </Button>
-                    )}
-                  </div>
-                </motion.div>
-
-                {/* Visual Side */}
-                <motion.div
-                  initial={{ opacity: 0, x: isEven ? 30 : -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.6 }}
-                  className={isEven ? "order-2" : "order-2 lg:order-1"}
-                >
-                  <div className="relative aspect-square max-w-md mx-auto">
-                    {/* Background Shape */}
-                    <div
-                      className="absolute inset-8 rounded-3xl opacity-10"
-                      style={{ backgroundColor: service.color }}
-                    />
-
-                    {/* Icon Display */}
-                    <div className="relative h-full flex items-center justify-center">
-                      <div
-                        className="w-48 h-48 md:w-64 md:h-64 rounded-3xl shadow-xl flex items-center justify-center"
-                        style={{ backgroundColor: service.color }}
-                      >
-                        {IconComponent && (
-                          <IconComponent
-                            className="w-24 h-24 md:w-32 md:h-32 text-white"
-                            strokeWidth={1}
-                          />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              </div>
-            </div>
-          </section>
-        );
-      })}
-
-      {/* Final CTA */}
       <FinalCTA />
     </>
   );

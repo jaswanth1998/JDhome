@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
-import { Inter, Poppins } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 import { theme } from "@/config/theme";
+import { GoogleAnalytics, GoogleTagManager, GoogleTagManagerNoScript } from "@/components/analytics";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -9,12 +10,16 @@ const inter = Inter({
   display: "swap",
 });
 
-const poppins = Poppins({
+const manrope = Manrope({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-poppins",
+  weight: ["600", "700", "800"],
+  variable: "--font-manrope",
   display: "swap",
 });
+
+export const viewport: Viewport = {
+  themeColor: theme.colors.primary.main,
+};
 
 export const metadata: Metadata = {
   title: {
@@ -44,6 +49,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
+    site: theme.seo.twitterHandle || undefined,
+    creator: theme.seo.twitterHandle || undefined,
     title: theme.seo.defaultTitle,
     description: theme.seo.defaultDescription,
     images: [theme.seo.ogImage],
@@ -59,10 +66,9 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  verification: {
-    // Add Google Search Console verification if available
-    // google: "verification-token",
-  },
+  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+    : undefined,
 };
 
 export default function RootLayout({
@@ -71,79 +77,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
-      <head>
-        {/* Schema.org LocalBusiness JSON-LD */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Locksmith",
-              name: theme.brand.name,
-              description: theme.brand.description,
-              url: theme.seo.siteUrl,
-              telephone: theme.contact.phone.tel,
-              email: theme.contact.email,
-              address: {
-                "@type": "PostalAddress",
-                addressLocality: theme.contact.address.city,
-                addressRegion: "ON",
-                addressCountry: "CA",
-              },
-              geo: {
-                "@type": "GeoCoordinates",
-                latitude: "43.8971",
-                longitude: "-78.8658",
-              },
-              openingHoursSpecification: [
-                {
-                  "@type": "OpeningHoursSpecification",
-                  dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-                  opens: "08:00",
-                  closes: "18:00",
-                },
-                {
-                  "@type": "OpeningHoursSpecification",
-                  dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-                  opens: "00:00",
-                  closes: "23:59",
-                  description: "Emergency lockout services available 24/7",
-                },
-              ],
-              areaServed: [
-                "Oshawa",
-                "Whitby",
-                "Ajax",
-                "Pickering",
-                "Courtice",
-                "Bowmanville",
-                "Durham Region",
-              ],
-              priceRange: "$$",
-              image: `${theme.seo.siteUrl}${theme.seo.ogImage}`,
-              sameAs: [
-                theme.contact.social.instagram,
-                theme.contact.social.facebook,
-              ].filter(Boolean),
-              hasOfferCatalog: {
-                "@type": "OfferCatalog",
-                name: "Locksmith Services",
-                itemListElement: theme.services.categories.map((service) => ({
-                  "@type": "Offer",
-                  itemOffered: {
-                    "@type": "Service",
-                    name: service.name,
-                    description: service.shortDescription,
-                  },
-                })),
-              },
-            }),
-          }}
-        />
-      </head>
+    <html lang="en-CA" className={`${inter.variable} ${manrope.variable}`}>
       <body className="antialiased">
+        <link rel="preconnect" href="https://images.unsplash.com" />
+        <GoogleTagManagerNoScript />
         {children}
+        <GoogleTagManager />
+        <GoogleAnalytics />
       </body>
     </html>
   );
