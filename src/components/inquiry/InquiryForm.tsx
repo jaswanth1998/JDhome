@@ -9,7 +9,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertCircle,
-  ArrowLeft,
   ArrowRight,
   Car,
   Cctv,
@@ -18,7 +17,9 @@ import {
   Lock,
   MessageSquare,
   Phone,
+  Plus,
   Send,
+  Star,
   Warehouse,
   Wrench,
   type LucideIcon,
@@ -28,22 +29,10 @@ import { trackMetaEvent } from "@/components/analytics";
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { getAttribution, toE164 } from "@/lib/tracking/attribution";
-import {
-  CAMERA_COUNTS,
-  CAMERA_FEATURES,
-  CITY_OPTIONS,
-  CONTACT_METHODS,
-  GARAGE_ISSUES,
-  INQUIRY_SERVICES,
-  INQUIRY_STEPS,
-  PROPERTY_TYPES,
-  TIMINGS,
-  inquirySchema,
-  serviceGroup,
-  type InquiryFormValues,
-  type InquiryService,
-} from "@/lib/inquiries/schema";
-import { ChoiceChip } from "./ChoiceChip";
+import { INQUIRY_SERVICES, inquirySchema, type InquiryFormValues, type InquiryService } from "@/lib/inquiries/schema";
+
+/** Short Google review shown under the send button (theme.testimonials id). */
+const FORM_REVIEW_ID = 5;
 
 const serviceIcons: Record<InquiryService, LucideIcon> = {
   "garage-repair": Wrench,
@@ -77,17 +66,17 @@ declare global {
 
 export function InquiryForm({ defaultService, onClose, className }: InquiryFormProps) {
   const pathname = usePathname();
-  const [step, setStep] = useState(defaultService ? 1 : 0);
-  const [direction, setDirection] = useState(1);
   const [submit, setSubmit] = useState<SubmitState>({ status: "idle" });
+  const [showNote, setShowNote] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const hasNavigated = useRef(false);
+  const started = useRef(false);
 
   const {
     register,
     handleSubmit,
-    trigger,
     setValue,
+    trigger,
     control,
     formState: { errors, isSubmitting },
   } = useForm<InquiryFormValues>({
@@ -95,48 +84,32 @@ export function InquiryForm({ defaultService, onClose, className }: InquiryFormP
     mode: "onTouched",
     defaultValues: {
       service: defaultService,
-      cameraFeatures: [],
-      city: "",
-      timing: "",
-      message: "",
       name: "",
       phone: "",
       email: "",
-      preferredContact: "phone",
+      textMe: false,
+      message: "",
       company: "",
     },
   });
 
   const service = useWatch({ control, name: "service" });
-  const preferredContact = useWatch({ control, name: "preferredContact" });
-  const group = serviceGroup(service);
+  const phoneValue = useWatch({ control, name: "phone" }) ?? "";
 
-  // Move focus to the step heading after navigating (not on first render).
+  // Move focus to the confirmation heading once sent (not on first render).
   useEffect(() => {
     if (hasNavigated.current) headingRef.current?.focus();
-  }, [step, submit.status]);
+  }, [submit.status]);
 
-  // Start downloading the Firebase code once the visitor reaches the last step,
-  // so pressing "Send" doesn't wait for it.
-  useEffect(() => {
-    if (step === INQUIRY_STEPS.length - 1) loadSubmitModules().catch(() => undefined);
-  }, [step]);
-
-  const goTo = (next: number) => {
-    hasNavigated.current = true;
-    if (next > step) window.dataLayer?.push({ event: "inquiry_step", inquiry_step: INQUIRY_STEPS[next].id });
-    setDirection(next > step ? 1 : -1);
-    setStep(next);
-  };
-
-  const next = async () => {
-    const valid = await trigger([...INQUIRY_STEPS[step].fields]);
-    if (valid) goTo(step + 1);
-  };
-
-  const chooseService = (value: InquiryService) => {
-    setValue("service", value, { shouldValidate: true });
-    goTo(1);
+  /**
+   * First touch of the form: report it (so GTM can compare starts with sends) and start
+   * downloading the Firebase code so pressing "Send" doesn't wait for it.
+   */
+  const onStart = () => {
+    if (started.current) return;
+    started.current = true;
+    window.dataLayer?.push({ event: "inquiry_started", inquiry_service: service ?? "" });
+    loadSubmitModules().catch(() => undefined);
   };
 
   const onSubmit = async (values: InquiryFormValues) => {
@@ -196,8 +169,8 @@ export function InquiryForm({ defaultService, onClose, className }: InquiryFormP
           Thanks{submit.name ? `, ${submit.name}` : ""}. Your request is in.
         </h2>
         <p className="mt-3 max-w-md text-ink-2">
-          We&apos;ll review the details and get back to you during business hours ({theme.contact.hours.regular.display}
-          ). If it can&apos;t wait, give us a call.
+          We&apos;ll get back to you during business hours ({theme.contact.hours.regular.display}) to talk through the
+          job and your free quote. If it can&apos;t wait, give us a call.
         </p>
         <div className="mt-7 flex flex-col gap-3 sm:flex-row">
           <Button as="a" href={`tel:${theme.contact.phone.tel}`} variant="navy" icon={Phone}>
@@ -213,285 +186,156 @@ export function InquiryForm({ defaultService, onClose, className }: InquiryFormP
     );
   }
 
-  const currentStep = INQUIRY_STEPS[step];
-  const isLastStep = step === INQUIRY_STEPS.length - 1;
-
-  // Pressing Enter on an earlier step moves forward instead of submitting.
-  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    if (!isLastStep) {
-      event.preventDefault();
-      if (step > 0) void next();
-      return;
-    }
-    void handleSubmit(onSubmit)(event);
-  };
+  const reviews = theme.contact.googleReviews;
+  const review = theme.testimonials.find((t) => t.id === FORM_REVIEW_ID);
 
   return (
-    <form onSubmit={handleFormSubmit} noValidate className={className}>
-      {/* Progress */}
-      <div className="mb-6">
-        <div className="mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.12em] text-ink-3">
-          <span>
-            Step {step + 1} of {INQUIRY_STEPS.length}
-          </span>
-          <span className="flex items-center gap-1.5 normal-case tracking-normal">
-            <Lock className="h-3.5 w-3.5" aria-hidden="true" />
-            Free, no-obligation quote
-          </span>
-        </div>
-        <div className="flex gap-1.5" aria-hidden="true">
-          {INQUIRY_STEPS.map((s, i) => (
-            <span
-              key={s.id}
-              className={cn("h-1 flex-1 rounded-full transition-colors", i <= step ? "bg-gold-500" : "bg-line")}
-            />
-          ))}
-        </div>
-      </div>
-
-      <h2 ref={headingRef} tabIndex={-1} className="mb-5 text-2xl text-ink outline-none">
-        {currentStep.title}
+    <form onSubmit={handleSubmit(onSubmit)} onFocusCapture={onStart} noValidate className={className}>
+      <h2 ref={headingRef} tabIndex={-1} className="mb-4 text-2xl text-ink outline-none">
+        What do you need?
       </h2>
 
-      {/* Keyed so each step mounts fresh and slides in; no exit animation to wait on. */}
-      <motion.div
-        key={currentStep.id}
-        initial={hasNavigated.current ? { opacity: 0, x: direction * 24 } : false}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.2 }}
-      >
-        {/* STEP 1: service */}
-        {currentStep.id === "service" && (
-          <fieldset>
-            <legend className="sr-only">Service needed</legend>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {INQUIRY_SERVICES.map((option) => {
-                const Icon = serviceIcons[option.value];
-                const selected = service === option.value;
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => chooseService(option.value)}
-                    aria-pressed={selected}
-                    className={cn(
-                      "group flex items-start gap-3 rounded-[var(--radius-lg)] border p-4 text-left transition-all",
-                      selected
-                        ? "border-navy-800 bg-paper-cool ring-1 ring-navy-800"
-                        : "border-line bg-white hover:border-navy-600 hover:shadow-[var(--shadow-md)]",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg transition-colors",
-                        option.group === "other" ? "bg-paper-cool text-navy-700" : "bg-navy-800 text-gold-500",
-                      )}
-                    >
-                      <Icon className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                    <span>
-                      <span className="block font-semibold text-ink">{option.label}</span>
-                      <span className="mt-0.5 block text-sm text-ink-3">{option.hint}</span>
-                    </span>
-                  </button>
-                );
+      <fieldset>
+        <legend className="sr-only">Service needed</legend>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {INQUIRY_SERVICES.map((option) => {
+            const Icon = serviceIcons[option.value];
+            const selected = service === option.value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setValue("service", option.value, { shouldValidate: true })}
+                aria-pressed={selected}
+                className={cn(
+                  "flex items-center gap-2.5 rounded-[var(--radius-lg)] border px-3 py-3 text-left text-sm font-semibold transition-all",
+                  selected
+                    ? "border-navy-800 bg-paper-cool text-ink ring-1 ring-navy-800"
+                    : "border-line bg-white text-ink hover:border-navy-600",
+                )}
+              >
+                <span
+                  className={cn(
+                    "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md",
+                    selected ? "bg-navy-800 text-gold-500" : "bg-paper-cool text-navy-700",
+                  )}
+                >
+                  <Icon className="h-4 w-4" aria-hidden="true" />
+                </span>
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+        {errors.service && <FieldError message={errors.service.message} />}
+      </fieldset>
+
+      {service === "car-lockout" && (
+        <div className="mt-4 flex items-start gap-3 rounded-[var(--radius-lg)] border border-gold-500/40 bg-gold-100 p-3.5">
+          <Car className="mt-0.5 h-5 w-5 flex-shrink-0 text-gold-700" aria-hidden="true" />
+          <p className="text-sm text-ink">
+            <strong>Locked out right now?</strong> Calling is fastest. Our lockout line is answered 24/7:{" "}
+            <a href={`tel:${theme.contact.phone.tel}`} className="font-semibold text-navy-700 underline">
+              {theme.contact.phone.display}
+            </a>
+          </p>
+        </div>
+      )}
+
+      <div className="mt-5">
+        <Field label="Your name" htmlFor="inq-name" error={errors.name?.message}>
+          <input
+            id="inq-name"
+            type="text"
+            autoComplete="name"
+            className="input"
+            placeholder="Jane Smith"
+            aria-invalid={errors.name ? true : undefined}
+            {...register("name")}
+          />
+        </Field>
+      </div>
+
+      <fieldset className="mt-4">
+        <legend className="mb-2 text-sm font-semibold text-ink">
+          How can we reach you?{" "}
+          <span className="font-normal text-ink-3">Phone or email, whichever you prefer.</span>
+        </legend>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label htmlFor="inq-phone" className="sr-only">
+              Phone number
+            </label>
+            <input
+              id="inq-phone"
+              type="tel"
+              autoComplete="tel"
+              inputMode="tel"
+              className="input"
+              placeholder="Phone (905) 555-0123"
+              aria-invalid={errors.phone ? true : undefined}
+              {...register("phone")}
+            />
+          </div>
+          <div>
+            <label htmlFor="inq-email" className="sr-only">
+              Email
+            </label>
+            <input
+              id="inq-email"
+              type="email"
+              autoComplete="email"
+              className="input"
+              placeholder="Email you@example.com"
+              aria-invalid={errors.email ? true : undefined}
+              {...register("email", {
+                // Typing an email can satisfy the "phone or email" rule shown under phone.
+                onChange: () => {
+                  if (errors.phone) void trigger("phone");
+                },
               })}
-            </div>
-            {errors.service && <FieldError message={errors.service.message} />}
-          </fieldset>
-        )}
-
-        {/* STEP 2: details */}
-        {currentStep.id === "details" && (
-          <div className="space-y-6">
-            {service === "car-lockout" && (
-              <div className="flex items-start gap-3 rounded-[var(--radius-lg)] border border-gold-500/40 bg-gold-100 p-4">
-                <Car className="mt-0.5 h-5 w-5 flex-shrink-0 text-gold-700" aria-hidden="true" />
-                <p className="text-sm text-ink">
-                  <strong>Locked out right now?</strong> Calling is fastest. Our lockout line is answered 24/7:{" "}
-                  <a href={`tel:${theme.contact.phone.tel}`} className="font-semibold text-navy-700 underline">
-                    {theme.contact.phone.display}
-                  </a>
-                </p>
-              </div>
-            )}
-
-            {group === "garage" && (
-              <fieldset>
-                <legend className="mb-3 text-sm font-semibold text-ink">What&apos;s going on with the door?</legend>
-                <div className="flex flex-wrap gap-2">
-                  {(service === "garage-install"
-                    ? ["Replace my existing door", "New door (no door now)", "New door + opener", "Not sure"]
-                    : GARAGE_ISSUES
-                  ).map((issue) => (
-                    <ChoiceChip key={issue} value={issue} label={issue} {...register("garageIssue")} />
-                  ))}
-                </div>
-              </fieldset>
-            )}
-
-            {group === "cameras" && (
-              <>
-                <fieldset>
-                  <legend className="mb-3 text-sm font-semibold text-ink">Where are the cameras going?</legend>
-                  <div className="flex flex-wrap gap-2">
-                    {PROPERTY_TYPES.map((type) => (
-                      <ChoiceChip key={type} value={type} label={type} {...register("propertyType")} />
-                    ))}
-                  </div>
-                </fieldset>
-                <fieldset>
-                  <legend className="mb-3 text-sm font-semibold text-ink">Roughly how many cameras?</legend>
-                  <div className="flex flex-wrap gap-2">
-                    {CAMERA_COUNTS.map((count) => (
-                      <ChoiceChip key={count} value={count} label={count} {...register("cameraCount")} />
-                    ))}
-                  </div>
-                </fieldset>
-                <fieldset>
-                  <legend className="mb-1 text-sm font-semibold text-ink">Features you&apos;re interested in</legend>
-                  <p className="mb-3 text-sm text-ink-3">Pick any that apply. We&apos;ll explain the options.</p>
-                  <div className="flex flex-wrap gap-2">
-                    {CAMERA_FEATURES.map((feature) => (
-                      <ChoiceChip
-                        key={feature}
-                        type="checkbox"
-                        value={feature}
-                        label={feature}
-                        {...register("cameraFeatures")}
-                      />
-                    ))}
-                  </div>
-                </fieldset>
-              </>
-            )}
-
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Field label="Your city" htmlFor="inq-city" error={errors.city?.message}>
-                <select
-                  id="inq-city"
-                  className="input cursor-pointer"
-                  aria-invalid={errors.city ? true : undefined}
-                  {...register("city")}
-                >
-                  <option value="">Select a city…</option>
-                  {CITY_OPTIONS.map((city) => (
-                    <option key={city} value={city}>
-                      {city}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="When do you need it?" optional htmlFor="inq-timing" error={errors.timing?.message}>
-                <select
-                  id="inq-timing"
-                  className="input cursor-pointer"
-                  aria-invalid={errors.timing ? true : undefined}
-                  {...register("timing")}
-                >
-                  <option value="">Select a timeframe…</option>
-                  {TIMINGS.map((timing) => (
-                    <option key={timing} value={timing}>
-                      {timing}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-            </div>
-
-            <Field label="Anything else we should know?" optional htmlFor="inq-message" error={errors.message?.message}>
-              <textarea
-                id="inq-message"
-                rows={3}
-                className="input textarea"
-                placeholder={
-                  group === "cameras"
-                    ? "e.g. We want to cover the driveway, front door, and backyard."
-                    : group === "garage"
-                      ? "e.g. Double door, it stopped halfway and makes a loud bang."
-                      : "Tell us a little about the job."
-                }
-                {...register("message")}
-              />
-            </Field>
+            />
           </div>
-        )}
+        </div>
+        {(errors.phone || errors.email) && <FieldError message={errors.phone?.message ?? errors.email?.message} />}
+      </fieldset>
 
-        {/* STEP 3: contact */}
-        {currentStep.id === "contact" && (
-          <div className="space-y-5">
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Field label="Full name" htmlFor="inq-name" error={errors.name?.message}>
-                <input
-                  id="inq-name"
-                  type="text"
-                  autoComplete="name"
-                  className="input"
-                  placeholder="Jane Smith"
-                  aria-invalid={errors.name ? true : undefined}
-                  {...register("name")}
-                />
-              </Field>
-              <Field label="Phone" htmlFor="inq-phone" error={errors.phone?.message}>
-                <input
-                  id="inq-phone"
-                  type="tel"
-                  autoComplete="tel"
-                  inputMode="tel"
-                  className="input"
-                  placeholder="(905) 555-0123"
-                  aria-invalid={errors.phone ? true : undefined}
-                  {...register("phone")}
-                />
-              </Field>
-            </div>
-            <Field
-              label="Email"
-              optional={preferredContact !== "email"}
-              htmlFor="inq-email"
-              error={errors.email?.message}
-            >
-              <input
-                id="inq-email"
-                type="email"
-                autoComplete="email"
-                className="input"
-                placeholder="you@example.com"
-                aria-invalid={errors.email ? true : undefined}
-                {...register("email")}
-              />
-            </Field>
+      {phoneValue.trim() !== "" && (
+        <label className="mt-3 flex cursor-pointer items-center gap-2.5 text-sm text-ink-2">
+          <input type="checkbox" className="h-4 w-4 accent-[var(--navy-800)]" {...register("textMe")} />
+          Text me instead of calling
+        </label>
+      )}
 
-            <fieldset>
-              <legend className="mb-3 text-sm font-semibold text-ink">Best way to reach you</legend>
-              <div className="flex flex-wrap gap-2">
-                {CONTACT_METHODS.map((method) => (
-                  <ChoiceChip
-                    key={method.value}
-                    value={method.value}
-                    label={method.label}
-                    {...register("preferredContact")}
-                  />
-                ))}
-              </div>
-            </fieldset>
+      {showNote ? (
+        <div className="mt-4">
+          <Field label="Anything we should know?" optional htmlFor="inq-message" error={errors.message?.message}>
+            <textarea
+              id="inq-message"
+              rows={2}
+              className="input textarea"
+              placeholder="e.g. The door stopped halfway and made a loud bang."
+              autoFocus
+              {...register("message")}
+            />
+          </Field>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setShowNote(true)}
+          className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-navy-700 hover:text-navy-900"
+        >
+          <Plus className="h-4 w-4" aria-hidden="true" />
+          Add a note (optional)
+        </button>
+      )}
 
-            {/* Honeypot: hidden from people and assistive tech */}
-            <div className="absolute -left-[9999px] h-px w-px overflow-hidden" aria-hidden="true">
-              <label htmlFor="inq-company">Company</label>
-              <input id="inq-company" type="text" tabIndex={-1} autoComplete="off" {...register("company")} />
-            </div>
-
-            <p className="text-xs leading-relaxed text-ink-3">
-              We only use your details to respond to this request. See our{" "}
-              <Link href="/privacy-policy/" className="underline hover:text-ink" target="_blank">
-                privacy policy
-              </Link>
-              .
-            </p>
-          </div>
-        )}
-      </motion.div>
+      {/* Honeypot: hidden from people and assistive tech */}
+      <div className="absolute -left-[9999px] h-px w-px overflow-hidden" aria-hidden="true">
+        <label htmlFor="inq-company">Company</label>
+        <input id="inq-company" type="text" tabIndex={-1} autoComplete="off" {...register("company")} />
+      </div>
 
       {submit.status === "error" && (
         <div
@@ -508,29 +352,55 @@ export function InquiryForm({ defaultService, onClose, className }: InquiryFormP
         </div>
       )}
 
-      {/* Navigation */}
-      {step > 0 && (
-        <div className="mt-7 flex items-center justify-between gap-3 border-t border-line pt-5">
-          <button
-            type="button"
-            onClick={() => goTo(step - 1)}
-            className="inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-sm font-semibold text-ink-2 hover:text-ink"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-            Back
-          </button>
-          {!isLastStep ? (
-            // Distinct keys so React never reuses the "Continue" button as the submit button mid-click.
-            <Button key="next" type="button" variant="navy" icon={ArrowRight} iconPosition="right" onClick={next}>
-              Continue
-            </Button>
-          ) : (
-            <Button key="submit" type="submit" variant="gold" icon={Send} iconPosition="right" isLoading={isSubmitting}>
-              {isSubmitting ? "Sending…" : "Send my request"}
-            </Button>
-          )}
-        </div>
+      <Button
+        type="submit"
+        variant="gold"
+        size="lg"
+        fullWidth
+        icon={isSubmitting ? Send : ArrowRight}
+        iconPosition="right"
+        isLoading={isSubmitting}
+        className="mt-5"
+      >
+        {isSubmitting ? "Sending…" : "Get my free quote"}
+      </Button>
+
+      {/* Reassurance right where the decision happens */}
+      <ul className="mt-4 space-y-1.5 text-sm text-ink-2">
+        <li className="flex items-start gap-2">
+          <Phone className="mt-0.5 h-4 w-4 flex-shrink-0 text-gold-600" aria-hidden="true" />
+          We get back to you during business hours ({theme.contact.hours.regular.display}).
+        </li>
+        <li className="flex items-start gap-2">
+          <Lock className="mt-0.5 h-4 w-4 flex-shrink-0 text-gold-600" aria-hidden="true" />
+          Free and no obligation. We never share your details or send spam.
+        </li>
+      </ul>
+
+      {review && (
+        <figure className="mt-4 rounded-[var(--radius-lg)] border border-line bg-paper-cool px-4 py-3">
+          <div className="flex items-center gap-2 text-xs font-semibold text-ink">
+            <span className="flex text-gold-500" aria-hidden="true">
+              {Array.from({ length: 5 }, (_, i) => (
+                <Star key={i} className="h-3.5 w-3.5 fill-current" />
+              ))}
+            </span>
+            <a href={reviews.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+              {reviews.rating.toFixed(1)} on Google
+            </a>
+          </div>
+          <blockquote className="mt-1.5 text-sm text-ink-2">&ldquo;{review.quote}&rdquo;</blockquote>
+          <figcaption className="mt-1 text-xs text-ink-3">{review.author}, Google review</figcaption>
+        </figure>
       )}
+
+      <p className="mt-3 text-xs leading-relaxed text-ink-3">
+        We only use your details to reply to this request. See our{" "}
+        <Link href="/privacy-policy/" className="underline hover:text-ink" target="_blank">
+          privacy policy
+        </Link>
+        .
+      </p>
       <SubmittingOverlay show={isSubmitting} />
     </form>
   );

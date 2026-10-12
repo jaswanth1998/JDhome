@@ -1,7 +1,7 @@
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { getDb } from "@/lib/firebase/client";
 import type { Attribution } from "@/lib/tracking/attribution";
-import { serviceGroup, serviceLabel, type InquiryFormValues } from "./schema";
+import { serviceLabel, type InquiryFormValues } from "./schema";
 
 export const INQUIRIES_COLLECTION = "inquiries";
 
@@ -16,30 +16,22 @@ export async function submitInquiry(
   page: string,
   attribution?: Attribution,
 ): Promise<string> {
-  const group = serviceGroup(values.service);
-
-  // Only keep the detail fields that apply to the chosen service.
-  const details: Record<string, string | string[]> = {};
-  if (group === "garage" && values.garageIssue) details.garageIssue = values.garageIssue;
-  if (group === "cameras") {
-    if (values.propertyType) details.propertyType = values.propertyType;
-    if (values.cameraCount) details.cameraCount = values.cameraCount;
-    if (Array.isArray(values.cameraFeatures) && values.cameraFeatures.length) {
-      details.cameraFeatures = values.cameraFeatures;
-    }
-  }
-
+  // The record keeps its original shape (firestore.rules, the n8n alerts and the leads
+  // dashboard all expect it): questions the short form no longer asks are saved as
+  // "Not specified" / empty and gathered on the call-back instead. The rules require a
+  // phone value, so an email-only request stores "Not provided" there.
+  const phone = values.phone.trim();
   const ref = await addDoc(collection(getDb(), INQUIRIES_COLLECTION), {
     service: values.service,
     serviceLabel: serviceLabel(values.service),
-    details,
-    city: values.city,
-    timing: values.timing || "Not specified",
+    details: {},
+    city: "Not specified",
+    timing: "Not specified",
     message: values.message?.trim() ?? "",
     name: values.name.trim(),
-    phone: values.phone.trim(),
+    phone: phone || "Not provided",
     email: values.email.trim(),
-    preferredContact: values.preferredContact,
+    preferredContact: !phone ? "email" : values.textMe ? "text" : "phone",
     page: page.slice(0, 200),
     // Ad click id + UTM tags, so leads can be traced to (and imported back into) Google Ads.
     ...(attribution ? { attribution } : {}),

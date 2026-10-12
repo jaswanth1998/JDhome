@@ -81,7 +81,7 @@ Call a technician if:
 - The door is crooked, off track, or making grinding or banging noises
 - The opener runs but the door doesn't move and it isn't simply disengaged
 
-Our [garage door repair service](/services/garage-door-repair-installation/) covers everything from openers and sensors to springs, cables, and tracks, and every visit ends with a safety and balance check. We're based in Oshawa and work across Whitby, Ajax, Pickering, Courtice, Bowmanville, and nearby communities.
+Our [garage door repair service](/services/garage-door-repair-installation/) covers everything from openers and sensors to springs, cables, and tracks, and every visit ends with a safety and balance check. We're based in Oshawa and work across Durham Region, including Whitby, Ajax, Pickering, Courtice, and Bowmanville.
 
 ## Frequently asked questions
 

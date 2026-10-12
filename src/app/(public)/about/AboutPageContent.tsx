@@ -44,7 +44,7 @@ export function AboutPageContent() {
       <PageHero
         eyebrow="About us"
         title="A local team for garage doors and home security"
-        subtitle="JD Home Services serves Durham Region and surrounding areas, focused on two things: garage doors that run safely and smoothly, and security camera systems people can rely on."
+        subtitle="JD Home Services serves Durham Region, focused on two things: garage doors that run safely and smoothly, and security camera systems people can rely on."
         image="modernHome"
         breadcrumbs={[
           { name: "Home", href: "/" },
@@ -134,7 +134,7 @@ export function AboutPageContent() {
             </div>
             <div className="rounded-[var(--radius-xl)] bg-navy-900 p-8 text-white md:p-10">
               <p className="eyebrow eyebrow-light mb-4">Service area</p>
-              <h2 className="text-2xl text-white md:text-3xl">Proudly serving Durham Region and surrounding areas</h2>
+              <h2 className="text-2xl text-white md:text-3xl">Proudly serving Durham Region</h2>
               <ul className="mt-6 flex flex-wrap gap-2">
                 {serviceCities.map((city) => (
                   <li key={city.slug}>

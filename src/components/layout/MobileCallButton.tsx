@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Phone, Pointer } from "lucide-react";
+import { MessageSquare, Phone, Pointer } from "lucide-react";
 import { theme } from "@/config/theme";
 import { InquiryButton } from "@/components/inquiry";
 
@@ -18,7 +18,15 @@ const BUBBLE_VISIBLE_MS = 6000;
 const BUBBLE_REPEAT_MS = 30000;
 
 /**
- * Sticky call + quote bar shown on phones. The quote button draws the eye with a
+ * Opens the visitor's messaging app with our number and a starter message. `?&body=`
+ * is the form both iOS and Android accept.
+ */
+const SMS_HREF = `sms:${theme.contact.phone.tel}?&body=${encodeURIComponent(
+  "Hi JD Home Services, I'd like a free quote for: ",
+)}`;
+
+/**
+ * Sticky call / text / quote bar shown on phones. The quote button draws the eye with a
  * looping "tap" (CSS `.tap-hint` in globals.css: a hand taps it, the button presses,
  * a ripple splashes out) and a speech bubble that appears twice. Everything is off on
  * /contact/ (the form is already on screen) and for reduced motion.
@@ -46,10 +54,14 @@ export function MobileCallButton() {
 
   return (
     <div className="sticky-mobile-cta md:hidden">
-      <div className="grid grid-cols-2 gap-2">
-        <a href={`tel:${theme.contact.phone.tel}`} className="btn btn-primary w-full">
+      <div className="grid grid-cols-[1fr_1fr_1.4fr] gap-2">
+        <a href={`tel:${theme.contact.phone.tel}`} className="btn btn-primary w-full px-2">
           <Phone className="h-[18px] w-[18px]" aria-hidden="true" />
-          Call now
+          Call
+        </a>
+        <a href={SMS_HREF} className="btn btn-outline w-full px-2">
+          <MessageSquare className="h-[18px] w-[18px]" aria-hidden="true" />
+          Text
         </a>
 
         <div

@@ -206,7 +206,7 @@ export const GARAGE_SUB_SERVICES: readonly GarageSubService[] = [
       {
         question: "Which Durham Region communities do you install new garage doors in?",
         answer:
-          "We are based in Oshawa and install new doors across Durham Region, including Whitby, Ajax, Pickering, Courtice and Bowmanville, and we travel to nearby communities such as Port Perry and Uxbridge. Share your address when you call and we will confirm availability and arrange a time for your free quote.",
+          "We are based in Oshawa and install new doors across Durham Region, including Whitby, Ajax, Pickering, Courtice, Bowmanville, Port Perry and Uxbridge. Share your address when you call and we will confirm availability and arrange a time for your free quote.",
       },
     ],
     areasSubtitle: "New doors fitted from our Oshawa base across Durham.",

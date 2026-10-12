@@ -34,7 +34,7 @@ export function ContactPageContent() {
       <PageHero
         eyebrow="Contact"
         title="Get a free quote"
-        subtitle="Tell us what you need in about a minute. We'll get back to you during business hours with clear options and a quote."
+        subtitle="Leave your name and number in 30 seconds. We'll call you back during business hours with clear options and a quote."
         hideActions
         breadcrumbs={[
           { name: "Home", href: "/" },

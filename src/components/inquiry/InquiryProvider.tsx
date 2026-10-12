@@ -105,7 +105,7 @@ export function InquiryProvider({ children }: { children: React.ReactNode }) {
               <div className="flex items-center justify-between border-b border-line px-6 py-4">
                 <div>
                   <p className="text-sm font-semibold text-ink">Request a free quote</p>
-                  <p className="text-xs text-ink-3">Takes about a minute</p>
+                  <p className="text-xs text-ink-3">Takes 30 seconds</p>
                 </div>
                 <button
                   type="button"

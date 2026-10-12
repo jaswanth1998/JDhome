@@ -38,7 +38,7 @@ export function Testimonials({ serviceIds, tone = "white" }: TestimonialsProps =
           title="What our customers say"
           subtitle={
             <>
-              Rated {reviews.rating.toFixed(1)} out of 5 from {reviews.count} Google reviews.{" "}
+              Rated {reviews.rating.toFixed(1)} out of 5 on Google.{" "}
               <a
                 href={reviews.url}
                 target="_blank"

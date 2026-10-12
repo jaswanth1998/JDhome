@@ -70,7 +70,7 @@ export function ServicesPageContent() {
       <PageHero
         eyebrow="Our services"
         title="Garage doors and security cameras, plus the extras"
-        subtitle="Two core specialties from one local team serving Durham Region and surrounding areas: garage door installation and repair, and smart security camera installation. Locksmith work and 24/7 car lockout help are available as add-ons."
+        subtitle="Two core specialties from one local team serving Durham Region: garage door installation and repair, and smart security camera installation. Locksmith work and 24/7 car lockout help are available as add-ons."
         breadcrumbs={[
           { name: "Home", href: "/" },
           { name: "Services", href: "/services/" },

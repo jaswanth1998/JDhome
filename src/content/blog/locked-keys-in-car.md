@@ -42,7 +42,7 @@ Call a professional if:
 - You're somewhere unsafe or it's late at night
 - The key is locked in and the car is running
 
-Our [car lockout service](/services/car-lockout/) is available **24/7**, including evenings and weekends, across Oshawa, Durham Region, and surrounding communities.
+Our [car lockout service](/services/car-lockout/) is available **24/7**, including evenings and weekends, across Durham Region.
 
 ## What to have ready when you call
 

@@ -81,7 +81,7 @@ If a section of the door is badly bent, it may need replacing. Our guide on whet
 - Tighten loose track brackets
 - Book an annual inspection, ideally before winter
 
-Our [garage door repair service](/services/garage-door-repair-installation/) covers track, roller, cable, and spring repairs across Oshawa, Whitby, Ajax, Pickering, Courtice, Bowmanville, and nearby communities.
+Our [garage door repair service](/services/garage-door-repair-installation/) covers track, roller, cable, and spring repairs across Durham Region, including Oshawa, Whitby, Ajax, Pickering, Courtice, and Bowmanville.
 
 ## Frequently asked questions
 

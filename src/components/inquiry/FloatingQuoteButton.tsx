@@ -49,7 +49,7 @@ export function FloatingQuoteButton() {
           </span>
           <span className="leading-tight">
             <span className="block text-[0.9375rem] font-bold">Get a free quote</span>
-            <span className="block text-xs font-medium text-navy-900/70">Takes about a minute</span>
+            <span className="block text-xs font-medium text-navy-900/70">Takes 30 seconds</span>
           </span>
         </motion.button>
       )}

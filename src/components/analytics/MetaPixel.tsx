@@ -44,9 +44,10 @@ export function MetaPixel() {
   useEffect(() => {
     if (!pixelId) return;
     const onClick = (event: MouseEvent) => {
-      const link = (event.target as Element | null)?.closest?.('a[href^="tel:"], a[href^="mailto:"]');
+      const link = (event.target as Element | null)?.closest?.('a[href^="tel:"], a[href^="sms:"], a[href^="mailto:"]');
       if (!link) return;
-      const method = link.getAttribute("href")?.startsWith("tel:") ? "phone" : "email";
+      const href = link.getAttribute("href") ?? "";
+      const method = href.startsWith("tel:") ? "phone" : href.startsWith("sms:") ? "text" : "email";
       trackMetaEvent("Contact", { content_category: method });
     };
     document.addEventListener("click", onClick, { capture: true });

@@ -99,4 +99,4 @@ No. The opener only guides the door; the springs do the lifting. A broken spring
 
 ### Do you repair springs outside Oshawa?
 
-Yes. We handle spring repairs across Durham Region, including Whitby, Ajax, Pickering, Courtice, and Bowmanville, and we travel to nearby communities as well. See our [service areas](/service-areas/) for details.
+Yes. We handle spring repairs across Durham Region, including Whitby, Ajax, Pickering, Courtice, and Bowmanville. See our [service areas](/service-areas/) for details.

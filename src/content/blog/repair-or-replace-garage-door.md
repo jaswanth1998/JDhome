@@ -78,4 +78,4 @@ Not always. If your opener is in good condition and suited to the new door's wei
 
 ### Do you install garage doors outside Oshawa?
 
-Yes, across Durham Region including Whitby, Ajax, Pickering, Courtice, and Bowmanville, plus nearby communities. See our [service areas](/service-areas/).
+Yes, across Durham Region including Whitby, Ajax, Pickering, Courtice, and Bowmanville. See our [service areas](/service-areas/).

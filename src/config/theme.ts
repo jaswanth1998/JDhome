@@ -111,7 +111,7 @@ export const theme = {
   brand: {
     name: "JD Home Services",
     tagline: "From Install to Repair. Finished to Perfection.",
-    description: "Garage door and security camera installation and repair in Oshawa, Durham Region, and surrounding areas, with locksmith and car lockout help as add-on services.",
+    description: "Garage door and security camera installation and repair across Durham Region, with locksmith and car lockout help as add-on services.",
 
     logo: {
       primary: "/images/logo.png",
@@ -150,7 +150,7 @@ export const theme = {
       city: "Oshawa",
       region: "Ontario",
       country: "Canada",
-      serviceArea: "Durham Region and surrounding areas",
+      serviceArea: "Durham Region",
       fullServiceArea: serviceCities.map((c) => c.name).join(", "),
       geo: {
         latitude: 43.8971,
@@ -182,7 +182,7 @@ export const theme = {
     googleReviews: {
       rating: 5.0,
       count: 24,
-      asOf: "2026-10-08",
+      asOf: "2026-10-13",
       url: "https://www.google.com/maps?cid=2609295801497916011",
     },
 
@@ -336,7 +336,7 @@ export const theme = {
           {
             question: "Do you service garage doors outside Oshawa?",
             answer:
-              "Yes. We repair and install garage doors from our Oshawa base across Durham Region, including Whitby, Ajax, Pickering, Courtice, and Bowmanville, and we also travel to nearby communities such as Port Perry, Uxbridge, Cobourg, Peterborough, and Lindsay. Call us with your location and we will confirm availability.",
+              "Yes. We repair and install garage doors from our Oshawa base across Durham Region, including Whitby, Ajax, Pickering, Courtice, Bowmanville, Port Perry, and Uxbridge, and we also serve Cobourg, Peterborough, and Lindsay. Call us with your location and we will confirm availability.",
           },
           {
             question: "Do you replace broken garage door springs?",
@@ -425,7 +425,7 @@ export const theme = {
         name: "Locksmith",
         shortName: "Locksmith",
         shortDescription: "New locks installed, old locks changed or rekeyed (so old keys stop working), and repairs for homes, rentals, and businesses.",
-        description: "Our locksmith service covers the everyday security work property owners rely on. We handle lock changes, rekeying, deadbolt and knob replacement, hardware upgrades, lock repairs, and security checks for homes, offices, storefronts, and rental properties throughout Durham and surrounding areas. It pairs naturally with a camera install when you are upgrading a property's security.",
+        description: "Our locksmith service covers the everyday security work property owners rely on. We handle lock changes, rekeying, deadbolt and knob replacement, hardware upgrades, lock repairs, and security checks for homes, offices, storefronts, and rental properties throughout Durham Region. It pairs naturally with a camera install when you are upgrading a property's security.",
         icon: "KeyRound",
         image: "locksmith",
         features: [
@@ -512,7 +512,7 @@ export const theme = {
           {
             question: "Which areas do you cover for locksmith service?",
             answer:
-              "We are based in Oshawa and provide locksmith service throughout Durham Region, including Whitby, Ajax, Pickering, Courtice, and Bowmanville. We also travel to nearby communities such as Port Perry, Uxbridge, Stouffville, Cobourg, Peterborough, and Lindsay. If you are not sure whether we cover your location, call us and we will let you know.",
+              "We are based in Oshawa and provide locksmith service throughout Durham Region, including Whitby, Ajax, Pickering, Courtice, Bowmanville, Port Perry, and Uxbridge, and we also serve Stouffville, Cobourg, Peterborough, and Lindsay. If you are not sure whether we cover your location, call us and we will let you know.",
           },
           {
             question: "How do I get a quote for locksmith work?",
@@ -536,14 +536,14 @@ export const theme = {
         tier: "addon",
         name: "Car Lockout",
         shortName: "Car Lockout",
-        shortDescription: "Damage-free vehicle entry, any time, anywhere in Durham and surrounding regions.",
+        shortDescription: "Damage-free vehicle entry, any time, anywhere in Durham Region.",
         description: "Locked your keys in the car or dealing with a stuck vehicle lock? We provide car lockout help with damage-free entry methods whenever possible. Our goal is simple: get you back into your vehicle quickly, safely, and without adding more stress to your day.",
         icon: "Car",
         image: "carLockout",
         badge: "24/7",
         features: [
           "24/7 availability, including evenings and weekends",
-          "Serving Oshawa, Durham Region and surrounding communities",
+          "Serving all of Durham Region",
           "Damage-free vehicle entry whenever possible",
           "Help with keys locked inside or malfunctioning locks",
           "Service for most cars, SUVs, vans, and light trucks",
@@ -585,7 +585,7 @@ export const theme = {
           {
             question: "How quickly can you reach me in Oshawa or Durham Region?",
             answer:
-              "Oshawa is our home base, so nearby areas are usually the quickest to reach, and we cover the rest of Durham Region and surrounding communities from there. Arrival time depends on your location, the time of day, and traffic. When you call, we will confirm where you are and give you a realistic arrival estimate before we head out.",
+              "Oshawa is our home base, so nearby areas are usually the quickest to reach, and we cover the rest of Durham Region from there. Arrival time depends on your location, the time of day, and traffic. When you call, we will confirm where you are and give you a realistic arrival estimate before we head out.",
           },
           {
             question: "What kinds of vehicles can you open?",
@@ -739,6 +739,30 @@ export const theme = {
       author: "Sai Teja P.",
       service: "Locks and garage door",
       serviceIds: ["locksmith", "garage-door-repair-installation"],
+      rating: 5,
+    },
+    {
+      id: 7,
+      quote: "He was straightforward and honest. The work was done properly, the pricing was very reasonable, and I never felt like I was being upsold or charged for things I didn't need.",
+      author: "Anand G.",
+      service: "Garage keypad install",
+      serviceIds: ["garage-door-repair-installation"],
+      rating: 5,
+    },
+    {
+      id: 8,
+      quote: "Great customer service and excellent work. Explained the details of the required work very clearly! Would definitely recommend to anyone who needs garage door repairs.",
+      author: "Aaron M.",
+      service: "Garage door repair",
+      serviceIds: ["garage-door-repair-installation"],
+      rating: 5,
+    },
+    {
+      id: 9,
+      quote: "The work was done professionally, and I felt that he was honest, transparent, and genuinely looking out for the customer.",
+      author: "Manish M.",
+      service: "Garage door spring repair",
+      serviceIds: ["garage-door-repair-installation"],
       rating: 5,
     },
   ],

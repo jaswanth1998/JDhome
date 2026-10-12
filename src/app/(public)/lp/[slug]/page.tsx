@@ -103,7 +103,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
             Local to Durham Region
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-ink-2">
-            Based in Oshawa, serving {durhamCities.join(", ")} and nearby communities.
+            Based in Oshawa, serving {durhamCities.join(", ")}.
           </p>
         </div>
       </section>
