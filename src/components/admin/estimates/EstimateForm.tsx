@@ -2,18 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Plus, Search, Hash, Sparkles, PackagePlus } from "lucide-react";
-import { useAuth } from "@/lib/auth";
+import { listClients, listServiceItems, type Client, type ServiceItem } from "@/lib/db";
 import { LineItemRow } from "../invoices/LineItemRow";
 import { SignaturePad } from "../invoices/SignaturePad";
 import type { EstimatePreviewData } from "./EstimatePreview";
-
-type Client = {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-};
 
 type LineItem = {
   description: string;
@@ -68,8 +60,6 @@ export function EstimateForm({
   isSaving,
   saveLabels,
 }: EstimateFormProps) {
-  const { supabase } = useAuth();
-
   const [autoGenerate, setAutoGenerate] = useState(
     initialData?.autoGenerate ?? true
   );
@@ -106,28 +96,33 @@ export function EstimateForm({
     initialData?.signatureDataUrl ?? ""
   );
 
-  // Service items catalog
-  type ServiceItem = {
-    id: string;
-    name: string;
-    description: string;
-    default_rate: number;
-    category: string;
-  };
+  // Service items catalog (active only, ordered by category then name)
   const [serviceItems, setServiceItems] = useState<ServiceItem[]>([]);
   const [showCatalog, setShowCatalog] = useState(false);
   const [catalogQuery, setCatalogQuery] = useState("");
 
   useEffect(() => {
-    supabase
-      .schema("jdhome")
-      .from("service_items")
-      .select("id, name, description, default_rate, category")
-      .eq("is_active", true)
-      .order("category")
-      .order("name")
-      .then(({ data }) => setServiceItems((data as ServiceItem[]) ?? []));
-  }, [supabase]);
+    let cancelled = false;
+    listServiceItems()
+      .then((rows) => {
+        if (cancelled) return;
+        setServiceItems(
+          rows
+            .filter((s) => s.is_active)
+            .sort(
+              (a, b) =>
+                a.category.localeCompare(b.category) ||
+                a.name.localeCompare(b.name)
+            )
+        );
+      })
+      .catch(() => {
+        if (!cancelled) setServiceItems([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredCatalog = catalogQuery
     ? serviceItems.filter(
@@ -146,26 +141,46 @@ export function EstimateForm({
     setCatalogQuery("");
   }
 
-  // Client search
+  // Client search — the whole client list is loaded the first time the search
+  // box opens (tens of docs) and matched on name/email in memory.
   const [clientQuery, setClientQuery] = useState("");
   const [clientResults, setClientResults] = useState<Client[]>([]);
   const [showClientSearch, setShowClientSearch] = useState(false);
+  const [clients, setClients] = useState<Client[] | null>(null);
+
+  useEffect(() => {
+    if (!showClientSearch || clients) return;
+    let cancelled = false;
+    listClients()
+      .then((rows) => {
+        if (!cancelled) setClients(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setClients([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [showClientSearch, clients]);
 
   const searchClients = useCallback(
-    async (q: string) => {
-      if (q.length < 2) {
+    (q: string) => {
+      if (q.length < 2 || !clients) {
         setClientResults([]);
         return;
       }
-      const { data } = await supabase
-        .schema("jdhome")
-        .from("clients")
-        .select("id, name, email, phone, address")
-        .or(`name.ilike.%${q}%,email.ilike.%${q}%`)
-        .limit(5);
-      setClientResults((data as Client[]) ?? []);
+      const needle = q.toLowerCase();
+      setClientResults(
+        clients
+          .filter(
+            (c) =>
+              c.name.toLowerCase().includes(needle) ||
+              (c.email ?? "").toLowerCase().includes(needle)
+          )
+          .slice(0, 5)
+      );
     },
-    [supabase]
+    [clients]
   );
 
   useEffect(() => {

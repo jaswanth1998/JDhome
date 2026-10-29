@@ -3,20 +3,24 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { useAuth } from "@/lib/auth";
-import {
-  InvoiceForm,
-  InvoicePreview,
-} from "@/components/admin/invoices";
+import { InvoiceForm } from "@/components/admin/invoices";
 import type { InvoiceFormData } from "@/components/admin/invoices/InvoiceForm";
 import type { InvoicePreviewData } from "@/components/admin/invoices/InvoicePreview";
 import { sendDocument, toInvoiceDocument } from "@/lib/pdf";
+import {
+  createClient,
+  createInvoice,
+  findInvoiceByNumber,
+  updateClient,
+  type Invoice,
+} from "@/lib/db";
 
 export default function NewInvoiceContent() {
-  const { supabase, user } = useAuth();
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
-  const [previewData, setPreviewData] = useState<InvoicePreviewData>({
+  // The side-by-side preview is currently hidden (see the commented JSX below);
+  // the form still reports its computed values here.
+  const [, setPreviewData] = useState<InvoicePreviewData>({
     invoiceNumber: "",
     clientName: "",
     clientAddress: "",
@@ -34,49 +38,46 @@ export default function NewInvoiceContent() {
     formData: InvoiceFormData,
     status: "draft" | "sent"
   ) {
-    // 1. Determine invoice number
-    let invoiceNumber: string;
-    if (formData.autoGenerate) {
-      const { data: numData, error: numError } = await supabase
-        .schema("jdhome")
-        .rpc("generate_invoice_number");
-      if (numError) throw new Error("Failed to generate invoice number: " + numError.message);
-      invoiceNumber = numData as string;
-    } else {
-      invoiceNumber = formData.invoiceNumber.trim();
-      if (!invoiceNumber) throw new Error("Invoice number is required");
+    // 1. Determine invoice number — auto numbers are reserved by createInvoice
+    //    inside its transaction; custom numbers must be unique (Postgres had
+    //    UNIQUE(invoice_number)), so check before saving.
+    let customNumber: string | undefined;
+    if (!formData.autoGenerate) {
+      customNumber = formData.invoiceNumber.trim();
+      if (!customNumber) throw new Error("Invoice number is required");
+      if (await findInvoiceByNumber(customNumber))
+        throw new Error(`Invoice ${customNumber} already exists`);
     }
 
     // 2. Upsert client
     let clientId = formData.clientId;
     if (!clientId) {
-      const { data: clientData, error: clientError } = await supabase
-        .schema("jdhome")
-        .from("clients")
-        .insert({
+      try {
+        const created = await createClient({
           name: formData.clientName,
           email: formData.clientEmail,
           phone: formData.clientPhone || null,
           address: formData.clientAddress || null,
-          created_by: user?.id,
-        })
-        .select("id")
-        .single();
-
-      if (clientError) throw new Error("Failed to save client: " + clientError.message);
-      clientId = clientData.id;
+        });
+        clientId = created.id;
+      } catch (err) {
+        throw new Error(
+          "Failed to save client: " +
+            (err instanceof Error ? err.message : String(err))
+        );
+      }
     } else {
-      // Update existing client info
-      await supabase
-        .schema("jdhome")
-        .from("clients")
-        .update({
+      // Update existing client info (best effort, as before)
+      try {
+        await updateClient(clientId, {
           name: formData.clientName,
           email: formData.clientEmail,
           phone: formData.clientPhone || null,
           address: formData.clientAddress || null,
-        })
-        .eq("id", clientId);
+        });
+      } catch {
+        /* ignore — the invoice still saves against the existing client */
+      }
     }
 
     // 3. Compute totals
@@ -95,70 +96,43 @@ export default function NewInvoiceContent() {
     const hstAmount = Math.round(subtotal * 0.13 * 100) / 100;
     const total = subtotal + hstAmount;
 
-    // 4. Insert invoice
-    const { data: invoiceData, error: invoiceError } = await supabase
-      .schema("jdhome")
-      .from("invoices")
-      .insert({
-        invoice_number: invoiceNumber,
-        client_id: clientId,
-        invoice_date: formData.invoiceDate,
-        payment_method: formData.paymentMethod,
-        notes: formData.notes || null,
-        client_signature: formData.signatureDataUrl || null,
-        subtotal,
-        hst_rate: 0.13,
-        hst_amount: hstAmount,
-        total,
-        status,
-        created_by: user?.id,
-      })
-      .select("id")
-      .single();
-
-    if (invoiceError) throw new Error("Failed to save invoice: " + invoiceError.message);
-
-    // 5. Insert line items
-    const itemsToInsert = computedItems.map((item) => ({
-      invoice_id: invoiceData.id,
-      description: item.description,
-      quantity: item.quantity,
-      rate: item.rate,
-      amount: item.amount,
-      sort_order: item.sort_order,
-    }));
-
-    const { error: itemsError } = await supabase
-      .schema("jdhome")
-      .from("invoice_items")
-      .insert(itemsToInsert);
-
-    if (itemsError) throw new Error("Failed to save line items: " + itemsError.message);
+    // 4. Save invoice (line items embedded, number reserved, share copy written)
+    let invoice: Invoice;
+    try {
+      invoice = await createInvoice(
+        {
+          client_id: clientId,
+          invoice_date: formData.invoiceDate,
+          payment_method: formData.paymentMethod,
+          notes: formData.notes || null,
+          client_signature: formData.signatureDataUrl || null,
+          subtotal,
+          hst_rate: 0.13,
+          hst_amount: hstAmount,
+          total,
+          status,
+          items: computedItems,
+        },
+        customNumber ? { invoice_number: customNumber } : {}
+      );
+    } catch (err) {
+      throw new Error(
+        "Failed to save invoice: " +
+          (err instanceof Error ? err.message : String(err))
+      );
+    }
 
     return {
-      id: invoiceData.id,
+      id: invoice.id,
       client: {
         name: formData.clientName,
         email: formData.clientEmail,
         phone: formData.clientPhone || null,
         address: formData.clientAddress || null,
         client_signature: formData.signatureDataUrl || null,
-        created_by: user?.id,
       },
-      invoice: {
-        invoice_number: invoiceNumber,
-        client_id: clientId,
-        invoice_date: formData.invoiceDate,
-        payment_method: formData.paymentMethod,
-        notes: formData.notes || null,
-        subtotal,
-        hst_rate: 0.13,
-        hst_amount: hstAmount,
-        total,
-        status,
-        created_by: user?.id,
-      },
-      invoice_items: itemsToInsert,
+      invoice,
+      invoice_items: invoice.items,
     };
   }
 

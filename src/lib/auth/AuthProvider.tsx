@@ -7,9 +7,22 @@ import {
   useMemo,
   useState,
 } from "react";
-import type { User, SupabaseClient } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/client";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  type User,
+} from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { getDb, getFirebaseAuth } from "@/lib/firebase/client";
 
+/**
+ * Admin-panel auth on Firebase Auth (email/password).
+ *
+ * A signed-in user is an admin when `admins/{uid}` exists. Those documents are
+ * created in the Firebase console (or by scripts/migrate/import-firestore.mjs);
+ * firestore.rules lets a user read only their own admins doc.
+ */
 export type UserProfile = {
   id: string;
   email: string;
@@ -23,63 +36,75 @@ export type AuthContextType = {
   profile: UserProfile | null;
   isLoading: boolean;
   isAdmin: boolean;
-  supabase: SupabaseClient;
+  /** Throws an Error with a user-friendly message on failure. */
+  signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
+const FRIENDLY: Record<string, string> = {
+  "auth/invalid-credential": "Incorrect email or password.",
+  "auth/invalid-login-credentials": "Incorrect email or password.",
+  "auth/user-not-found": "Incorrect email or password.",
+  "auth/wrong-password": "Incorrect email or password.",
+  "auth/invalid-email": "Enter a valid email address.",
+  "auth/user-disabled": "This account has been disabled.",
+  "auth/too-many-requests": "Too many attempts. Try again in a few minutes.",
+  "auth/network-request-failed": "Network error. Check your connection and try again.",
+};
+
+async function fetchProfile(user: User): Promise<UserProfile> {
+  const base = { id: user.uid, email: user.email ?? "", username: user.displayName ?? null };
+  try {
+    const snap = await getDoc(doc(getDb(), "admins", user.uid));
+    if (snap.exists()) {
+      const data = snap.data() as { email?: string; username?: string | null };
+      return { ...base, email: data.email ?? base.email, username: data.username ?? base.username, role: "admin", is_active: true };
+    }
+  } catch {
+    // permission-denied or offline: treat as not an admin
+  }
+  return { ...base, role: "user", is_active: false };
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const supabase = useMemo(() => createClient(), []);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchProfile = useCallback(
-    async (userId: string) => {
-      const { data } = await supabase
-        .from("user_profiles")
-        .select("id, email, username, role, is_active")
-        .eq("id", userId)
-        .single();
-
-      setProfile(data as UserProfile | null);
-    },
-    [supabase]
-  );
-
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-      if (user) {
-        fetchProfile(user.id).finally(() => setIsLoading(false));
-      } else {
-        setIsLoading(false);
-      }
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      const currentUser = session?.user ?? null;
+    // Resolve the admin profile BEFORE publishing the user, and publish both in
+    // one batch: otherwise there is a frame where `user && !isAdmin` is true and
+    // the protected layout would bounce a real admin to /admin/login.
+    let cancelled = false;
+    const unsubscribe = onAuthStateChanged(getFirebaseAuth(), async (currentUser) => {
+      const nextProfile = currentUser ? await fetchProfile(currentUser) : null;
+      if (cancelled) return;
       setUser(currentUser);
-      if (currentUser) {
-        fetchProfile(currentUser.id);
-      } else {
-        setProfile(null);
-      }
+      setProfile(nextProfile);
+      setIsLoading(false);
     });
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, []);
 
-    return () => subscription.unsubscribe();
-  }, [supabase, fetchProfile]);
+  const signIn = useCallback(async (email: string, password: string) => {
+    try {
+      await signInWithEmailAndPassword(getFirebaseAuth(), email.trim(), password);
+    } catch (err) {
+      const code = (err as { code?: string })?.code ?? "";
+      throw new Error(FRIENDLY[code] ?? "Sign-in failed. Please try again.");
+    }
+  }, []);
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
+    await firebaseSignOut(getFirebaseAuth());
     setUser(null);
     setProfile(null);
-  }, [supabase]);
+  }, []);
 
   const value = useMemo<AuthContextType>(
     () => ({
@@ -87,10 +112,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       profile,
       isLoading,
       isAdmin: profile?.role === "admin" && profile?.is_active === true,
-      supabase,
+      signIn,
       signOut,
     }),
-    [user, profile, isLoading, supabase, signOut]
+    [user, profile, isLoading, signIn, signOut]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

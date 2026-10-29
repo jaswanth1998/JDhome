@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   Plus,
   Search,
@@ -11,17 +11,13 @@ import {
   Package,
   Loader2,
 } from "lucide-react";
-import { useAuth } from "@/lib/auth";
-
-type ServiceItem = {
-  id: string;
-  name: string;
-  description: string;
-  default_rate: number;
-  category: string;
-  is_active: boolean;
-  created_at: string;
-};
+import {
+  listServiceItems,
+  createServiceItem,
+  updateServiceItem,
+  deleteServiceItem,
+  type ServiceItem,
+} from "@/lib/db";
 
 type FormState = {
   name: string;
@@ -56,8 +52,18 @@ function formatCurrency(amount: number) {
   }).format(amount);
 }
 
+/** Category A→Z, then name A→Z (the old `ORDER BY category, name`). */
+function sortItems(items: ServiceItem[]): ServiceItem[] {
+  return [...items].sort(
+    (a, b) =>
+      a.category.localeCompare(b.category, "en-CA", { sensitivity: "base" }) ||
+      a.name.localeCompare(b.name, "en-CA", { sensitivity: "base" }),
+  );
+}
+
+const errorMessage = (e: unknown) => (e instanceof Error ? e.message : String(e));
+
 export default function ServiceItemsContent() {
-  const { supabase } = useAuth();
   const [items, setItems] = useState<ServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -70,21 +76,30 @@ export default function ServiceItemsContent() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchItems = useCallback(async () => {
+  const [reloadKey, setReloadKey] = useState(0);
+  const fetchItems = () => {
     setLoading(true);
-    const { data } = await supabase
-      .schema("jdhome")
-      .from("service_items")
-      .select("*")
-      .order("category", { ascending: true })
-      .order("name", { ascending: true });
-    setItems((data as ServiceItem[]) ?? []);
-    setLoading(false);
-  }, [supabase]);
+    setReloadKey((k) => k + 1);
+  };
 
   useEffect(() => {
-    fetchItems();
-  }, [fetchItems]);
+    let cancelled = false;
+    (async () => {
+      let rows: ServiceItem[] = [];
+      try {
+        rows = sortItems(await listServiceItems());
+      } catch {
+        // Unreadable (offline / rules): show an empty list, as before.
+        rows = [];
+      }
+      if (cancelled) return;
+      setItems(rows);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [reloadKey]);
 
   // Filtering
   const categories = [
@@ -149,36 +164,25 @@ export default function ServiceItemsContent() {
     setError(null);
     setSaving(true);
 
+    // `updated_at` is stamped by the data layer.
     const payload = {
       name: form.name.trim(),
       description: form.description.trim(),
       default_rate: Number(form.default_rate) || 0,
       category: form.category,
       is_active: form.is_active,
-      updated_at: new Date().toISOString(),
     };
 
-    if (editingId) {
-      const { error: updateError } = await supabase
-        .schema("jdhome")
-        .from("service_items")
-        .update(payload)
-        .eq("id", editingId);
-      if (updateError) {
-        setError("Failed to update: " + updateError.message);
-        setSaving(false);
-        return;
+    try {
+      if (editingId) {
+        await updateServiceItem(editingId, payload);
+      } else {
+        await createServiceItem(payload);
       }
-    } else {
-      const { error: insertError } = await supabase
-        .schema("jdhome")
-        .from("service_items")
-        .insert(payload);
-      if (insertError) {
-        setError("Failed to create: " + insertError.message);
-        setSaving(false);
-        return;
-      }
+    } catch (e) {
+      setError((editingId ? "Failed to update: " : "Failed to create: ") + errorMessage(e));
+      setSaving(false);
+      return;
     }
 
     setSaving(false);
@@ -192,21 +196,21 @@ export default function ServiceItemsContent() {
       !confirm(`Delete "${item.name}"? This cannot be undone.`)
     )
       return;
-    await supabase
-      .schema("jdhome")
-      .from("service_items")
-      .delete()
-      .eq("id", item.id);
+    try {
+      await deleteServiceItem(item.id);
+    } catch (e) {
+      alert("Failed to delete item: " + errorMessage(e));
+    }
     fetchItems();
   }
 
   // Toggle active
   async function handleToggleActive(item: ServiceItem) {
-    await supabase
-      .schema("jdhome")
-      .from("service_items")
-      .update({ is_active: !item.is_active, updated_at: new Date().toISOString() })
-      .eq("id", item.id);
+    try {
+      await updateServiceItem(item.id, { is_active: !item.is_active });
+    } catch (e) {
+      alert("Failed to update item: " + errorMessage(e));
+    }
     fetchItems();
   }
 

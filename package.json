@@ -8,12 +8,14 @@
     "start": "npx serve out",
     "lint": "eslint",
     "verify:seo": "node scripts/verify-seo.mjs",
-    "indexnow": "node scripts/indexnow.mjs"
+    "indexnow": "node scripts/indexnow.mjs",
+    "dev:emulator": "NEXT_PUBLIC_FIREBASE_EMULATOR=1 next dev",
+    "emulators": "firebase emulators:start --only auth,firestore --project jd-home-services-prod",
+    "migrate:import": "node scripts/migrate/import-firestore.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@react-pdf/renderer": "^4.6.0",
-    "@supabase/supabase-js": "^2.98.0",
     "clsx": "^2.1.1",
     "firebase": "^12.19.0",
     "framer-motion": "^12.23.26",

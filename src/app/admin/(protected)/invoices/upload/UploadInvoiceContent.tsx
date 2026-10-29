@@ -3,25 +3,31 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, FileUp, Loader2 } from "lucide-react";
-import { useAuth } from "@/lib/auth";
 import {
-  UPLOADED_INVOICE_BUCKET,
   UPLOADED_INVOICE_MAX_BYTES,
-  removeUploadedInvoiceFile,
+  uploadInvoiceFile,
 } from "@/lib/pdf/uploadedInvoice";
-
-type Client = { id: string; name: string; email: string };
+import {
+  createClient,
+  createInvoice,
+  deleteInvoice,
+  findInvoiceByNumber,
+  listClients,
+  listInvoices,
+  nowIso,
+  type Client,
+} from "@/lib/db";
 
 const PAYMENT_METHODS = ["E-Transfer", "Cash", "Cheque", "Credit Card"];
 const NEW_CLIENT = "__new__";
 const labelClass = "block text-xs font-medium text-[var(--text-muted)] mb-1";
+const MAX_PDF_KB = Math.round(UPLOADED_INVOICE_MAX_BYTES / 1024);
 
 function round2(n: number) {
   return Math.round(n * 100) / 100;
 }
 
 export default function UploadInvoiceContent() {
-  const { supabase, user } = useAuth();
   const router = useRouter();
 
   const [clients, setClients] = useState<Client[]>([]);
@@ -45,31 +51,34 @@ export default function UploadInvoiceContent() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .schema("jdhome")
-        .from("clients")
-        .select("id, name, email")
-        .order("name");
-      setClients((data as Client[]) ?? []);
-
-      // Offer companies already used, so the list filter stays tidy
-      const { data: companies } = await supabase
-        .schema("jdhome")
-        .from("invoices")
-        .select("sent_from_company")
-        .not("sent_from_company", "is", null);
-      setSentFromOptions(
-        [
-          ...new Set(
-            ((companies as { sent_from_company: string }[]) ?? []).map(
-              (c) => c.sent_from_company,
+      try {
+        // Clients come back A→Z by name; companies are offered from the
+        // invoices already uploaded, so the list filter stays tidy.
+        const [clientList, invoices] = await Promise.all([
+          listClients(),
+          listInvoices(),
+        ]);
+        if (cancelled) return;
+        setClients(clientList);
+        setSentFromOptions(
+          [
+            ...new Set(
+              invoices.flatMap((inv) =>
+                inv.sent_from_company ? [inv.sent_from_company] : [],
+              ),
             ),
-          ),
-        ].sort(),
-      );
+          ].sort(),
+        );
+      } catch {
+        if (!cancelled) setClients([]);
+      }
     })();
-  }, [supabase]);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const subtotalNum = Number(subtotal) || 0;
   const hstNum = Number(hst) || 0;
@@ -93,7 +102,7 @@ export default function UploadInvoiceContent() {
     if (!sentFrom.trim())
       return setError("Enter the company the invoice was sent from");
     if (!number) return setError("Enter the invoice number");
-    // generate_invoice_number() casts the tail of INV-YYYYMM-… to an integer
+    // Auto-numbering reads the tail of INV-YYYYMM-… as an integer
     if (/^INV-\d{6}-/i.test(number) && !/^INV-\d{6}-\d+$/i.test(number))
       return setError(
         "Numbers starting with INV-YYYYMM- must end in digits only",
@@ -103,74 +112,81 @@ export default function UploadInvoiceContent() {
     if (file.type !== "application/pdf")
       return setError("The file must be a PDF");
     if (file.size > UPLOADED_INVOICE_MAX_BYTES)
-      return setError("The PDF must be 10 MB or smaller");
+      return setError(`The PDF must be ${MAX_PDF_KB} KB or smaller`);
 
     setIsSaving(true);
-    let uploadedPath: string | null = null;
     try {
-      const { data: existing } = await supabase
-        .schema("jdhome")
-        .from("invoices")
-        .select("id")
-        .eq("invoice_number", number)
-        .maybeSingle();
-      if (existing) throw new Error(`Invoice ${number} already exists`);
+      // Postgres had UNIQUE(invoice_number); keep the duplicate guard.
+      if (await findInvoiceByNumber(number))
+        throw new Error(`Invoice ${number} already exists`);
 
       let finalClientId = clientId;
       if (clientId === NEW_CLIENT) {
-        const { data: clientData, error: clientError } = await supabase
-          .schema("jdhome")
-          .from("clients")
-          .insert({
+        try {
+          const created = await createClient({
             name: clientName.trim(),
             email: clientEmail.trim(),
-            created_by: user?.id,
-          })
-          .select("id")
-          .single();
-        if (clientError)
-          throw new Error("Failed to save client: " + clientError.message);
-        finalClientId = clientData.id;
+          });
+          finalClientId = created.id;
+        } catch (err) {
+          throw new Error(
+            "Failed to save client: " +
+              (err instanceof Error ? err.message : String(err)),
+          );
+        }
       }
 
-      const path = `uploaded/${crypto.randomUUID()}.pdf`;
-      const { error: uploadError } = await supabase.storage
-        .from(UPLOADED_INVOICE_BUCKET)
-        .upload(path, file, { contentType: "application/pdf" });
-      if (uploadError)
-        throw new Error("Failed to upload PDF: " + uploadError.message);
-      uploadedPath = path;
+      // The invoice document first (it reserves the number and carries the
+      // PDF metadata), then the bytes in invoiceFiles/{invoiceId}.
+      const now = nowIso();
+      let invoiceId: string;
+      try {
+        const invoice = await createInvoice(
+          {
+            client_id: finalClientId,
+            invoice_date: invoiceDate,
+            payment_method: paymentMethod,
+            notes: notes.trim() || null,
+            subtotal: subtotalNum,
+            hst_rate: Math.round((hstNum / subtotalNum) * 10000) / 10000,
+            hst_amount: hstNum,
+            total,
+            status,
+            sent_at: now,
+            paid_at: status === "paid" ? now : null,
+            sent_from_company: sentFrom.trim(),
+            share_enabled: false,
+            pdf_name: file.name,
+            pdf_size: file.size,
+            items: [],
+          },
+          { invoice_number: number },
+        );
+        invoiceId = invoice.id;
+      } catch (err) {
+        throw new Error(
+          "Failed to save invoice: " +
+            (err instanceof Error ? err.message : String(err)),
+        );
+      }
 
-      const now = new Date().toISOString();
-      const { data: invoiceData, error: invoiceError } = await supabase
-        .schema("jdhome")
-        .from("invoices")
-        .insert({
-          invoice_number: number,
-          client_id: finalClientId,
-          invoice_date: invoiceDate,
-          payment_method: paymentMethod,
-          notes: notes.trim() || null,
-          subtotal: subtotalNum,
-          hst_rate: Math.round((hstNum / subtotalNum) * 10000) / 10000,
-          hst_amount: hstNum,
-          total,
-          status,
-          sent_at: now,
-          paid_at: status === "paid" ? now : null,
-          pdf_url: path,
-          sent_from_company: sentFrom.trim(),
-          share_enabled: false,
-          created_by: user?.id,
-        })
-        .select("id")
-        .single();
-      if (invoiceError)
-        throw new Error("Failed to save invoice: " + invoiceError.message);
+      try {
+        await uploadInvoiceFile(invoiceId, file);
+      } catch (err) {
+        // Compensate: an invoice without its PDF would be a dead record
+        try {
+          await deleteInvoice(invoiceId);
+        } catch {
+          /* ignore — the upload error is what matters here */
+        }
+        throw new Error(
+          "Failed to upload PDF: " +
+            (err instanceof Error ? err.message : String(err)),
+        );
+      }
 
-      router.push(`/admin/invoices/view?id=${invoiceData.id}`);
+      router.push(`/admin/invoices/view?id=${invoiceId}`);
     } catch (err) {
-      if (uploadedPath) await removeUploadedInvoiceFile(supabase, uploadedPath);
       setError(err instanceof Error ? err.message : "Failed to save invoice");
       setIsSaving(false);
     }
@@ -339,7 +355,7 @@ export default function UploadInvoiceContent() {
         </div>
 
         <div>
-          <label className={labelClass}>Invoice PDF (max 10 MB)</label>
+          <label className={labelClass}>Invoice PDF (max {MAX_PDF_KB} KB)</label>
           <input
             type="file"
             accept="application/pdf"

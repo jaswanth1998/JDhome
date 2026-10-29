@@ -1,19 +1,16 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Search, Hash, Sparkles, PackagePlus } from "lucide-react";
-import { useAuth } from "@/lib/auth";
+import {
+  listClients,
+  listServiceItems,
+  type Client,
+  type ServiceItem,
+} from "@/lib/db";
 import { LineItemRow } from "./LineItemRow";
 import { SignaturePad } from "./SignaturePad";
 import type { InvoicePreviewData } from "./InvoicePreview";
-
-type Client = {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-};
 
 type LineItem = {
   description: string;
@@ -61,8 +58,6 @@ export function InvoiceForm({
   isSaving,
   saveLabels,
 }: InvoiceFormProps) {
-  const { supabase } = useAuth();
-
   const [autoGenerate, setAutoGenerate] = useState(
     initialData?.autoGenerate ?? true
   );
@@ -96,28 +91,31 @@ export function InvoiceForm({
     initialData?.signatureDataUrl ?? ""
   );
 
-  // Service items catalog
-  type ServiceItem = {
-    id: string;
-    name: string;
-    description: string;
-    default_rate: number;
-    category: string;
-  };
+  // Service items catalog — active items only, grouped by category then name
   const [serviceItems, setServiceItems] = useState<ServiceItem[]>([]);
   const [showCatalog, setShowCatalog] = useState(false);
   const [catalogQuery, setCatalogQuery] = useState("");
 
   useEffect(() => {
-    supabase
-      .schema("jdhome")
-      .from("service_items")
-      .select("id, name, description, default_rate, category")
-      .eq("is_active", true)
-      .order("category")
-      .order("name")
-      .then(({ data }) => setServiceItems((data as ServiceItem[]) ?? []));
-  }, [supabase]);
+    let cancelled = false;
+    listServiceItems()
+      .then((all) => {
+        if (cancelled) return;
+        setServiceItems(
+          all
+            .filter((s) => s.is_active)
+            .sort(
+              (a, b) =>
+                a.category.localeCompare(b.category) ||
+                a.name.localeCompare(b.name)
+            )
+        );
+      })
+      .catch(() => !cancelled && setServiceItems([]));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredCatalog = catalogQuery
     ? serviceItems.filter(
@@ -136,32 +134,35 @@ export function InvoiceForm({
     setCatalogQuery("");
   }
 
-  // Client search
+  // Client search — Firestore has no substring queries, so the whole clients
+  // collection (tens of docs) is loaded once the search box opens and matched
+  // in memory: name or email contains the query, first 5 hits, from 2 chars.
   const [clientQuery, setClientQuery] = useState("");
-  const [clientResults, setClientResults] = useState<Client[]>([]);
+  const [allClients, setAllClients] = useState<Client[] | null>(null);
   const [showClientSearch, setShowClientSearch] = useState(false);
 
-  const searchClients = useCallback(
-    async (q: string) => {
-      if (q.length < 2) {
-        setClientResults([]);
-        return;
-      }
-      const { data } = await supabase
-        .schema("jdhome")
-        .from("clients")
-        .select("id, name, email, phone, address")
-        .or(`name.ilike.%${q}%,email.ilike.%${q}%`)
-        .limit(5);
-      setClientResults((data as Client[]) ?? []);
-    },
-    [supabase]
-  );
-
   useEffect(() => {
-    const timeout = setTimeout(() => searchClients(clientQuery), 300);
-    return () => clearTimeout(timeout);
-  }, [clientQuery, searchClients]);
+    if (!showClientSearch || allClients !== null) return;
+    let cancelled = false;
+    listClients()
+      .then((clients) => !cancelled && setAllClients(clients))
+      .catch(() => !cancelled && setAllClients([]));
+    return () => {
+      cancelled = true;
+    };
+  }, [showClientSearch, allClients]);
+
+  const normalizedQuery = clientQuery.trim().toLowerCase();
+  const clientResults =
+    normalizedQuery.length < 2 || !allClients
+      ? []
+      : allClients
+          .filter(
+            (c) =>
+              c.name.toLowerCase().includes(normalizedQuery) ||
+              c.email.toLowerCase().includes(normalizedQuery)
+          )
+          .slice(0, 5);
 
   function selectClient(client: Client) {
     setClientId(client.id);
@@ -171,7 +172,6 @@ export function InvoiceForm({
     setClientAddress(client.address ?? "");
     setShowClientSearch(false);
     setClientQuery("");
-    setClientResults([]);
   }
 
   // Line item handlers

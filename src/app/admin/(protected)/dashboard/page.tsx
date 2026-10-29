@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Home, Users, Wrench, FileText, DollarSign } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { listInvoices } from "@/lib/db";
 import { theme } from "@/config/theme";
 
 type InvoiceStats = {
@@ -34,26 +35,30 @@ const staticCards = [
 ];
 
 export default function DashboardPage() {
-  const { profile, supabase } = useAuth();
+  const { profile } = useAuth();
   const router = useRouter();
   const [invoiceStats, setInvoiceStats] = useState<InvoiceStats>({ total: 0, drafts: 0, unpaidTotal: 0 });
 
-  const fetchStats = useCallback(async () => {
-    const { data } = await supabase
-      .schema("jdhome")
-      .from("invoices")
-      .select("status, total");
-    if (data) {
-      const total = data.length;
-      const drafts = data.filter((i: { status: string }) => i.status === "draft").length;
-      const unpaidTotal = data
-        .filter((i: { status: string }) => i.status === "sent" || i.status === "overdue")
-        .reduce((sum: number, i: { total: number }) => sum + Number(i.total), 0);
-      setInvoiceStats({ total, drafts, unpaidTotal });
-    }
-  }, [supabase]);
-
-  useEffect(() => { fetchStats(); }, [fetchStats]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await listInvoices();
+        if (cancelled) return;
+        const total = data.length;
+        const drafts = data.filter((i) => i.status === "draft").length;
+        const unpaidTotal = data
+          .filter((i) => i.status === "sent" || i.status === "overdue")
+          .reduce((sum, i) => sum + Number(i.total), 0);
+        setInvoiceStats({ total, drafts, unpaidTotal });
+      } catch {
+        // Unreadable (offline / rules): keep the zeroed stats, as before.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div>

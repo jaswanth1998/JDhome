@@ -14,55 +14,29 @@ import {
   Link2,
   Check,
 } from "lucide-react";
-import { useAuth } from "@/lib/auth";
 import {
   InvoiceStatusBadge,
   UploadedPdfViewer,
 } from "@/components/admin/invoices";
-import {
-  downloadUploadedInvoice,
-  removeUploadedInvoiceFile,
-} from "@/lib/pdf/uploadedInvoice";
+import { downloadUploadedInvoice } from "@/lib/pdf/uploadedInvoice";
 import {
   sendDocument,
   downloadDocumentPdf,
   toInvoiceDocument,
   DocumentPdfViewer,
 } from "@/lib/pdf";
+import {
+  deleteInvoice,
+  getClient,
+  getInvoice,
+  nowIso,
+  setInvoiceStatus,
+  type Client,
+  type Invoice,
+} from "@/lib/db";
 
-type InvoiceDetail = {
-  id: string;
-  invoice_number: string;
-  invoice_date: string;
-  payment_method: string;
-  notes: string | null;
-  client_signature: string | null;
-  public_token: string;
-  /** Set when the invoice was issued elsewhere and uploaded as a PDF */
-  pdf_url: string | null;
-  sent_from_company: string | null;
-  subtotal: number;
-  hst_rate: number;
-  hst_amount: number;
-  total: number;
-  status: string;
-  sent_at: string | null;
-  paid_at: string | null;
-  created_at: string;
-  client: {
-    name: string;
-    email: string;
-    phone: string | null;
-    address: string | null;
-  };
-  invoice_items: {
-    description: string;
-    quantity: number;
-    rate: number;
-    amount: number;
-    sort_order: number;
-  }[];
-};
+/** The invoice document joined (in memory) to its client. */
+type InvoiceDetail = Invoice & { client: Client };
 
 function formatTimestamp(ts: string | null) {
   if (!ts) return "—";
@@ -76,7 +50,6 @@ function formatTimestamp(ts: string | null) {
 }
 
 export default function InvoiceDetailContent() {
-  const { supabase } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -91,32 +64,33 @@ export default function InvoiceDetailContent() {
       router.push("/admin/invoices");
       return;
     }
-    const { data, error } = await supabase
-      .schema("jdhome")
-      .from("invoices")
-      .select(
-        `
-        id, invoice_number, invoice_date, payment_method, notes, client_signature,
-        public_token, pdf_url, sent_from_company,
-        subtotal, hst_rate, hst_amount, total, status,
-        sent_at, paid_at, created_at,
-        client:clients(name, email, phone, address),
-        invoice_items(description, quantity, rate, amount, sort_order)
-      `
-      )
-      .eq("id", id)
-      .single();
+    let data: Invoice | null = null;
+    try {
+      data = await getInvoice(id);
+    } catch {
+      data = null;
+    }
 
-    if (error || !data) {
+    if (!data) {
       router.push("/admin/invoices");
       return;
     }
 
-    const inv = data as unknown as InvoiceDetail;
-    inv.invoice_items.sort((a, b) => a.sort_order - b.sort_order);
-    setInvoice(inv);
+    let client: Client | null = null;
+    try {
+      client = await getClient(data.client_id);
+    } catch {
+      client = null;
+    }
+    if (!client) {
+      router.push("/admin/invoices");
+      return;
+    }
+
+    const items = [...data.items].sort((a, b) => a.sort_order - b.sort_order);
+    setInvoice({ ...data, items, client });
     setLoading(false);
-  }, [supabase, id, router]);
+  }, [id, router]);
 
   useEffect(() => {
     fetchInvoice();
@@ -129,17 +103,16 @@ export default function InvoiceDetailContent() {
     try {
       // Update status to sent if draft
       if (invoice.status === "draft") {
-        const { error: updateError } = await supabase
-          .schema("jdhome")
-          .from("invoices")
-          .update({ status: "sent", sent_at: new Date().toISOString() })
-          .eq("id", invoice.id);
-        if (updateError) throw new Error("Failed to update invoice status");
+        try {
+          await setInvoiceStatus(invoice.id, "sent", { sent_at: nowIso() });
+        } catch {
+          throw new Error("Failed to update invoice status");
+        }
       }
 
       // Render the PDF in the browser, then hand it to n8n to email
       await sendDocument(
-        toInvoiceDocument(invoice, invoice.client, invoice.invoice_items)
+        toInvoiceDocument(invoice, invoice.client, invoice.items)
       );
 
       await fetchInvoice();
@@ -167,17 +140,13 @@ export default function InvoiceDetailContent() {
     if (!invoice) return;
     setActionLoading("download");
     try {
-      if (invoice.pdf_url) {
-        await downloadUploadedInvoice(
-          supabase,
-          invoice.pdf_url,
-          invoice.invoice_number
-        );
+      if (invoice.pdf_name) {
+        await downloadUploadedInvoice(invoice.id, invoice.invoice_number);
         return;
       }
       // Render the PDF in the browser and save it locally
       await downloadDocumentPdf(
-        toInvoiceDocument(invoice, invoice.client, invoice.invoice_items)
+        toInvoiceDocument(invoice, invoice.client, invoice.items)
       );
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to download invoice");
@@ -189,13 +158,14 @@ export default function InvoiceDetailContent() {
   async function handleMarkPaid() {
     if (!invoice) return;
     setActionLoading("paid");
-    await supabase
-      .schema("jdhome")
-      .from("invoices")
-      .update({ status: "paid", paid_at: new Date().toISOString() })
-      .eq("id", invoice.id);
-    await fetchInvoice();
-    setActionLoading(null);
+    try {
+      await setInvoiceStatus(invoice.id, "paid", { paid_at: nowIso() });
+      await fetchInvoice();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to update invoice");
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   async function handleDelete() {
@@ -207,13 +177,14 @@ export default function InvoiceDetailContent() {
     )
       return;
     setActionLoading("delete");
-    await supabase
-      .schema("jdhome")
-      .from("invoices")
-      .delete()
-      .eq("id", invoice.id);
-    if (invoice.pdf_url) await removeUploadedInvoiceFile(supabase, invoice.pdf_url);
-    router.push("/admin/invoices");
+    try {
+      // Also removes the public share copy and any uploaded PDF
+      await deleteInvoice(invoice.id);
+      router.push("/admin/invoices");
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to delete invoice");
+      setActionLoading(null);
+    }
   }
 
   if (loading || !invoice) {
@@ -227,7 +198,7 @@ export default function InvoiceDetailContent() {
 
   // Uploaded invoices have no line items and were sent outside the app, so
   // editing, emailing and the public share link do not apply to them.
-  const isUploaded = !!invoice.pdf_url;
+  const isUploaded = !!invoice.pdf_name;
 
   return (
     <div>
@@ -349,14 +320,14 @@ export default function InvoiceDetailContent() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Invoice Preview — the actual PDF the client receives */}
         <div className="lg:col-span-2">
-          {invoice.pdf_url ? (
-            <UploadedPdfViewer path={invoice.pdf_url} />
+          {invoice.pdf_name ? (
+            <UploadedPdfViewer invoiceId={invoice.id} />
           ) : (
             <DocumentPdfViewer
               data={toInvoiceDocument(
                 invoice,
                 invoice.client,
-                invoice.invoice_items
+                invoice.items
               )}
             />
           )}

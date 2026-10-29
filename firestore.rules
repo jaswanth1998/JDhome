@@ -1,13 +1,29 @@
 rules_version = '2';
 
-// Website inquiries: the public site may only CREATE well-formed documents.
-// The n8n lead-alert automation signs in as the Firebase Auth email/password
-// user in isLeadBot() to read inquiries and mark them notified. Nobody else
-// can read, edit, or delete them from the browser; view them in the Firebase
-// console (or with the Admin SDK, which bypasses these rules).
-// Keep the field list in sync with src/lib/inquiries/schema.ts + submit.ts.
+// Two very different users share this database:
+//   1. The public website, which may only CREATE well-formed `inquiries`.
+//      The n8n lead-alert automation signs in as the Firebase Auth email/password
+//      user in isLeadBot() to read inquiries and mark them notified.
+//   2. The admin panel (/admin), whose signed-in users must have an
+//      `admins/{uid}` document. Admins own every business collection:
+//      clients, invoices, invoiceFiles, estimates, serviceItems, settings,
+//      counters, shared.
+//      `admins` docs are created in the Firebase console or by
+//      scripts/migrate/import-firestore.mjs — never from the browser.
+//   3. Anyone holding a share link may GET one `shared/{token}` document
+//      (the token is an unguessable uuid); listing is never allowed.
+// Keep the inquiry field list in sync with src/lib/inquiries/schema.ts + submit.ts.
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
 
     // Create this user in Firebase console > Authentication > Users BEFORE
     // deploying, and turn off public sign-up (Authentication > Settings >
@@ -76,11 +92,60 @@ service cloud.firestore {
         && request.resource.data.status == 'new'
         && request.resource.data.createdAt == request.time;
 
-      allow read: if isLeadBot();
+      allow read: if isLeadBot() || isAdmin();
       allow update: if isLeadBot()
         && request.resource.data.diff(resource.data).affectedKeys()
              .hasOnly(['status', 'notifiedAt', 'telegramMessageId']);
       allow delete: if false;
+    }
+
+    // ----- Admin panel -----------------------------------------------------
+
+    // A signed-in user may read only their own admins doc (that is how the app
+    // learns whether it is an admin). Nobody may write admins from the browser.
+    match /admins/{uid} {
+      allow get: if isSignedIn() && request.auth.uid == uid;
+      allow list, write: if false;
+    }
+
+    match /clients/{clientId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /invoices/{invoiceId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /estimates/{estimateId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Uploaded third-party invoice PDFs (base64), one per invoice.
+    match /invoiceFiles/{invoiceId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /serviceItems/{itemId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Single document: settings/document (editable PDF copy).
+    match /settings/{settingId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Monthly sequence counters for INV-/EST- numbers (transactions only).
+    match /counters/{counterId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Public share links. The document id IS the credential (an unguessable
+    // uuid), so single-document GET is open while sharing is on; listing is
+    // never allowed. Admins write these alongside the invoice/estimate.
+    match /shared/{token} {
+      allow get: if resource.data.share_enabled == true;
+      allow list: if false;
+      allow write: if isAdmin();
     }
 
     // Everything else is closed.

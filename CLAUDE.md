@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-JD Home Services (www.jdhomeservices.ca) - a business website + admin panel for a garage door and security camera (CCTV) company in Oshawa, Ontario (Durham Region). Primary services: garage door repair & installation, smart security camera installation. Add-on services: locksmith, 24/7 car lockout. Frontend deployed to GitHub Pages; admin backend powered by Supabase; website inquiries stored in Firebase Firestore (project `jd-home-services-prod`).
+JD Home Services (www.jdhomeservices.ca) - a business website + admin panel for a garage door and security camera (CCTV) company in Oshawa, Ontario (Durham Region). Primary services: garage door repair & installation, smart security camera installation. Add-on services: locksmith, 24/7 car lockout. Frontend deployed to GitHub Pages; admin panel and website inquiries both run on Firebase (Firestore + Auth, project `jd-home-services-prod`, free Spark plan — no Supabase since 2026-10-29).
 
 ## Commands
 
@@ -24,7 +24,7 @@ No test framework is configured.
 - **Tailwind CSS v4** via `@tailwindcss/postcss` plugin
 - **Framer Motion** for animations
 - **react-hook-form** + **zod** for the inquiry form
-- **Firebase** (Firestore web SDK) for website inquiries
+- **Firebase** (Firestore + Auth web SDK) for the admin panel data, admin login and website inquiries
 - **lucide-react** and **react-icons** for icons
 - Path alias: `@/*` maps to `./src/*`
 
@@ -86,16 +86,7 @@ Marketing pages use the pattern: `page.tsx` (server component with metadata) ren
 
 ### Admin Authentication (Client-Side)
 
-Auth is fully client-side (required by `output: "export"` static build):
-
-- `src/lib/supabase/client.ts` — Browser-only Supabase client (singleton)
-- `src/lib/auth/AuthProvider.tsx` — React context: listens to `onAuthStateChange`, fetches `public.user_profiles` for role
-- `src/lib/auth/useAuth.ts` — Hook: `{ user, profile, isLoading, isAdmin, supabase, signOut }`
-- `admin/layout.tsx` wraps all admin pages with `<AuthProvider>`
-- `admin/(protected)/layout.tsx` acts as client-side route guard: redirects to `/admin/login` if not admin
-- Login page lives outside `(protected)/` so it's accessible without auth
-
-No middleware or server-side auth — the static export doesn't support it.
+See **Firebase Backend › Admin Authentication** below. Auth is client-side only (static export): Firebase Auth email/password + an `admins/{uid}` document; `admin/(protected)/layout.tsx` is the route guard.
 
 ### Guides (Blog)
 
@@ -142,75 +133,54 @@ Routes: `/blog/` (index, CollectionPage), `/blog/category/[category]/`, `/blog/[
 - Images are unoptimized (`images.unoptimized: true`) since there's no server
 - Custom domain configured via `public/CNAME` (www.jdhomeservices.ca). The old domain jdhomesolutions.com is a parked lander, not this site; it should 301 to www.jdhomeservices.ca
 - Docker setup exists (`Dockerfile` + `docker-compose.yml`) mapping port 5006 -> 3000
-- **Environment variables** (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and the six `NEXT_PUBLIC_FIREBASE_*` values) are injected from GitHub Secrets during build. For local dev, use `.env.local` (gitignored). See `.env.example` for required vars. `npm run build` fails without the Supabase vars (admin pages create the client at prerender); placeholder values are enough for a local build.
+- **Environment variables** (the six `NEXT_PUBLIC_FIREBASE_*` values) are injected from GitHub Secrets during build. For local dev, use `.env.local` (gitignored); `firebase apps:sdkconfig web --project jd-home-services-prod` prints the values. See `.env.example` for required vars. The Firebase client is created lazily, so a build without them still succeeds (the admin and the inquiry form just report "not configured" at runtime).
 - **Firestore rules** deploy separately with the Firebase CLI: `firebase deploy --only firestore:rules` (see `docs/firebase-setup.md`).
 - Optional SEO/analytics vars: `NEXT_PUBLIC_GA_MEASUREMENT_ID` (GA4 tag renders only when set) and `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` (Search Console meta tag). Both are read at build time, so they must be GitHub Secrets too.
 - Google Tag Manager container `GTM-5Q937BVV` lives in `theme.analytics.gtmId` and loads on every page by default (`NEXT_PUBLIC_GTM_ID` overrides it; `theme.features.analytics: false` disables all tags). Configure GA4 inside GTM rather than also setting `NEXT_PUBLIC_GA_MEASUREMENT_ID`, which would double-count pageviews.
 
-## Supabase Backend
+## Firebase Backend (admin panel + inquiries)
 
-### Shared Database - Schema Isolation
+Everything server-side lives in one Firebase project, `jd-home-services-prod`, on the free **Spark** plan: Cloud Firestore `(default)` in `northamerica-northeast2` and Firebase Auth (email/password). There is no Cloud Storage and no Cloud Functions (both need the Blaze plan), so all admin logic runs in the browser under the signed-in admin's session, and n8n does the emailing. Supabase was retired on 2026-10-29 (`scripts/migrate/` holds the importer; the last Supabase snapshot is schema `jdhome_backup_20261029` plus the JSON export in `~/Desktop/projects/Info JDHomes/migration-export-2026-10-29/`).
 
-This project shares a Supabase instance with **quickmart** (a separate app). Each app is isolated by schema:
+### Collections
 
-| Schema | Owner | Purpose |
-|--------|-------|---------|
-| `public` | quickmart | Products, transactions, shift reports, etc. |
-| `jdhome` | JD Home Services | All JDhome tables (admin panel, services, bookings, etc.) |
-| `auth` | Supabase built-in | Shared authentication (`auth.users`) |
+| Collection | Purpose |
+|---|---|
+| `admins/{uid}` | One doc per admin (`email`, `username`). Created in the Firebase console or by the import script, never from the browser. `isAdmin()` in the rules = this doc exists. |
+| `clients/{id}` | Client contact info (`name`, `email`, `phone`, `address`). |
+| `invoices/{id}` | All former invoice columns plus `items: LineItem[]` embedded (sorted by `sort_order`); `public_token` + `share_enabled` drive share links; `sent_from_company`, `pdf_name`, `pdf_size` mark uploaded third-party invoices. |
+| `invoiceFiles/{invoiceId}` | Base64 bytes of an uploaded third-party PDF (cap 700 KB — a Firestore doc is 1 MiB max). Kept apart so list views stay light. |
+| `estimates/{id}` | Same pattern as invoices, with `valid_until`, `accepted_at`, `declined_at`. |
+| `serviceItems/{id}` | Catalogue of line items (`name`, `description`, `default_rate`, `category`, `is_active`). |
+| `settings/document` | Editable PDF copy (company details, terms, payment options) — `src/lib/pdf/settings.ts`. |
+| `counters/invoices`, `counters/estimates` | `{ "YYYYMM": lastSeq }` behind `INV-`/`EST-YYYYMM-NNN` numbering. |
+| `shared/{public_token}` | Public share-link copy of one invoice/estimate (client name/address/signature, totals, items, settings snapshot). Anyone may GET it while `share_enabled`; LIST is never allowed, so the unguessable token is the credential. Client email/phone are never included. |
+| `inquiries/{id}` | Website quote requests (public create only; the n8n lead bot reads/updates). |
 
-**Critical rules:**
-- **All JDhome tables must live in the `jdhome` schema** — never create tables in `public`
-- **Never modify quickmart tables** (`public.products`, `public.transactions`, `public.departments`, `public.shift_reports`, `public.value_stock_entries`, `public.drawer_stock_entries`, `public.cash_counting_entries`, `public.todos`)
-- **Shared auth**: `public.user_profiles` and `public.role_permissions` are shared across both apps. Reference `auth.users` for FK relationships from `jdhome` tables
-- Migration names for JDhome should be prefixed descriptively (e.g., `create_jdhome_*`, `add_jdhome_*`)
+Conventions: field names are **snake_case**, identical to the old Postgres columns, so the PDF adapters and forms are unchanged; dates are `YYYY-MM-DD` strings, timestamps ISO strings, money plain numbers; document ids are uuids generated client-side (`newId()`); Firestore rejects `undefined`, so every write goes through `clean()`.
 
-### Schema Grants
+### Data layer (`src/lib/db/`)
 
-The `jdhome` schema has default privileges configured:
-- `anon` — SELECT on tables, USAGE on sequences
-- `authenticated` — SELECT, INSERT, UPDATE, DELETE on tables, USAGE on sequences
-- `service_role` — ALL on tables, sequences, functions
+Screens never import `firebase/firestore` directly; they call `@/lib/db` (`listClients`, `createClient`, `listInvoices`, `createInvoice`, `updateInvoice`, `setInvoiceStatus`, `deleteInvoice`, `findInvoiceByNumber`, the estimate twins, `listServiceItems`, `getSharedDocument`, …) and `@/lib/pdf/settings` (`getDocumentSettings`, `saveDocumentSettings`). Whole collections are read and filtered/sorted in memory (tens to hundreds of docs; the free tier allows 50k reads/day) — do not add queries that need composite indexes. `createInvoice`/`createEstimate` reserve the next number inside `runTransaction`, so numbers can neither collide nor be burned by an abandoned form (`previewNext*Number()` is display-only; a custom number raises the month counter past itself). Every invoice/estimate write also rewrites its `shared/{public_token}` copy in the same transaction/batch, and `deleteInvoice` removes the share copy and any uploaded file. Uploaded PDFs go through `src/lib/pdf/uploadedInvoice.ts` (`uploadInvoiceFile`, `fetchUploadedInvoiceBlob`, `downloadUploadedInvoice`).
 
-RLS must be enabled on every new table. Policies should reference `auth.uid()` or role checks against `public.user_profiles`.
+### Admin Authentication (Client-Side)
 
-### Supabase Client Usage
+Auth is fully client-side (required by `output: "export"`): `src/lib/firebase/client.ts` exposes `getFirebaseAuth()`/`getDb()`; `src/lib/auth/AuthProvider.tsx` listens to `onAuthStateChanged` and reads `admins/{uid}` to decide `isAdmin`; `useAuth()` returns `{ user, profile, isLoading, isAdmin, signIn, signOut }`; `admin/layout.tsx` wraps admin pages in `<AuthProvider>`; `admin/(protected)/layout.tsx` is the route guard (non-admins land on `/admin/login?error=unauthorized`, where they can sign out). Keep public sign-up **off** in the Firebase console (Authentication > Settings > User actions). To add an admin: create the user under Authentication > Users, then create `admins/<uid>` with an `email` field in Firestore.
 
-When querying `jdhome` tables from the frontend, use `.schema('jdhome')` on the Supabase client:
-```ts
-supabase.schema('jdhome').from('table_name').select('*')
-```
+### Rules, emulators, scripts
 
-Also add `jdhome` to the exposed schemas in Supabase Dashboard > API Settings for the auto-generated REST API to work.
+- `firestore.rules` — deploy with `firebase deploy --only firestore:rules`. Admin collections require `isAdmin()`; `shared` allows single-doc GET while `share_enabled`; `inquiries` rules are unchanged from the website-only days.
+- Local development against the emulators: `npm run emulators` (Auth 9099, Firestore 8080, UI 4000; the global `firebase` CLI needs Java 21, so on a Java 17 machine use `npx firebase-tools@13 emulators:start --only auth,firestore --project jd-home-services-prod`) plus `npm run dev:emulator` (sets `NEXT_PUBLIC_FIREBASE_EMULATOR=1`). `.claude/launch.json` has `jdhome-dev-emulator`. Emulator data is discarded on exit; seed it with the import script below.
+- `node scripts/migrate/import-firestore.mjs <export-dir> [--prod] [--verify-only]` — idempotent REST importer/verifier for the Supabase export (counts, totals and signature hashes). Production auth comes from `FIREBASE_ACCESS_TOKEN` or `gcloud auth print-access-token`; in emulator mode it also creates the admin users and writes their test passwords to `<export-dir>/emulator-admins.local.json`.
+- Backups: Spark has no scheduled Firestore backups. Export JSON before risky changes (the Firebase console can export, or extend the migrate script); the Supabase snapshot above is the pre-migration baseline.
 
-### JDhome Tables
+### Invoice & estimate system
 
-| Table | Purpose |
-|-------|---------|
-| `jdhome.clients` | Client contact info (name, email, phone, address) |
-| `jdhome.invoices` | Invoice records (number, date, totals, status, PDF URL) |
-| `jdhome.invoice_items` | Line items per invoice (description, qty, rate, amount) |
-
-All tables have RLS enabled with admin-only policies. `invoices` has an auto-increment number function `jdhome.generate_invoice_number()` (format: `INV-YYYYMM-NNN`).
-
-### Supabase Storage
-
-- **Bucket:** `jdhome-invoices` (private) — stores generated invoice PDFs
-- Path pattern: `{invoice_id}.pdf`
-
-### Edge Functions
-
-- **`send-invoice`** — Generates PDF (pdf-lib), uploads to storage, sends email via SMTP (nodemailer to smtp.hostinger.com), updates invoice status. Triggered from admin UI via `supabase.functions.invoke('send-invoice', { body: { invoice_id } })`.
-- Required secrets: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM_EMAIL`, `SMTP_FROM_NAME`
-
-### Invoice System
-
-The admin panel includes a full invoice system at `/admin/invoices`:
-- **List page** — filterable by status (draft/sent/paid/overdue), searchable by number or client
-- **Create page** — form with client search/create, dynamic line items, live preview matching the JD Home invoice template, save as draft or save & send
-- **Detail page** — invoice preview, timeline, actions (send, resend, mark paid, download PDF, delete draft)
-- Invoice detail uses query params (`/admin/invoices/view?id=xxx`) instead of dynamic `[id]` routes due to static export constraint
-- Components: `src/components/admin/invoices/` (InvoiceForm, InvoicePreview, InvoiceStatusBadge, LineItemRow)
+`/admin/invoices` and `/admin/estimates`:
+- **List pages** — tabs by status, search by number or client, newest first; invoices also have a monthly summary (`MonthlySummary`) and an **Upload existing** flow for invoices issued by another company (`sent_from_company`, PDF ≤ 700 KB, `share_enabled = false`, custom number allowed if unique).
+- **Create/edit pages** — client search/create, dynamic line items (service-item picker), HST 13%, signature capture, live preview, save as draft or save & send (n8n emails the browser-rendered PDF; see `src/lib/pdf/sendDocument.tsx`).
+- **Detail pages** — PDF preview, timeline, actions (send/resend, mark paid / accepted / declined, download, copy share link, delete). They use query params (`/admin/invoices/view?id=xxx`) because the static export cannot have dynamic `[id]` routes.
+- `/share/?token=<public_token>` renders a document for clients with no login.
 
 ## Key Conventions
 

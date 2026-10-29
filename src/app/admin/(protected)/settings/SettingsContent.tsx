@@ -1,21 +1,20 @@
 "use client";
 
 /**
- * Document Settings — edits the single `jdhome.document_settings` row that
- * supplies all the fixed copy on generated invoices and estimates.
+ * Document Settings — edits the single `settings/document` Firestore document
+ * that supplies all the fixed copy on generated invoices and estimates.
  *
  * A live PDF preview sits beside the form so changes can be checked before
  * saving. The preview is fed from local form state, so it updates without
  * touching the database.
  */
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Loader2, Save, Plus, Trash2, RotateCcw } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import {
   DEFAULT_DOCUMENT_SETTINGS,
-  SETTINGS_COLUMNS,
-  rowToSettings,
-  settingsToRow,
+  getDocumentSettings,
+  saveDocumentSettings,
   invalidateDocumentSettings,
   type DocumentSettings,
   type TermsClause,
@@ -117,30 +116,25 @@ function Section({
 }
 
 export default function SettingsContent() {
-  const { supabase, profile } = useAuth();
+  const { profile } = useAuth();
   const [settings, setSettings] = useState<DocumentSettings | null>(null);
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    const { data, error: err } = await supabase
-      .schema("jdhome")
-      .from("document_settings")
-      .select(SETTINGS_COLUMNS)
-      .maybeSingle();
-
-    if (err || !data) {
-      // No row yet (or unreadable) — start from the built-in defaults.
-      setSettings(DEFAULT_DOCUMENT_SETTINGS);
-      return;
-    }
-    setSettings(rowToSettings(data as never));
-  }, [supabase]);
-
   useEffect(() => {
-    load();
-  }, [load]);
+    let cancelled = false;
+    (async () => {
+      // Bypass the session cache so the form always starts from what is stored.
+      // A missing doc (or an unreadable one) falls back to the built-in defaults.
+      invalidateDocumentSettings();
+      const s = await getDocumentSettings();
+      if (!cancelled) setSettings(s);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function patch<K extends keyof DocumentSettings>(
     key: K,
@@ -155,15 +149,9 @@ export default function SettingsContent() {
     setSaving(true);
     setError(null);
     try {
-      const { error: err } = await supabase
-        .schema("jdhome")
-        .from("document_settings")
-        .upsert({ id: true, ...settingsToRow(settings) }, { onConflict: "id" });
-
-      if (err) throw new Error(err.message);
-
-      // Make sure the next generated document picks the new values up.
-      invalidateDocumentSettings();
+      // Overwrites settings/document and drops the cache, so the next
+      // generated document picks the new values up.
+      await saveDocumentSettings(settings);
       setSavedAt(new Date().toLocaleTimeString("en-CA"));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save settings");

@@ -3,45 +3,27 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import { useAuth } from "@/lib/auth";
-import {
-  InvoiceForm,
-  InvoicePreview,
-} from "@/components/admin/invoices";
+import { InvoiceForm } from "@/components/admin/invoices";
 import type { InvoiceFormData } from "@/components/admin/invoices/InvoiceForm";
 import type { InvoicePreviewData } from "@/components/admin/invoices/InvoicePreview";
 import { sendDocument, toInvoiceDocument } from "@/lib/pdf";
+import {
+  createClient,
+  findInvoiceByNumber,
+  getClient,
+  getInvoice,
+  nowIso,
+  updateClient,
+  updateInvoice,
+  type Client,
+  type Invoice,
+  type InvoicePatch,
+} from "@/lib/db";
 
-type InvoiceDetail = {
-  id: string;
-  invoice_number: string;
-  invoice_date: string;
-  payment_method: string;
-  notes: string | null;
-  client_signature: string | null;
-  subtotal: number;
-  hst_rate: number;
-  hst_amount: number;
-  total: number;
-  status: string;
-  client_id: string;
-  client: {
-    name: string;
-    email: string;
-    phone: string | null;
-    address: string | null;
-  };
-  invoice_items: {
-    description: string;
-    quantity: number;
-    rate: number;
-    amount: number;
-    sort_order: number;
-  }[];
-};
+/** The invoice document joined (in memory) to its client. */
+type InvoiceDetail = Invoice & { client: Client };
 
 export default function EditInvoiceContent() {
-  const { supabase, user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -49,7 +31,9 @@ export default function EditInvoiceContent() {
   const [invoice, setInvoice] = useState<InvoiceDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [previewData, setPreviewData] = useState<InvoicePreviewData>({
+  // The side-by-side preview is currently hidden (see the commented JSX below);
+  // the form still reports its computed values here.
+  const [, setPreviewData] = useState<InvoicePreviewData>({
     invoiceNumber: "",
     clientName: "",
     clientAddress: "",
@@ -68,42 +52,45 @@ export default function EditInvoiceContent() {
       router.push("/admin/invoices");
       return;
     }
-    const { data, error } = await supabase
-      .schema("jdhome")
-      .from("invoices")
-      .select(
-        `
-        id, invoice_number, invoice_date, payment_method, notes, client_signature,
-        subtotal, hst_rate, hst_amount, total, status, client_id, pdf_url,
-        client:clients(name, email, phone, address),
-        invoice_items(description, quantity, rate, amount, sort_order)
-      `
-      )
-      .eq("id", id)
-      .single();
+    let data: Invoice | null = null;
+    try {
+      data = await getInvoice(id);
+    } catch {
+      data = null;
+    }
 
-    if (error || !data) {
+    if (!data) {
       router.push("/admin/invoices");
       return;
     }
 
     // Uploaded invoices have no line items — saving this form would zero their totals
-    if ((data as { pdf_url?: string | null }).pdf_url) {
+    if (data.pdf_name) {
       router.push(`/admin/invoices/view?id=${id}`);
       return;
     }
 
-    const inv = data as unknown as InvoiceDetail;
-    inv.invoice_items.sort((a, b) => a.sort_order - b.sort_order);
-    setInvoice(inv);
+    let client: Client | null = null;
+    try {
+      client = await getClient(data.client_id);
+    } catch {
+      client = null;
+    }
+    if (!client) {
+      router.push("/admin/invoices");
+      return;
+    }
+
+    const items = [...data.items].sort((a, b) => a.sort_order - b.sort_order);
+    setInvoice({ ...data, items, client });
     setLoading(false);
-  }, [supabase, id, router]);
+  }, [id, router]);
 
   useEffect(() => {
     fetchInvoice();
   }, [fetchInvoice]);
 
-  async function updateInvoice(
+  async function persistInvoice(
     formData: InvoiceFormData,
     status: "draft" | "sent"
   ) {
@@ -112,33 +99,32 @@ export default function EditInvoiceContent() {
     // 1. Upsert client
     let clientId = formData.clientId;
     if (!clientId) {
-      const { data: clientData, error: clientError } = await supabase
-        .schema("jdhome")
-        .from("clients")
-        .insert({
+      try {
+        const created = await createClient({
           name: formData.clientName,
           email: formData.clientEmail,
           phone: formData.clientPhone || null,
           address: formData.clientAddress || null,
-          created_by: user?.id,
-        })
-        .select("id")
-        .single();
-
-      if (clientError)
-        throw new Error("Failed to save client: " + clientError.message);
-      clientId = clientData.id;
+        });
+        clientId = created.id;
+      } catch (err) {
+        throw new Error(
+          "Failed to save client: " +
+            (err instanceof Error ? err.message : String(err))
+        );
+      }
     } else {
-      await supabase
-        .schema("jdhome")
-        .from("clients")
-        .update({
+      // Update existing client info (best effort, as before)
+      try {
+        await updateClient(clientId, {
           name: formData.clientName,
           email: formData.clientEmail,
           phone: formData.clientPhone || null,
           address: formData.clientAddress || null,
-        })
-        .eq("id", clientId);
+        });
+      } catch {
+        /* ignore — the invoice still saves against the existing client */
+      }
     }
 
     // 2. Compute totals
@@ -157,13 +143,21 @@ export default function EditInvoiceContent() {
     const hstAmount = Math.round(subtotal * 0.13 * 100) / 100;
     const total = subtotal + hstAmount;
 
-    // 3. Determine invoice number
+    // 3. Determine invoice number (editing never draws a new auto number)
     const finalInvoiceNumber = formData.autoGenerate
       ? invoice.invoice_number
       : formData.invoiceNumber.trim() || invoice.invoice_number;
 
-    // 4. Update invoice record
-    const updatePayload: Record<string, unknown> = {
+    // Postgres had UNIQUE(invoice_number); keep a renamed invoice from
+    // colliding with another one.
+    if (finalInvoiceNumber !== invoice.invoice_number) {
+      const clash = await findInvoiceByNumber(finalInvoiceNumber);
+      if (clash && clash.id !== invoice.id)
+        throw new Error(`Invoice ${finalInvoiceNumber} already exists`);
+    }
+
+    // 4. Update invoice record (items replace the whole list; share copy refreshed)
+    const patch: InvoicePatch = {
       invoice_number: finalInvoiceNumber,
       client_id: clientId,
       invoice_date: formData.invoiceDate,
@@ -175,47 +169,22 @@ export default function EditInvoiceContent() {
       hst_amount: hstAmount,
       total,
       status,
+      items: computedItems,
     };
 
     if (status === "sent" && invoice.status === "draft") {
-      updatePayload.sent_at = new Date().toISOString();
+      patch.sent_at = nowIso();
     }
 
-    const { error: invoiceError } = await supabase
-      .schema("jdhome")
-      .from("invoices")
-      .update(updatePayload)
-      .eq("id", invoice.id);
-
-    if (invoiceError)
-      throw new Error("Failed to update invoice: " + invoiceError.message);
-
-    // 5. Replace line items: delete old, insert new
-    const { error: deleteError } = await supabase
-      .schema("jdhome")
-      .from("invoice_items")
-      .delete()
-      .eq("invoice_id", invoice.id);
-
-    if (deleteError)
-      throw new Error("Failed to update line items: " + deleteError.message);
-
-    const itemsToInsert = computedItems.map((item) => ({
-      invoice_id: invoice.id,
-      description: item.description,
-      quantity: item.quantity,
-      rate: item.rate,
-      amount: item.amount,
-      sort_order: item.sort_order,
-    }));
-
-    const { error: itemsError } = await supabase
-      .schema("jdhome")
-      .from("invoice_items")
-      .insert(itemsToInsert);
-
-    if (itemsError)
-      throw new Error("Failed to save line items: " + itemsError.message);
+    let saved: Invoice;
+    try {
+      saved = await updateInvoice(invoice.id, patch);
+    } catch (err) {
+      throw new Error(
+        "Failed to update invoice: " +
+          (err instanceof Error ? err.message : String(err))
+      );
+    }
 
     return {
       id: invoice.id,
@@ -226,26 +195,15 @@ export default function EditInvoiceContent() {
         address: formData.clientAddress || null,
         client_signature: formData.signatureDataUrl || null,
       },
-      invoice: {
-        invoice_number: finalInvoiceNumber,
-        client_id: clientId,
-        invoice_date: formData.invoiceDate,
-        payment_method: formData.paymentMethod,
-        notes: formData.notes || null,
-        subtotal,
-        hst_rate: 0.13,
-        hst_amount: hstAmount,
-        total,
-        status,
-      },
-      invoice_items: itemsToInsert,
+      invoice: saved,
+      invoice_items: saved.items,
     };
   }
 
   async function handleSaveDraft(formData: InvoiceFormData) {
     setIsSaving(true);
     try {
-      const result = await updateInvoice(formData, "draft");
+      const result = await persistInvoice(formData, "draft");
       router.push(`/admin/invoices/view?id=${result.id}`);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to save invoice");
@@ -257,7 +215,7 @@ export default function EditInvoiceContent() {
   async function handleSaveAndSend(formData: InvoiceFormData) {
     setIsSaving(true);
     try {
-      const result = await updateInvoice(formData, "sent");
+      const result = await persistInvoice(formData, "sent");
 
       await sendDocument(
         toInvoiceDocument(
@@ -295,7 +253,7 @@ export default function EditInvoiceContent() {
     paymentMethod: invoice.payment_method,
     notes: invoice.notes ?? "",
     signatureDataUrl: invoice.client_signature ?? "",
-    items: invoice.invoice_items.map((item) => ({
+    items: invoice.items.map((item) => ({
       description: item.description,
       quantity: item.quantity,
       rate: item.rate,

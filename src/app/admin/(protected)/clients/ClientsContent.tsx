@@ -13,7 +13,17 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
-import { useAuth } from "@/lib/auth";
+import {
+  listClients,
+  listInvoices,
+  listEstimates,
+  createClient,
+  updateClient,
+  deleteClient,
+  type Client as ClientRecord,
+  type Invoice,
+  type Estimate,
+} from "@/lib/db";
 import { InvoiceStatusBadge } from "@/components/admin/invoices";
 
 type ClientDoc = {
@@ -37,28 +47,6 @@ type Client = {
   outstanding: number;
 };
 
-type ClientRow = {
-  id: string;
-  name: string;
-  email: string;
-  phone: string | null;
-  address: string | null;
-  invoices: {
-    id: string;
-    invoice_number: string;
-    invoice_date: string;
-    total: number;
-    status: string;
-  }[];
-  estimates: {
-    id: string;
-    estimate_number: string;
-    estimate_date: string;
-    total: number;
-    status: string;
-  }[];
-};
-
 const EMPTY_FORM = { name: "", email: "", phone: "", address: "" };
 const labelClass = "block text-xs font-medium text-[var(--text-muted)] mb-1";
 
@@ -77,9 +65,20 @@ function formatDate(dateStr: string) {
   });
 }
 
-function toClient(row: ClientRow): Client {
+/** Group invoices/estimates by `client_id` (replaces the old embedded reverse joins). */
+function groupByClient<T extends { client_id: string }>(rows: T[]): Map<string, T[]> {
+  const map = new Map<string, T[]>();
+  for (const row of rows) {
+    const list = map.get(row.client_id);
+    if (list) list.push(row);
+    else map.set(row.client_id, [row]);
+  }
+  return map;
+}
+
+function toClient(row: ClientRecord, invoices: Invoice[], estimates: Estimate[]): Client {
   const docs: ClientDoc[] = [
-    ...row.invoices.map((i) => ({
+    ...invoices.map((i) => ({
       id: i.id,
       number: i.invoice_number,
       date: i.invoice_date,
@@ -87,7 +86,7 @@ function toClient(row: ClientRow): Client {
       status: i.status,
       kind: "invoice" as const,
     })),
-    ...row.estimates.map((e) => ({
+    ...estimates.map((e) => ({
       id: e.id,
       number: e.estimate_number,
       date: e.estimate_date,
@@ -97,7 +96,7 @@ function toClient(row: ClientRow): Client {
     })),
   ].sort((a, b) => b.date.localeCompare(a.date));
 
-  const billed = row.invoices.filter((i) => i.status !== "draft");
+  const billed = invoices.filter((i) => i.status !== "draft");
   return {
     id: row.id,
     name: row.name,
@@ -113,7 +112,6 @@ function toClient(row: ClientRow): Client {
 }
 
 export default function ClientsContent() {
-  const { supabase, user } = useAuth();
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -134,25 +132,33 @@ export default function ClientsContent() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .schema("jdhome")
-        .from("clients")
-        .select(
-          `
-          id, name, email, phone, address,
-          invoices(id, invoice_number, invoice_date, total, status),
-          estimates(id, estimate_number, estimate_date, total, status)
-        `,
-        )
-        .order("name");
+      let rows: Client[] = [];
+      try {
+        const [clientRows, invoices, estimates] = await Promise.all([
+          listClients(),
+          listInvoices(),
+          listEstimates(),
+        ]);
+        const invoicesByClient = groupByClient(invoices);
+        const estimatesByClient = groupByClient(estimates);
+        rows = clientRows
+          .map((c) =>
+            toClient(c, invoicesByClient.get(c.id) ?? [], estimatesByClient.get(c.id) ?? []),
+          )
+          // Case-insensitive A→Z, like the old Postgres `ORDER BY name`.
+          .sort((a, b) => a.name.localeCompare(b.name, "en-CA", { sensitivity: "base" }));
+      } catch {
+        // Unreadable (offline / rules): show an empty list, as before.
+        rows = [];
+      }
       if (cancelled) return;
-      setClients(((data as unknown as ClientRow[]) ?? []).map(toClient));
+      setClients(rows);
       setLoading(false);
     })();
     return () => {
       cancelled = true;
     };
-  }, [supabase, reloadKey]);
+  }, [reloadKey]);
 
   function openCreate() {
     setEditingId(null);
@@ -187,14 +193,16 @@ export default function ClientsContent() {
       phone: form.phone.trim() || null,
       address: form.address.trim() || null,
     };
-    const clientsTable = supabase.schema("jdhome").from("clients");
-    const { error: saveError } = editingId
-      ? await clientsTable.update(values).eq("id", editingId)
-      : await clientsTable.insert({ ...values, created_by: user?.id });
+    try {
+      if (editingId) await updateClient(editingId, values);
+      else await createClient(values);
+    } catch (e) {
+      setIsSaving(false);
+      return setError(
+        "Failed to save client: " + (e instanceof Error ? e.message : String(e)),
+      );
+    }
     setIsSaving(false);
-
-    if (saveError)
-      return setError("Failed to save client: " + saveError.message);
     setShowModal(false);
     fetchClients();
   }
@@ -209,13 +217,14 @@ export default function ClientsContent() {
     if (!confirm(`Delete client ${client.name}? This cannot be undone.`))
       return;
     setDeletingId(client.id);
-    const { error: deleteError } = await supabase
-      .schema("jdhome")
-      .from("clients")
-      .delete()
-      .eq("id", client.id);
+    try {
+      // Also refuses (with a friendly message) when invoices/estimates still reference the client.
+      await deleteClient(client.id);
+    } catch (e) {
+      setDeletingId(null);
+      return alert(e instanceof Error ? e.message : "Failed to delete client");
+    }
     setDeletingId(null);
-    if (deleteError) return alert("Failed to delete client");
     fetchClients();
   }
 

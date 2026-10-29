@@ -4,7 +4,19 @@
     {
       "name": "jdhome-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "jdhome-dev-emulator",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev:emulator"
+      ],
       "port": 3000
     }
   ]
