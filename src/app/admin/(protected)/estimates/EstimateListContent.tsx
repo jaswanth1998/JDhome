@@ -13,48 +13,21 @@ import {
   Trash2,
   Loader2,
 } from "lucide-react";
-import { useAuth } from "@/lib/auth";
 import { EstimateStatusBadge } from "@/components/admin/estimates";
 import { downloadDocumentPdf, toEstimateDocument } from "@/lib/pdf";
+import {
+  deleteEstimate,
+  getClient,
+  getEstimate,
+  indexById,
+  listClients,
+  listEstimates,
+  type Client,
+  type Estimate,
+} from "@/lib/db";
 
-type Estimate = {
-  id: string;
-  estimate_number: string;
-  estimate_date: string;
-  total: number;
-  status: string;
-  public_token: string;
-  client: { name: string } | null;
-};
-
-/** Full record the PDF needs — the list query only selects a summary. */
-type EstimateFull = {
-  id: string;
-  estimate_number: string;
-  estimate_date: string;
-  valid_until: string | null;
-  payment_method: string;
-  notes: string | null;
-  client_signature: string | null;
-  subtotal: number;
-  hst_rate: number;
-  hst_amount: number;
-  total: number;
-  status: string;
-  client: {
-    name: string;
-    email: string;
-    phone: string | null;
-    address: string | null;
-  };
-  estimate_items: {
-    description: string;
-    quantity: number;
-    rate: number;
-    amount: number;
-    sort_order: number;
-  }[];
-};
+/** List row: the Firestore estimate plus the client name joined in memory. */
+type EstimateRow = Estimate & { client: Pick<Client, "name"> | null };
 
 const STATUS_TABS = ["all", "draft", "sent", "accepted", "declined", "expired"] as const;
 
@@ -74,9 +47,8 @@ function formatDate(dateStr: string) {
 }
 
 export default function EstimateListContent() {
-  const { supabase } = useAuth();
   const router = useRouter();
-  const [estimates, setEstimates] = useState<Estimate[]>([]);
+  const [estimates, setEstimates] = useState<EstimateRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<(typeof STATUS_TABS)[number]>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -86,24 +58,25 @@ export default function EstimateListContent() {
     action: "download" | "delete";
   } | null>(null);
 
+  // Load every estimate (newest first) and every client once; the status tab
+  // and the search box filter in memory.
   const fetchEstimates = useCallback(async () => {
     setLoading(true);
-    let query = supabase
-      .schema("jdhome")
-      .from("estimates")
-      .select(
-        "id, estimate_number, estimate_date, total, status, public_token, client:clients(name)"
-      )
-      .order("created_at", { ascending: false });
-
-    if (activeTab !== "all") {
-      query = query.eq("status", activeTab);
+    try {
+      const [rows, clients] = await Promise.all([listEstimates(), listClients()]);
+      const clientsById = indexById(clients);
+      setEstimates(
+        rows.map((est) => {
+          const client = clientsById[est.client_id];
+          return { ...est, client: client ? { name: client.name } : null };
+        })
+      );
+    } catch {
+      setEstimates([]);
+    } finally {
+      setLoading(false);
     }
-
-    const { data } = await query;
-    setEstimates((data as unknown as Estimate[]) ?? []);
-    setLoading(false);
-  }, [supabase, activeTab]);
+  }, []);
 
   useEffect(() => {
     fetchEstimates();
@@ -124,33 +97,19 @@ export default function EstimateListContent() {
   async function handleDownload(id: string) {
     setRowBusy({ id, action: "download" });
     try {
-      // The list only holds a summary — pull the full record the PDF needs
-      const { data, error } = await supabase
-        .schema("jdhome")
-        .from("estimates")
-        .select(
-          `
-          id, estimate_number, estimate_date, valid_until, payment_method, notes, client_signature,
-          subtotal, hst_rate, hst_amount, total, status,
-          client:clients(name, email, phone, address),
-          estimate_items(description, quantity, rate, amount, sort_order)
-        `
-        )
-        .eq("id", id)
-        .single();
+      // Pull the full record (and its client) the PDF needs
+      const est = await getEstimate(id);
+      const client = est ? await getClient(est.client_id) : null;
 
-      if (error || !data) {
+      if (!est || !client) {
         alert("Failed to load estimate");
         return;
       }
 
-      const est = data as unknown as EstimateFull;
-      est.estimate_items.sort((a, b) => a.sort_order - b.sort_order);
+      const items = [...est.items].sort((a, b) => a.sort_order - b.sort_order);
 
       // Render the PDF in the browser and save it locally
-      await downloadDocumentPdf(
-        toEstimateDocument(est, est.client, est.estimate_items)
-      );
+      await downloadDocumentPdf(toEstimateDocument(est, client, items));
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to download estimate");
     } finally {
@@ -163,12 +122,11 @@ export default function EstimateListContent() {
       return;
     setRowBusy({ id, action: "delete" });
     try {
-      const { error } = await supabase
-        .schema("jdhome")
-        .from("estimates")
-        .delete()
-        .eq("id", id);
-      if (error) throw new Error("Failed to delete estimate");
+      try {
+        await deleteEstimate(id);
+      } catch {
+        throw new Error("Failed to delete estimate");
+      }
       await fetchEstimates();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to delete estimate");
@@ -177,13 +135,18 @@ export default function EstimateListContent() {
     }
   }
 
+  const byTab =
+    activeTab === "all"
+      ? estimates
+      : estimates.filter((est) => est.status === activeTab);
+
   const filtered = searchQuery
-    ? estimates.filter(
+    ? byTab.filter(
         (est) =>
           est.estimate_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
           est.client?.name?.toLowerCase().includes(searchQuery.toLowerCase())
       )
-    : estimates;
+    : byTab;
 
   return (
     <div>
@@ -244,11 +207,11 @@ export default function EstimateListContent() {
         <div className="text-center py-16 bg-white rounded-lg border border-[var(--border-light)]">
           <FileText className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-3 opacity-40" />
           <p className="text-[var(--text-muted)] mb-4">
-            {estimates.length === 0
+            {byTab.length === 0
               ? "No estimates yet"
               : "No estimates match your search"}
           </p>
-          {estimates.length === 0 && (
+          {byTab.length === 0 && (
             <button
               onClick={() => router.push("/admin/estimates/new")}
               className="btn btn-primary btn-sm"

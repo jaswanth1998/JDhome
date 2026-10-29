@@ -4,15 +4,15 @@
  * Public document view — no login required.
  *
  * Access is granted purely by the `?token=` value, which is an unguessable
- * uuid v4. The page never queries a table directly: it calls the
- * `jdhome.get_shared_document` RPC, which is the only thing the anon role is
- * allowed to execute and which returns just the fields the document renders.
+ * uuid v4. The page never queries the invoices/estimates collections: it
+ * fetches the single `shared/{token}` document (see src/lib/db/shared.ts and
+ * firestore.rules), which holds just the fields the document renders — client
+ * email/phone are never included.
  */
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { Loader2, Download, FileWarning } from "lucide-react";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/client";
+import { getSharedDocument, type SharedDocument } from "@/lib/db";
 import { DocumentPdfViewer, downloadDocumentPdf } from "@/lib/pdf";
 import type { JDDocumentData } from "@/lib/pdf";
 import {
@@ -20,35 +20,6 @@ import {
   DEFAULT_DOCUMENT_SETTINGS,
   type DocumentSettings,
 } from "@/lib/pdf/settings";
-
-type SharedPayload = {
-  kind: "invoice" | "estimate";
-  client: {
-    name: string;
-    address: string | null;
-    client_signature: string | null;
-  };
-  meta: {
-    number: string;
-    date: string;
-    valid_until?: string | null;
-    payment_method?: string | null;
-    notes?: string | null;
-    subtotal: number;
-    hst_rate: number;
-    hst_amount: number;
-    total: number;
-    status: string;
-  };
-  items: {
-    description: string;
-    quantity: number;
-    rate: number;
-    amount: number;
-    sort_order: number;
-  }[];
-  settings: Record<string, unknown> | null;
-};
 
 export default function ShareContent() {
   const searchParams = useSearchParams();
@@ -69,33 +40,36 @@ export default function ShareContent() {
     let active = true;
 
     (async () => {
-      const supabase: SupabaseClient = createClient();
-      const { data, error } = await supabase
-        .schema("jdhome")
-        .rpc("get_shared_document", { p_token: token });
+      // null for an unknown token or when sharing is off; any other failure
+      // (offline, misconfigured) is shown the same way.
+      let payload: SharedDocument | null = null;
+      try {
+        payload = await getSharedDocument(token);
+      } catch {
+        payload = null;
+      }
 
       if (!active) return;
 
-      if (error || !data) {
+      if (!payload) {
         setState("missing");
         return;
       }
 
-      const payload = data as SharedPayload;
       setDoc({
         kind: payload.kind,
         client: {
           name: payload.client.name,
-          email: "", // not returned by the RPC; the document doesn't render it
+          email: "", // not part of the shared copy; the document doesn't render it
           phone: null,
           address: payload.client.address,
           client_signature: payload.client.client_signature,
         },
         meta: payload.meta,
-        items: payload.items,
+        items: [...payload.items].sort((a, b) => a.sort_order - b.sort_order),
       });
       if (payload.settings) {
-        setSettings(rowToSettings(payload.settings as never));
+        setSettings(rowToSettings(payload.settings));
       }
       setState("ok");
     })();

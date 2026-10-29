@@ -2,19 +2,20 @@
 
 import { useState, useEffect } from "react";
 import { FileText, Loader2 } from "lucide-react";
-import { useAuth } from "@/lib/auth";
 import { fetchUploadedInvoiceBlob } from "@/lib/pdf/uploadedInvoice";
 
-/** Shows a PDF stored in the private invoices bucket. */
-export function UploadedPdfViewer({ path }: { path: string }) {
-  const { supabase } = useAuth();
+/**
+ * Shows the PDF uploaded for an invoice (stored as base64 in
+ * `invoiceFiles/{invoiceId}`). Render it only when `invoice.pdf_name` is set.
+ */
+export function UploadedPdfViewer({ invoiceId }: { invoiceId: string }) {
   const [url, setUrl] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let objectUrl: string | null = null;
     let cancelled = false;
-    fetchUploadedInvoiceBlob(supabase, path)
+    fetchUploadedInvoiceBlob(invoiceId)
       .then((blob) => {
         if (cancelled) return;
         objectUrl = URL.createObjectURL(blob);
@@ -25,7 +26,7 @@ export function UploadedPdfViewer({ path }: { path: string }) {
       cancelled = true;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [supabase, path]);
+  }, [invoiceId]);
 
   if (failed) {
     return (

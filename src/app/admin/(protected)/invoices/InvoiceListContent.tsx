@@ -14,57 +14,26 @@ import {
   Loader2,
   FileUp,
 } from "lucide-react";
-import { useAuth } from "@/lib/auth";
 import {
   InvoiceStatusBadge,
   MonthlySummary,
 } from "@/components/admin/invoices";
 import { downloadDocumentPdf, toInvoiceDocument } from "@/lib/pdf";
+import { downloadUploadedInvoice } from "@/lib/pdf/uploadedInvoice";
 import {
-  downloadUploadedInvoice,
-  removeUploadedInvoiceFile,
-} from "@/lib/pdf/uploadedInvoice";
+  deleteInvoice,
+  indexById,
+  listClients,
+  listInvoices,
+  type Client,
+  type Invoice,
+} from "@/lib/db";
 
-type Invoice = {
-  id: string;
-  invoice_number: string;
-  invoice_date: string;
-  total: number;
-  status: string;
-  public_token: string;
-  /** Set when the invoice was issued elsewhere and uploaded as a PDF */
-  pdf_url: string | null;
-  sent_from_company: string | null;
-  client: { name: string } | null;
-};
-
-/** Full record the PDF needs — the list query only selects a summary. */
-type InvoiceFull = {
-  id: string;
-  invoice_number: string;
-  invoice_date: string;
-  payment_method: string;
-  notes: string | null;
-  client_signature: string | null;
-  subtotal: number;
-  hst_rate: number;
-  hst_amount: number;
-  total: number;
-  status: string;
-  client: {
-    name: string;
-    email: string;
-    phone: string | null;
-    address: string | null;
-  };
-  invoice_items: {
-    description: string;
-    quantity: number;
-    rate: number;
-    amount: number;
-    sort_order: number;
-  }[];
-};
+/**
+ * An invoice document joined (in memory) to its client. Firestore has no joins:
+ * the list loads `invoices` and `clients` once and matches them by `client_id`.
+ */
+type InvoiceRow = Invoice & { client: Client | null };
 
 const STATUS_TABS = ["all", "draft", "sent", "paid", "overdue"] as const;
 
@@ -84,9 +53,8 @@ function formatDate(dateStr: string) {
 }
 
 export default function InvoiceListContent() {
-  const { supabase } = useAuth();
   const router = useRouter();
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<(typeof STATUS_TABS)[number]>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -100,22 +68,19 @@ export default function InvoiceListContent() {
 
   const fetchInvoices = useCallback(async () => {
     setLoading(true);
-    let query = supabase
-      .schema("jdhome")
-      .from("invoices")
-      .select(
-        "id, invoice_number, invoice_date, total, status, public_token, pdf_url, sent_from_company, client:clients(name)"
-      )
-      .order("created_at", { ascending: false });
-
-    if (activeTab !== "all") {
-      query = query.eq("status", activeTab);
+    try {
+      // Newest first (listInvoices orders by created_at desc); status tabs filter in memory.
+      const [all, clients] = await Promise.all([listInvoices(), listClients()]);
+      const clientsById = indexById(clients);
+      setInvoices(
+        all.map((inv) => ({ ...inv, client: clientsById[inv.client_id] ?? null }))
+      );
+    } catch {
+      setInvoices([]);
+    } finally {
+      setLoading(false);
     }
-
-    const { data } = await query;
-    setInvoices((data as unknown as Invoice[]) ?? []);
-    setLoading(false);
-  }, [supabase, activeTab]);
+  }, []);
 
   useEffect(() => {
     fetchInvoices();
@@ -136,43 +101,22 @@ export default function InvoiceListContent() {
   async function handleDownload(id: string) {
     setRowBusy({ id, action: "download" });
     try {
-      const uploaded = invoices.find((inv) => inv.id === id);
-      if (uploaded?.pdf_url) {
-        await downloadUploadedInvoice(
-          supabase,
-          uploaded.pdf_url,
-          uploaded.invoice_number
-        );
-        return;
-      }
-
-      // The list only holds a summary — pull the full record the PDF needs
-      const { data, error } = await supabase
-        .schema("jdhome")
-        .from("invoices")
-        .select(
-          `
-          id, invoice_number, invoice_date, payment_method, notes, client_signature,
-          subtotal, hst_rate, hst_amount, total, status,
-          client:clients(name, email, phone, address),
-          invoice_items(description, quantity, rate, amount, sort_order)
-        `
-        )
-        .eq("id", id)
-        .single();
-
-      if (error || !data) {
+      const inv = invoices.find((row) => row.id === id);
+      if (!inv || !inv.client) {
         alert("Failed to load invoice");
         return;
       }
 
-      const inv = data as unknown as InvoiceFull;
-      inv.invoice_items.sort((a, b) => a.sort_order - b.sort_order);
+      if (inv.pdf_name) {
+        await downloadUploadedInvoice(inv.id, inv.invoice_number);
+        return;
+      }
+
+      // The invoice document already carries everything the PDF needs
+      const items = [...inv.items].sort((a, b) => a.sort_order - b.sort_order);
 
       // Render the PDF in the browser and save it locally
-      await downloadDocumentPdf(
-        toInvoiceDocument(inv, inv.client, inv.invoice_items)
-      );
+      await downloadDocumentPdf(toInvoiceDocument(inv, inv.client, items));
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to download invoice");
     } finally {
@@ -185,14 +129,8 @@ export default function InvoiceListContent() {
       return;
     setRowBusy({ id, action: "delete" });
     try {
-      const { error } = await supabase
-        .schema("jdhome")
-        .from("invoices")
-        .delete()
-        .eq("id", id);
-      if (error) throw new Error("Failed to delete invoice");
-      const pdfPath = invoices.find((inv) => inv.id === id)?.pdf_url;
-      if (pdfPath) await removeUploadedInvoiceFile(supabase, pdfPath);
+      // Also removes the public share copy and any uploaded PDF
+      await deleteInvoice(id);
       await fetchInvoices();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to delete invoice");
@@ -201,17 +139,21 @@ export default function InvoiceListContent() {
     }
   }
 
+  const tabInvoices =
+    activeTab === "all"
+      ? invoices
+      : invoices.filter((inv) => inv.status === activeTab);
   const companies = [
     ...new Set(
-      invoices.flatMap((inv) =>
+      tabInvoices.flatMap((inv) =>
         inv.sent_from_company ? [inv.sent_from_company] : []
       )
     ),
   ].sort();
   const byCompany =
     companyFilter === "all"
-      ? invoices
-      : invoices.filter((inv) => inv.sent_from_company === companyFilter);
+      ? tabInvoices
+      : tabInvoices.filter((inv) => inv.sent_from_company === companyFilter);
   const filtered = searchQuery
     ? byCompany.filter(
         (inv) =>
@@ -333,11 +275,11 @@ export default function InvoiceListContent() {
         <div className="text-center py-16 bg-white rounded-lg border border-[var(--border-light)]">
           <FileText className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-3 opacity-40" />
           <p className="text-[var(--text-muted)] mb-4">
-            {invoices.length === 0 && activeTab === "all"
+            {tabInvoices.length === 0 && activeTab === "all"
               ? "No invoices yet"
               : "No invoices match your search"}
           </p>
-          {invoices.length === 0 && (
+          {tabInvoices.length === 0 && (
             <button
               onClick={() => router.push("/admin/invoices/new")}
               className="btn btn-primary btn-sm"
@@ -386,7 +328,7 @@ export default function InvoiceListContent() {
                   >
                     <td className="px-4 py-3 font-medium text-[var(--text-primary)]">
                       {inv.invoice_number}
-                      {inv.pdf_url && (
+                      {inv.pdf_name && (
                         <span className="ml-2 text-[10px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
                           Uploaded
                         </span>
@@ -409,7 +351,7 @@ export default function InvoiceListContent() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
-                        {!inv.pdf_url && (
+                        {!inv.pdf_name && (
                         <button
                           title="Edit"
                           onClick={(e) => {
@@ -422,7 +364,7 @@ export default function InvoiceListContent() {
                           <Pencil className="w-4 h-4" />
                         </button>
                         )}
-                        {!inv.pdf_url && (
+                        {!inv.pdf_name && (
                         <button
                           title="Copy client link"
                           onClick={(e) => {
@@ -489,7 +431,7 @@ export default function InvoiceListContent() {
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-sm font-medium text-[var(--text-primary)]">
                     {inv.invoice_number}
-                    {inv.pdf_url && (
+                    {inv.pdf_name && (
                       <span className="ml-2 text-[10px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
                         Uploaded
                       </span>
@@ -516,7 +458,7 @@ export default function InvoiceListContent() {
                     {formatDate(inv.invoice_date)}
                   </p>
                   <div className="flex items-center justify-end gap-1">
-                    {!inv.pdf_url && (
+                    {!inv.pdf_name && (
                     <button
                       title="Edit"
                       onClick={(e) => {
@@ -529,7 +471,7 @@ export default function InvoiceListContent() {
                       <Pencil className="w-4 h-4" />
                     </button>
                     )}
-                    {!inv.pdf_url && (
+                    {!inv.pdf_name && (
                     <button
                       title="Copy client link"
                       onClick={(e) => {

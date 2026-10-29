@@ -3,21 +3,39 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { useAuth } from "@/lib/auth";
-import {
-  EstimateForm,
-  EstimatePreview,
-} from "@/components/admin/estimates";
+import { EstimateForm } from "@/components/admin/estimates";
 import type { EstimateFormData } from "@/components/admin/estimates/EstimateForm";
 import type { EstimatePreviewData } from "@/components/admin/estimates/EstimatePreview";
 import { sendDocument, toEstimateDocument } from "@/lib/pdf";
+import {
+  createClient,
+  createEstimate,
+  findEstimateByNumber,
+  nowIso,
+  updateClient,
+  type Estimate,
+} from "@/lib/db";
 //TODO: Move this to env vars and backend config
 
+/** Client details as entered in the form — what the PDF/email is addressed to. */
+type SavedClient = {
+  name: string;
+  email: string;
+  phone: string | null;
+  address: string | null;
+  client_signature: string | null;
+};
+
+function errorMessage(err: unknown) {
+  return err instanceof Error ? err.message : String(err);
+}
+
 export default function NewEstimateContent() {
-  const { supabase, user } = useAuth();
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
-  const [previewData, setPreviewData] = useState<EstimatePreviewData>({
+  // The live preview panel is currently commented out below; the form still
+  // reports its data so the panel can be switched back on without changes.
+  const [, setPreviewData] = useState<EstimatePreviewData>({
     estimateNumber: "",
     clientName: "",
     clientAddress: "",
@@ -35,49 +53,33 @@ export default function NewEstimateContent() {
   async function saveEstimate(
     formData: EstimateFormData,
     status: "draft" | "sent"
-  ) {
-    // 1. Determine estimate number
-    let estimateNumber: string;
-    if (formData.autoGenerate) {
-      const { data: numData, error: numError } = await supabase
-        .schema("jdhome")
-        .rpc("generate_estimate_number");
-      if (numError) throw new Error("Failed to generate estimate number: " + numError.message);
-      estimateNumber = numData as string;
-    } else {
-      estimateNumber = formData.estimateNumber.trim();
-      if (!estimateNumber) throw new Error("Estimate number is required");
+  ): Promise<{ estimate: Estimate; client: SavedClient }> {
+    // 1. Determine estimate number. Auto numbers (EST-YYYYMM-NNN) are reserved
+    //    by createEstimate inside its transaction; custom ones must be unique.
+    let customNumber: string | undefined;
+    if (!formData.autoGenerate) {
+      customNumber = formData.estimateNumber.trim();
+      if (!customNumber) throw new Error("Estimate number is required");
+      if (await findEstimateByNumber(customNumber))
+        throw new Error(`Estimate number ${customNumber} already exists`);
     }
 
     // 2. Upsert client
+    const clientFields = {
+      name: formData.clientName,
+      email: formData.clientEmail,
+      phone: formData.clientPhone || null,
+      address: formData.clientAddress || null,
+    };
     let clientId = formData.clientId;
-    if (!clientId) {
-      const { data: clientData, error: clientError } = await supabase
-        .schema("jdhome")
-        .from("clients")
-        .insert({
-          name: formData.clientName,
-          email: formData.clientEmail,
-          phone: formData.clientPhone || null,
-          address: formData.clientAddress || null,
-          created_by: user?.id,
-        })
-        .select("id")
-        .single();
-
-      if (clientError) throw new Error("Failed to save client: " + clientError.message);
-      clientId = clientData.id;
-    } else {
-      await supabase
-        .schema("jdhome")
-        .from("clients")
-        .update({
-          name: formData.clientName,
-          email: formData.clientEmail,
-          phone: formData.clientPhone || null,
-          address: formData.clientAddress || null,
-        })
-        .eq("id", clientId);
+    try {
+      if (!clientId) {
+        clientId = (await createClient(clientFields)).id;
+      } else {
+        await updateClient(clientId, clientFields);
+      }
+    } catch (err) {
+      throw new Error("Failed to save client: " + errorMessage(err));
     }
 
     // 3. Compute totals
@@ -96,73 +98,37 @@ export default function NewEstimateContent() {
     const hstAmount = Math.round(subtotal * 0.13 * 100) / 100;
     const total = subtotal + hstAmount;
 
-    // 4. Insert estimate
-    const { data: estimateData, error: estimateError } = await supabase
-      .schema("jdhome")
-      .from("estimates")
-      .insert({
-        estimate_number: estimateNumber,
-        client_id: clientId,
-        estimate_date: formData.estimateDate,
-        valid_until: formData.validUntil || null,
-        payment_method: formData.paymentMethod,
-        notes: formData.notes || null,
-        client_signature: formData.signatureDataUrl || null,
-        subtotal,
-        hst_rate: 0.13,
-        hst_amount: hstAmount,
-        total,
-        status,
-        sent_at: status === "sent" ? new Date().toISOString() : null,
-        created_by: user?.id,
-      })
-      .select("id")
-      .single();
-
-    if (estimateError) throw new Error("Failed to save estimate: " + estimateError.message);
-
-    // 5. Insert line items
-    const itemsToInsert = computedItems.map((item) => ({
-      estimate_id: estimateData.id,
-      description: item.description,
-      quantity: item.quantity,
-      rate: item.rate,
-      amount: item.amount,
-      sort_order: item.sort_order,
-    }));
-
-    const { error: itemsError } = await supabase
-      .schema("jdhome")
-      .from("estimate_items")
-      .insert(itemsToInsert);
-
-    if (itemsError) throw new Error("Failed to save line items: " + itemsError.message);
+    // 4. Save the estimate with its line items embedded (and its share copy)
+    let estimate: Estimate;
+    try {
+      estimate = await createEstimate(
+        {
+          client_id: clientId,
+          estimate_date: formData.estimateDate,
+          valid_until: formData.validUntil || null,
+          payment_method: formData.paymentMethod,
+          notes: formData.notes || null,
+          client_signature: formData.signatureDataUrl || null,
+          subtotal,
+          hst_rate: 0.13,
+          hst_amount: hstAmount,
+          total,
+          status,
+          sent_at: status === "sent" ? nowIso() : null,
+          items: computedItems,
+        },
+        customNumber ? { estimate_number: customNumber } : {}
+      );
+    } catch (err) {
+      throw new Error("Failed to save estimate: " + errorMessage(err));
+    }
 
     return {
-      id: estimateData.id,
+      estimate,
       client: {
-        name: formData.clientName,
-        email: formData.clientEmail,
-        phone: formData.clientPhone || null,
-        address: formData.clientAddress || null,
+        ...clientFields,
         client_signature: formData.signatureDataUrl || null,
-        created_by: user?.id,
       },
-      estimate: {
-        estimate_number: estimateNumber,
-        client_id: clientId,
-        estimate_date: formData.estimateDate,
-        valid_until: formData.validUntil || null,
-        payment_method: formData.paymentMethod,
-        notes: formData.notes || null,
-        subtotal,
-        hst_rate: 0.13,
-        hst_amount: hstAmount,
-        total,
-        status,
-        created_by: user?.id,
-      },
-      estimate_items: itemsToInsert,
     };
   }
 
@@ -170,7 +136,7 @@ export default function NewEstimateContent() {
     setIsSaving(true);
     try {
       const result = await saveEstimate(formData, "draft");
-      router.push(`/admin/estimates/view?id=${result.id}`);
+      router.push(`/admin/estimates/view?id=${result.estimate.id}`);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to save estimate");
     } finally {
@@ -188,11 +154,11 @@ export default function NewEstimateContent() {
         toEstimateDocument(
           result.estimate,
           result.client,
-          result.estimate_items
+          result.estimate.items
         )
       );
 
-      router.push(`/admin/estimates/view?id=${result.id}`);
+      router.push(`/admin/estimates/view?id=${result.estimate.id}`);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to save estimate");
     } finally {

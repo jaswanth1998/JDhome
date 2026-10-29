@@ -42,3 +42,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Firebase emulator logs + local-only credential files
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+*.local.json

@@ -1,16 +1,16 @@
 "use client";
 
 /**
- * Editable content for the generated documents, stored in
- * `jdhome.document_settings` (a single row).
+ * Editable content for the generated documents, stored in Firestore at
+ * `settings/document` (a single document; see firestore.rules).
  *
- * Every consumer goes through `getDocumentSettings()`, which caches the row for
+ * Every consumer goes through `getDocumentSettings()`, which caches the doc for
  * the session and falls back to DEFAULT_DOCUMENT_SETTINGS on any failure — so a
- * missing row, an RLS change or an offline browser degrades to today's output
+ * missing doc, a rules change or an offline browser degrades to today's output
  * rather than breaking document generation.
  */
-import type { SupabaseClient } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/client";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { getDb } from "@/lib/firebase/client";
 
 export type TermsClause = { title: string; body: string };
 
@@ -80,13 +80,11 @@ export const DEFAULT_DOCUMENT_SETTINGS: DocumentSettings = {
   defaultHstRate: 0.13,
 };
 
-/** Column names as stored in Postgres. */
-export const SETTINGS_COLUMNS =
-  "company_phone, company_email, company_web, company_address, company_gst, " +
-  "tagline, footer_thanks, footer_badge, invoice_terms, estimate_terms, " +
-  "payment_options, cheque_payable_to, cheque_mail_to, default_hst_rate";
+export const SETTINGS_COLLECTION = "settings";
+export const SETTINGS_DOC_ID = "document";
 
-type SettingsRow = {
+/** Field names as stored in Firestore (unchanged from the Postgres columns). */
+export type SettingsRow = {
   company_phone: string | null;
   company_email: string | null;
   company_web: string | null;
@@ -167,17 +165,9 @@ export async function getDocumentSettings(): Promise<DocumentSettings> {
 
   inFlight = (async () => {
     try {
-      const supabase: SupabaseClient = createClient();
-      const { data, error } = await supabase
-        .schema("jdhome")
-        .from("document_settings")
-        .select(SETTINGS_COLUMNS)
-        .maybeSingle();
-
-      if (error || !data) {
-        return DEFAULT_DOCUMENT_SETTINGS;
-      }
-      return rowToSettings(data as unknown as SettingsRow);
+      const snap = await getDoc(doc(getDb(), SETTINGS_COLLECTION, SETTINGS_DOC_ID));
+      if (!snap.exists()) return DEFAULT_DOCUMENT_SETTINGS;
+      return rowToSettings(snap.data() as SettingsRow);
     } catch {
       // Never let a settings failure block document generation.
       return DEFAULT_DOCUMENT_SETTINGS;
@@ -187,4 +177,13 @@ export async function getDocumentSettings(): Promise<DocumentSettings> {
   cached = await inFlight;
   inFlight = null;
   return cached;
+}
+
+/** Admin-only (firestore.rules). Overwrites the single settings document. */
+export async function saveDocumentSettings(settings: DocumentSettings): Promise<void> {
+  await setDoc(doc(getDb(), SETTINGS_COLLECTION, SETTINGS_DOC_ID), {
+    ...settingsToRow(settings),
+    updated_at: new Date().toISOString(),
+  });
+  invalidateDocumentSettings();
 }

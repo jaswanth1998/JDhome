@@ -16,6 +16,7 @@ import {
   KeyRound,
   Fingerprint,
   ScanLine,
+  LogOut,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
@@ -28,20 +29,24 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 function LoginForm() {
-  const { user, isLoading: authLoading, supabase } = useAuth();
+  const { user, profile, isLoading: authLoading, isAdmin, signIn, signOut } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const unauthorizedError = searchParams.get("error") === "unauthorized";
+  // Signed in, but no admins/{uid} doc: stay here (the protected layout would
+  // only bounce us straight back) and offer a way out.
+  const noAdminAccess = Boolean(user) && !isAdmin;
 
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && user && isAdmin) {
       router.replace("/admin/dashboard");
     }
-  }, [user, authLoading, router]);
+  }, [user, isAdmin, authLoading, router]);
 
   const {
     register,
@@ -55,21 +60,37 @@ function LoginForm() {
     setIsSubmitting(true);
     setError(null);
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: data.email,
-      password: data.password,
-    });
-
-    if (signInError) {
-      setError(signInError.message);
+    try {
+      await signIn(data.email, data.password);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign-in failed. Please try again.");
       setIsSubmitting(false);
       return;
     }
 
-    router.push("/admin/dashboard");
+    // The auth listener now loads the profile; the effect above redirects
+    // once the user is confirmed an admin, and a non-admin sees the banner.
+    setIsSubmitting(false);
   };
 
-  if (authLoading || user) {
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    setError(null);
+    try {
+      await signOut();
+      // Drop a stale ?error=unauthorized from the URL.
+      router.replace("/admin/login");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign-out failed. Please try again.");
+    } finally {
+      setSigningOut(false);
+    }
+  };
+
+  // Spinner while auth resolves, while a freshly signed-in user's profile is
+  // still loading (user set, profile not yet), and while an admin is being
+  // redirected to the dashboard.
+  if (authLoading || (user && !profile) || (user && isAdmin)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#060d19]">
         <Loader2 className="w-8 h-8 text-[var(--accent-teal)] animate-spin" />
@@ -273,17 +294,39 @@ function LoginForm() {
           </div>
 
           {/* Error alerts */}
-          {unauthorizedError && (
+          {(unauthorizedError || noAdminAccess) && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className="mb-5 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-2.5"
             >
               <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-red-300/90">
-                You don&apos;t have admin access. Please sign in with an admin
-                account.
-              </p>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm text-red-300/90">
+                  You don&apos;t have admin access. Please sign in with an admin
+                  account.
+                </p>
+                {noAdminAccess && (
+                  <div className="mt-2 flex items-center justify-between gap-3">
+                    <p className="text-xs text-red-300/70 truncate">
+                      Signed in as {user?.email}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      disabled={signingOut}
+                      className="shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold text-red-200 hover:text-white transition-colors disabled:opacity-50"
+                    >
+                      {signingOut ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <LogOut className="w-3.5 h-3.5" />
+                      )}
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
             </motion.div>
           )}
 

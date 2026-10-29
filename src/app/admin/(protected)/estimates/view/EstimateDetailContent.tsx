@@ -15,7 +15,6 @@ import {
   Link2,
   Check,
 } from "lucide-react";
-import { useAuth } from "@/lib/auth";
 import { EstimateStatusBadge } from "@/components/admin/estimates";
 import {
   sendDocument,
@@ -23,39 +22,15 @@ import {
   toEstimateDocument,
   DocumentPdfViewer,
 } from "@/lib/pdf";
-
-type EstimateDetail = {
-  id: string;
-  estimate_number: string;
-  estimate_date: string;
-  valid_until: string | null;
-  payment_method: string;
-  notes: string | null;
-  client_signature: string | null;
-  public_token: string;
-  subtotal: number;
-  hst_rate: number;
-  hst_amount: number;
-  total: number;
-  status: string;
-  sent_at: string | null;
-  accepted_at: string | null;
-  declined_at: string | null;
-  created_at: string;
-  client: {
-    name: string;
-    email: string;
-    phone: string | null;
-    address: string | null;
-  };
-  estimate_items: {
-    description: string;
-    quantity: number;
-    rate: number;
-    amount: number;
-    sort_order: number;
-  }[];
-};
+import {
+  deleteEstimate,
+  getClient,
+  getEstimate,
+  nowIso,
+  setEstimateStatus,
+  type Client,
+  type Estimate,
+} from "@/lib/db";
 
 function formatTimestamp(ts: string | null) {
   if (!ts) return "—";
@@ -69,12 +44,12 @@ function formatTimestamp(ts: string | null) {
 }
 
 export default function EstimateDetailContent() {
-  const { supabase } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
-  const [estimate, setEstimate] = useState<EstimateDetail | null>(null);
+  const [estimate, setEstimate] = useState<Estimate | null>(null);
+  const [client, setClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -84,55 +59,43 @@ export default function EstimateDetailContent() {
       router.push("/admin/estimates");
       return;
     }
-    const { data, error } = await supabase
-      .schema("jdhome")
-      .from("estimates")
-      .select(
-        `
-        id, estimate_number, estimate_date, valid_until, payment_method, notes, client_signature,
-        public_token,
-        subtotal, hst_rate, hst_amount, total, status,
-        sent_at, accepted_at, declined_at, created_at,
-        client:clients(name, email, phone, address),
-        estimate_items(description, quantity, rate, amount, sort_order)
-      `
-      )
-      .eq("id", id)
-      .single();
-
-    if (error || !data) {
+    try {
+      const est = await getEstimate(id);
+      const cli = est ? await getClient(est.client_id) : null;
+      if (!est || !cli) {
+        router.push("/admin/estimates");
+        return;
+      }
+      setEstimate({
+        ...est,
+        items: [...est.items].sort((a, b) => a.sort_order - b.sort_order),
+      });
+      setClient(cli);
+      setLoading(false);
+    } catch {
       router.push("/admin/estimates");
-      return;
     }
-
-    const est = data as unknown as EstimateDetail;
-    est.estimate_items.sort((a, b) => a.sort_order - b.sort_order);
-    setEstimate(est);
-    setLoading(false);
-  }, [supabase, id, router]);
+  }, [id, router]);
 
   useEffect(() => {
     fetchEstimate();
   }, [fetchEstimate]);
 
   async function handleSend() {
-    if (!estimate) return;
+    if (!estimate || !client) return;
     const action = estimate.status === "draft" ? "send" : "resend";
     setActionLoading(action);
     try {
       if (estimate.status === "draft") {
-        const { error: updateError } = await supabase
-          .schema("jdhome")
-          .from("estimates")
-          .update({ status: "sent", sent_at: new Date().toISOString() })
-          .eq("id", estimate.id);
-        if (updateError) throw new Error("Failed to update estimate status");
+        try {
+          await setEstimateStatus(estimate.id, "sent", { sent_at: nowIso() });
+        } catch {
+          throw new Error("Failed to update estimate status");
+        }
       }
 
       // Render the PDF in the browser, then hand it to n8n to email
-      await sendDocument(
-        toEstimateDocument(estimate, estimate.client, estimate.estimate_items)
-      );
+      await sendDocument(toEstimateDocument(estimate, client, estimate.items));
 
       await fetchEstimate();
     } catch (err) {
@@ -156,12 +119,12 @@ export default function EstimateDetailContent() {
   }
 
   async function handleDownload() {
-    if (!estimate) return;
+    if (!estimate || !client) return;
     setActionLoading("download");
     try {
       // Render the PDF in the browser and save it locally
       await downloadDocumentPdf(
-        toEstimateDocument(estimate, estimate.client, estimate.estimate_items)
+        toEstimateDocument(estimate, client, estimate.items)
       );
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to download estimate");
@@ -173,25 +136,31 @@ export default function EstimateDetailContent() {
   async function handleMarkAccepted() {
     if (!estimate) return;
     setActionLoading("accepted");
-    await supabase
-      .schema("jdhome")
-      .from("estimates")
-      .update({ status: "accepted", accepted_at: new Date().toISOString() })
-      .eq("id", estimate.id);
-    await fetchEstimate();
-    setActionLoading(null);
+    try {
+      await setEstimateStatus(estimate.id, "accepted", {
+        accepted_at: nowIso(),
+      });
+      await fetchEstimate();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to update estimate");
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   async function handleMarkDeclined() {
     if (!estimate) return;
     setActionLoading("declined");
-    await supabase
-      .schema("jdhome")
-      .from("estimates")
-      .update({ status: "declined", declined_at: new Date().toISOString() })
-      .eq("id", estimate.id);
-    await fetchEstimate();
-    setActionLoading(null);
+    try {
+      await setEstimateStatus(estimate.id, "declined", {
+        declined_at: nowIso(),
+      });
+      await fetchEstimate();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to update estimate");
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   async function handleDelete() {
@@ -203,15 +172,16 @@ export default function EstimateDetailContent() {
     )
       return;
     setActionLoading("delete");
-    await supabase
-      .schema("jdhome")
-      .from("estimates")
-      .delete()
-      .eq("id", estimate.id);
-    router.push("/admin/estimates");
+    try {
+      await deleteEstimate(estimate.id);
+      router.push("/admin/estimates");
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to delete estimate");
+      setActionLoading(null);
+    }
   }
 
-  if (loading || !estimate) {
+  if (loading || !estimate || !client) {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="w-8 h-8 text-[var(--accent-teal)] animate-spin" />
@@ -239,7 +209,7 @@ export default function EstimateDetailContent() {
               <EstimateStatusBadge status={estimate.status} />
             </div>
             <p className="text-xs sm:text-sm text-[var(--text-muted)] truncate">
-              {estimate.client.name} &middot; {estimate.client.email}
+              {client.name} &middot; {client.email}
             </p>
           </div>
         </div>
@@ -337,11 +307,7 @@ export default function EstimateDetailContent() {
         {/* Estimate Preview — the actual PDF the client receives */}
         <div className="lg:col-span-2">
           <DocumentPdfViewer
-            data={toEstimateDocument(
-              estimate,
-              estimate.client,
-              estimate.estimate_items
-            )}
+            data={toEstimateDocument(estimate, client, estimate.items)}
           />
         </div>
 
@@ -400,22 +366,22 @@ export default function EstimateDetailContent() {
             <div className="space-y-2 text-sm">
               <p>
                 <span className="text-[var(--text-muted)]">Name:</span>{" "}
-                <span className="font-medium">{estimate.client.name}</span>
+                <span className="font-medium">{client.name}</span>
               </p>
               <p>
                 <span className="text-[var(--text-muted)]">Email:</span>{" "}
-                <span className="font-medium">{estimate.client.email}</span>
+                <span className="font-medium">{client.email}</span>
               </p>
-              {estimate.client.phone && (
+              {client.phone && (
                 <p>
                   <span className="text-[var(--text-muted)]">Phone:</span>{" "}
-                  <span className="font-medium">{estimate.client.phone}</span>
+                  <span className="font-medium">{client.phone}</span>
                 </p>
               )}
-              {estimate.client.address && (
+              {client.address && (
                 <p>
                   <span className="text-[var(--text-muted)]">Address:</span>{" "}
-                  <span className="font-medium">{estimate.client.address}</span>
+                  <span className="font-medium">{client.address}</span>
                 </p>
               )}
             </div>

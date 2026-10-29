@@ -3,19 +3,21 @@
 import { Fragment, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronRight, Download } from "lucide-react";
-import { useAuth } from "@/lib/auth";
+import { indexById, listClients, listInvoices, type Invoice } from "@/lib/db";
 import { InvoiceStatusBadge } from "./InvoiceStatusBadge";
 
-type SummaryInvoice = {
-  id: string;
-  invoice_number: string;
-  pdf_url: string | null;
+type SummaryInvoice = Pick<
+  Invoice,
+  | "id"
+  | "invoice_number"
+  | "pdf_name"
+  | "invoice_date"
+  | "subtotal"
+  | "hst_amount"
+  | "total"
+  | "status"
+> & {
   client: { name: string } | null;
-  invoice_date: string;
-  subtotal: number;
-  hst_amount: number;
-  total: number;
-  status: string;
 };
 
 type MonthRow = {
@@ -110,7 +112,6 @@ function downloadCsv(rows: MonthRow[]) {
 }
 
 export function MonthlySummary() {
-  const { supabase } = useAuth();
   const router = useRouter();
   // Months the user has collapsed — everything starts expanded
   const [closed, setClosed] = useState<Set<string>>(new Set());
@@ -126,21 +127,41 @@ export function MonthlySummary() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .schema("jdhome")
-        .from("invoices")
-        .select(
-          "id, invoice_number, invoice_date, subtotal, hst_amount, total, status, pdf_url, client:clients(name)",
-        )
-        .order("invoice_date", { ascending: false });
+      let summary: SummaryInvoice[] = [];
+      try {
+        const [invoices, clients] = await Promise.all([
+          listInvoices(),
+          listClients(),
+        ]);
+        const clientsById = indexById(clients);
+        // Newest invoice date first within each month (ties keep created_at desc)
+        summary = [...invoices]
+          .sort((a, b) => b.invoice_date.localeCompare(a.invoice_date))
+          .map((inv) => {
+            const client = clientsById[inv.client_id];
+            return {
+              id: inv.id,
+              invoice_number: inv.invoice_number,
+              pdf_name: inv.pdf_name ?? null,
+              invoice_date: inv.invoice_date,
+              subtotal: inv.subtotal,
+              hst_amount: inv.hst_amount,
+              total: inv.total,
+              status: inv.status,
+              client: client ? { name: client.name } : null,
+            };
+          });
+      } catch {
+        summary = [];
+      }
       if (cancelled) return;
-      setRows(summarize((data as unknown as SummaryInvoice[]) ?? []));
+      setRows(summarize(summary));
       setLoading(false);
     })();
     return () => {
       cancelled = true;
     };
-  }, [supabase]);
+  }, []);
 
   if (loading) {
     return (
@@ -262,7 +283,7 @@ export function MonthlySummary() {
                     >
                       <td className="pl-10 pr-4 py-2 text-[var(--text-primary)]">
                         {inv.invoice_number}
-                        {inv.pdf_url && (
+                        {inv.pdf_name && (
                           <span className="text-[var(--text-muted)]">
                             {" "}
                             · uploaded
@@ -369,7 +390,7 @@ export function MonthlySummary() {
                     <span className="min-w-0 truncate text-[var(--text-secondary)]">
                       <span className="font-medium text-[var(--text-primary)]">
                         {inv.invoice_number}
-                        {inv.pdf_url && (
+                        {inv.pdf_name && (
                           <span className="text-[var(--text-muted)]">
                             {" "}
                             · uploaded
