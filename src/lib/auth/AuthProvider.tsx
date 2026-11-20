@@ -9,6 +9,7 @@ import {
 } from "react";
 import {
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   type User,
@@ -38,6 +39,12 @@ export type AuthContextType = {
   isAdmin: boolean;
   /** Throws an Error with a user-friendly message on failure. */
   signIn: (email: string, password: string) => Promise<void>;
+  /**
+   * Email a set-new-password link (Firebase's hosted reset page). Resolves even
+   * when no account uses the address, so the form never reveals who has a login.
+   * Throws an Error with a user-friendly message on real failures.
+   */
+  resetPassword: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -100,6 +107,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const resetPassword = useCallback(async (email: string) => {
+    try {
+      await sendPasswordResetEmail(getFirebaseAuth(), email.trim());
+    } catch (err) {
+      const code = (err as { code?: string })?.code ?? "";
+      // Unknown address: stay silent (same outcome as a sent email).
+      if (code === "auth/user-not-found") return;
+      throw new Error(FRIENDLY[code] ?? "Could not send the reset email. Please try again.");
+    }
+  }, []);
+
   const signOut = useCallback(async () => {
     await firebaseSignOut(getFirebaseAuth());
     setUser(null);
@@ -113,9 +131,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isLoading,
       isAdmin: profile?.role === "admin" && profile?.is_active === true,
       signIn,
+      resetPassword,
       signOut,
     }),
-    [user, profile, isLoading, signIn, signOut]
+    [user, profile, isLoading, signIn, resetPassword, signOut]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

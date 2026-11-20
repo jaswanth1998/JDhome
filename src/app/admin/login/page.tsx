@@ -9,6 +9,7 @@ import {
   Lock,
   Mail,
   AlertCircle,
+  CheckCircle2,
   Loader2,
   Eye,
   EyeOff,
@@ -29,13 +30,15 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 function LoginForm() {
-  const { user, profile, isLoading: authLoading, isAdmin, signIn, signOut } = useAuth();
+  const { user, profile, isLoading: authLoading, isAdmin, signIn, resetPassword, signOut } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [sendingReset, setSendingReset] = useState(false);
 
   const unauthorizedError = searchParams.get("error") === "unauthorized";
   // Signed in, but no admins/{uid} doc: stay here (the protected layout would
@@ -51,6 +54,8 @@ function LoginForm() {
   const {
     register,
     handleSubmit,
+    getValues,
+    trigger,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -59,6 +64,7 @@ function LoginForm() {
   const onSubmit = async (data: LoginFormData) => {
     setIsSubmitting(true);
     setError(null);
+    setNotice(null);
 
     try {
       await signIn(data.email, data.password);
@@ -71,6 +77,29 @@ function LoginForm() {
     // The auth listener now loads the profile; the effect above redirects
     // once the user is confirmed an admin, and a non-admin sees the banner.
     setIsSubmitting(false);
+  };
+
+  // Uses whatever is typed in the email box; the password box is ignored.
+  const handleForgotPassword = async () => {
+    setError(null);
+    setNotice(null);
+    const emailOk = await trigger("email", { shouldFocus: true });
+    if (!emailOk) {
+      setError("Enter your email address above, then tap “Forgot password?” again.");
+      return;
+    }
+    const email = getValues("email").trim();
+    setSendingReset(true);
+    try {
+      await resetPassword(email);
+      setNotice(
+        `If ${email} has an admin account, a password reset link is on its way. Check your inbox and spam folder.`,
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send the reset email. Please try again.");
+    } finally {
+      setSendingReset(false);
+    }
   };
 
   const handleSignOut = async () => {
@@ -341,6 +370,18 @@ function LoginForm() {
             </motion.div>
           )}
 
+          {notice && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              role="status"
+              className="mb-5 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-2.5"
+            >
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-emerald-200/90">{notice}</p>
+            </motion.div>
+          )}
+
           {/* Login form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Email */}
@@ -371,12 +412,23 @@ function LoginForm() {
 
             {/* Password */}
             <div>
-              <label
-                htmlFor="password"
-                className="block text-xs font-medium mb-2 uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.55)" }}
-              >
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-xs font-medium uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.55)" }}
+                >
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  disabled={sendingReset}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-cyan-400/90 hover:text-cyan-300 transition-colors disabled:opacity-50"
+                >
+                  {sendingReset && <Loader2 className="w-3 h-3 animate-spin" />}
+                  Forgot password?
+                </button>
+              </div>
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-white/20 transition-colors group-focus-within:text-cyan-400/70" />
                 <input
